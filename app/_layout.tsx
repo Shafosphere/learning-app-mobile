@@ -1,6 +1,6 @@
 // _layout.tsx
 import i18n from "@/src/i18n";
-import { StudyOrientationController } from "@/src/components/flashcards/StudyOrientationController";
+import { AppOrientationController } from "@/src/components/AppOrientationController";
 import Navbar from "@/src/components/navbar/navbar";
 import { CoachmarkLayerPortalProvider } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { OnboardingGate } from "@/src/components/onboarding/OnboardingGate";
@@ -48,6 +48,8 @@ import {
   Image,
   Platform,
   Pressable,
+  ScrollView,
+  useWindowDimensions,
   StyleSheet,
   Text,
   View,
@@ -139,6 +141,8 @@ async function simulateStartupProgress(
 type RootStatus = "loading" | "ready" | "error" | "importing" | "resetting";
 
 export default function RootLayout() {
+  const { width, height } = useWindowDimensions();
+  const isErrorLandscape = width >= 840 && width > height;
   const { t } = useTranslation();
   const [startupTheme, setStartupTheme] = useState<Theme | null>(null);
   const [isStartupReady, setIsStartupReady] = useState(false);
@@ -593,63 +597,64 @@ export default function RootLayout() {
   const renderBlockingState = () => {
     if (status === "error") {
       return (
-        <View
-          style={[
-            styles.blockingContainer,
-            { backgroundColor: startupUi.backgroundColor },
-          ]}
-        >
-          <Text style={[styles.errorTitle, { color: startupUi.primaryTextColor }]}>
-            {t("app.error.title")}
-          </Text>
-          <Text style={[styles.errorText, { color: startupUi.secondaryTextColor }]}>
-            {t("app.error.description")}
-          </Text>
-          <Text style={[styles.errorText, { color: startupUi.secondaryTextColor }]}>
-            {t("app.error.backupHint")}
-          </Text>
-          {isDebugErrorOverride ? (
-            <Text
-              style={[
-                styles.debugBadge,
-                {
-                  backgroundColor: startupUi.errorBadgeBackgroundColor,
-                  color: startupUi.errorBadgeTextColor,
-                },
-              ]}
-            >
-              {t("app.error.debugBadge")}
-            </Text>
-          ) : null}
-          {errorMessage ? (
-            <Text style={[styles.errorReason, { color: startupUi.errorTextColor }]}>
-              {errorMessage}
-            </Text>
-          ) : null}
-          <View style={styles.actions}>
-            <ActionButton
-              label={t("app.error.actions.retry")}
-              startupUi={startupUi}
-              onPress={() => {
-                void handleRetry();
-              }}
-            />
-            <ActionButton
-              label={t("app.error.actions.importBackup")}
-              variant="ghost"
-              startupUi={startupUi}
-              onPress={() => {
-                void handleImportBackup();
-              }}
-            />
-            <ActionButton
-              label={t("app.error.actions.reset")}
-              variant="secondary"
-              startupUi={startupUi}
-              onPress={handleResetApp}
-            />
-          </View>
-        </View>
+        <SafeAreaView style={[styles.startupSafeArea, { backgroundColor: startupUi.backgroundColor }]} edges={["top", "bottom"]}>
+          <ScrollView contentContainerStyle={styles.errorScrollContent}>
+            <View style={[styles.errorWorkspace, isErrorLandscape && styles.errorWorkspaceLandscape]}>
+              <View style={[styles.errorDetails, isErrorLandscape && styles.errorDetailsLandscape]}>
+                <Text style={[styles.errorTitle, { color: startupUi.primaryTextColor }]}>
+                  {t("app.error.title")}
+                </Text>
+                <Text style={[styles.errorText, { color: startupUi.secondaryTextColor }]}>
+                  {t("app.error.description")}
+                </Text>
+                <Text style={[styles.errorText, { color: startupUi.secondaryTextColor }]}>
+                  {t("app.error.backupHint")}
+                </Text>
+                {isDebugErrorOverride ? (
+                  <Text
+                    style={[
+                      styles.debugBadge,
+                      {
+                        backgroundColor: startupUi.errorBadgeBackgroundColor,
+                        color: startupUi.errorBadgeTextColor,
+                      },
+                    ]}
+                  >
+                    {t("app.error.debugBadge")}
+                  </Text>
+                ) : null}
+                {errorMessage ? (
+                  <Text style={[styles.errorReason, { color: startupUi.errorTextColor }]}>
+                    {errorMessage}
+                  </Text>
+                ) : null}
+              </View>
+              <View style={[styles.actions, isErrorLandscape && styles.errorActionsLandscape]}>
+                <ActionButton
+                  label={t("app.error.actions.retry")}
+                  startupUi={startupUi}
+                  onPress={() => {
+                    void handleRetry();
+                  }}
+                />
+                <ActionButton
+                  label={t("app.error.actions.importBackup")}
+                  variant="ghost"
+                  startupUi={startupUi}
+                  onPress={() => {
+                    void handleImportBackup();
+                  }}
+                />
+                <ActionButton
+                  label={t("app.error.actions.reset")}
+                  variant="secondary"
+                  startupUi={startupUi}
+                  onPress={handleResetApp}
+                />
+              </View>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
       );
     }
 
@@ -730,11 +735,11 @@ export default function RootLayout() {
         style={[styles.root, { backgroundColor: startupUi.backgroundColor }]}
         onLayout={onLayoutRootView}
       >
+        <AppOrientationController />
         {shouldRenderApp ? (
           <SettingsProvider initialTheme={effectiveStartupTheme}>
             <CoachmarkProvider>
               <AppThemeSystemUiSync />
-              <StudyOrientationController />
               <DueReviewsProvider>
                 <QuoteProvider>
                   <QuoteSystemInitializer />
@@ -851,6 +856,36 @@ const styles = StyleSheet.create({
   },
   startupSafeArea: {
     flex: 1,
+  },
+  errorScrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  errorWorkspace: {
+    width: "100%",
+    maxWidth: 480,
+    alignItems: "center",
+    gap: 22,
+  },
+  errorWorkspaceLandscape: {
+    maxWidth: 900,
+    flexDirection: "row",
+    gap: 32,
+  },
+  errorDetails: {
+    width: "100%",
+    alignItems: "center",
+    gap: 22,
+  },
+  errorDetailsLandscape: {
+    flex: 1,
+    width: undefined,
+  },
+  errorActionsLandscape: {
+    flex: 1,
+    marginTop: 0,
   },
   blockingContainer: {
     flex: 1,

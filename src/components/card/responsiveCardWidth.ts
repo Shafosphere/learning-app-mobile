@@ -31,7 +31,7 @@ export function getResponsiveFlashcardWidth(windowWidth: number): number {
   const availableWidth = Math.max(0, windowWidth - FLASHCARD_HORIZONTAL_INSET);
   return clamp(
     availableWidth,
-    BASE_FLASHCARD_WIDTH,
+    Math.min(BASE_FLASHCARD_WIDTH, Math.max(0, windowWidth)),
     MAX_TABLET_FLASHCARD_WIDTH,
   );
 }

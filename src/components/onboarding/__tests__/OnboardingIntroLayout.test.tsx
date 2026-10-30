@@ -14,6 +14,8 @@ jest.mock("@/src/contexts/SettingsContext", () => {
   return { useSettings, useThemeSettings: useSettings };
 });
 const mockedUseSettings = useSettings as jest.Mock;
+let mockDeviceLayout = { isTabletLayout: false, orientation: "portrait" };
+jest.mock("@/src/hooks/useDeviceLayout", () => ({ useDeviceLayout: () => mockDeviceLayout }));
 const aspectRatio = 1179 / 879;
 const props = {
   title: "Zapamiętuj więcej",
@@ -40,7 +42,24 @@ function measure(screen: ReturnType<typeof render>) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockDeviceLayout = { isTabletLayout: false, orientation: "portrait" };
   mockedUseSettings.mockReturnValue(settings);
+});
+
+it("keeps the intro and continuation available when rotating between portrait and landscape", () => {
+  const screen = render(<OnboardingIntroLayout {...props} />);
+  measure(screen);
+  mockDeviceLayout = { isTabletLayout: true, orientation: "landscape" };
+  screen.rerender(<OnboardingIntroLayout {...props} />);
+  expect(screen.getByText(props.description)).toBeTruthy();
+  expect(screen.getByTestId("leitner-diagram").findByType(Image).props.resizeMode).toBe("contain");
+  fireEvent.press(screen.getByRole("button"));
+  expect(props.onContinue).toHaveBeenCalledTimes(1);
+  mockDeviceLayout = { isTabletLayout: true, orientation: "portrait" };
+  screen.rerender(<OnboardingIntroLayout {...props} />);
+  measure(screen);
+  expect(screen.getByText(props.description)).toBeTruthy();
+  expect(screen.getByRole("button")).toBeTruthy();
 });
 
 it("fits the illustration to measured space and updates after rotation and text growth", () => {

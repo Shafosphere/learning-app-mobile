@@ -23,6 +23,11 @@ import i18n from "@/src/i18n";
 import { REVIEW_EMPTY_MESSAGES } from "../reviewEmptyMessages";
 import * as emptyMessages from "../reviewEmptyMessages";
 
+let mockSideNavbarLayout = false;
+jest.mock("@/src/components/navbar/useSideNavbarLayout", () => ({
+  useSideNavbarLayout: () => mockSideNavbarLayout,
+}));
+
 // Keep real settings, persistence, locale, styles, review components, coachmark
 // flow/portal hooks and router. Mock native effects and database responses only.
 jest.mock("@/src/db/sqlite/db", () => ({
@@ -168,6 +173,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  mockSideNavbarLayout = false;
   await AsyncStorage.clear();
   await AsyncStorage.multiSet([
     ["uiLanguage", '"en"'],
@@ -508,4 +514,24 @@ it.each([
   expect(await AsyncStorage.getItem("activeCustomCourseId")).toBe(String(id));
   expect(app.getPathname()).toBe("/review/reviewflashcards");
   expect(app.getSearchParams()).toEqual({ courseId: String(id) });
+});
+
+
+it("places the empty clock beside its message on a landscape phone and restores portrait flow", async () => {
+  mockSideNavbarLayout = true;
+  mockedDueCount.mockResolvedValue(0);
+  renderRouter({ _layout: Layout, "review/index": ReviewRoute }, { initialUrl: "/review" });
+  await waitFor(() => expect(screen.getByTestId("review-empty-title")).toBeTruthy());
+  fireEvent(scrollView(), "layout", { nativeEvent: { layout: { width: 720, height: 333 } } });
+  expect(screen.getByTestId("review-empty-state")).toHaveStyle({ flexDirection: "row", minHeight: 333 });
+  expect(screen.getByTestId("review-empty-message")).toHaveStyle({ marginTop: 0 });
+  const illustration = StyleSheet.flatten(screen.getByTestId("review-empty-illustration", hidden).props.style);
+  expect(illustration.height + illustration.marginTop + 32).toBeCloseTo(333);
+  const previousMessage = screen.getByTestId("review-empty-title").props.children;
+
+  mockSideNavbarLayout = false;
+  await act(async () => { await settings.toggleTheme(); });
+  fireEvent(scrollView(), "layout", { nativeEvent: { layout: { width: 390, height: 900 } } });
+  expect(screen.getByTestId("review-empty-message")).toHaveStyle({ marginTop: 28 });
+  expect(screen.getByTestId("review-empty-title").props.children).toBe(previousMessage);
 });

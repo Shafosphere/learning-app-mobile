@@ -77,8 +77,9 @@ function formatBody(selectedDiagnostics: DiagnosticEntry[], t: TFunction) {
 export default function SupportScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { isTabletLayout, shortestSide } = useDeviceLayout();
+  const { isTabletLayout, shortestSide, orientation, width } = useDeviceLayout();
   const useCenteredTabletLayout = isTabletLayout || shortestSide >= 560;
+  const isLandscapeLayout = orientation === "landscape" && width >= 840;
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [attachBasicData, setAttachBasicData] = useState(false);
@@ -280,141 +281,144 @@ export default function SupportScreen() {
         style={[
           styles.scrollView,
           useCenteredTabletLayout && styles.scrollViewTablet,
+          isLandscapeLayout && styles.scrollViewLandscape,
         ]}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.section}>
-          <Text style={styles.header}>{t("support.report.title")}</Text>
-          <Text style={styles.subtitle}>{t("support.report.subtitle")}</Text>
-          <Pressable
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: attachBasicData }}
-            onPress={() => setAttachBasicData((value) => !value)}
-            style={styles.checkboxRow}
-          >
-            <View
-              style={[
-                styles.checkboxBox,
-                attachBasicData ? styles.checkboxBoxActive : null,
-              ]}
+        <View style={[styles.workspace, isLandscapeLayout && styles.workspaceLandscape]}>
+          <View style={[styles.section, isLandscapeLayout && styles.sectionLandscape]}>
+            <Text style={styles.header}>{t("support.report.title")}</Text>
+            <Text style={styles.subtitle}>{t("support.report.subtitle")}</Text>
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: attachBasicData }}
+              onPress={() => setAttachBasicData((value) => !value)}
+              style={styles.checkboxRow}
             >
-              {attachBasicData ? <View style={styles.checkboxDot} /> : null}
-            </View>
-            <View style={styles.checkboxTextGroup}>
-              <Text style={styles.checkboxTitle}>
-                {t("support.report.attachBasicData")}
-              </Text>
-              <Text style={styles.checkboxSubtitle}>
-                {t("support.report.attachBasicDataSubtitle")}
-              </Text>
-            </View>
-          </Pressable>
-          <Pressable
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: attachDiagnostics }}
-            onPress={() => setAttachDiagnostics((value) => !value)}
-            style={styles.checkboxRow}
-          >
-            <View
-              style={[
-                styles.checkboxBox,
-                attachDiagnostics ? styles.checkboxBoxActive : null,
-              ]}
+              <View
+                style={[
+                  styles.checkboxBox,
+                  attachBasicData ? styles.checkboxBoxActive : null,
+                ]}
+              >
+                {attachBasicData ? <View style={styles.checkboxDot} /> : null}
+              </View>
+              <View style={styles.checkboxTextGroup}>
+                <Text style={styles.checkboxTitle}>
+                  {t("support.report.attachBasicData")}
+                </Text>
+                <Text style={styles.checkboxSubtitle}>
+                  {t("support.report.attachBasicDataSubtitle")}
+                </Text>
+              </View>
+            </Pressable>
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: attachDiagnostics }}
+              onPress={() => setAttachDiagnostics((value) => !value)}
+              style={styles.checkboxRow}
             >
-              {attachDiagnostics ? <View style={styles.checkboxDot} /> : null}
-            </View>
-            <View style={styles.checkboxTextGroup}>
-              <Text style={styles.checkboxTitle}>
-                {t("support.report.attachDiagnostics")}
-              </Text>
-              <Text style={styles.checkboxSubtitle}>
-                {t("support.report.attachDiagnosticsSubtitle")}
-              </Text>
-            </View>
-          </Pressable>
-          <View style={styles.buttonWrapper}>
-            <MyButton
-              text={t("support.report.button")}
-              onPress={handleSendEmail}
-              width={160}
-              disabled={busy}
-            />
-          </View>
-          {status ? <Text style={styles.status}>{status}</Text> : null}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.header}>{t("support.suggestion.title")}</Text>
-          <Text style={styles.subtitle}>{t("support.suggestion.subtitle")}</Text>
-          <View style={styles.buttonWrapper}>
-            <MyButton
-              text={t("support.suggestion.button")}
-              onPress={handleSendSuggestion}
-              width={160}
-              disabled={busy}
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.header}>{t("support.guide.title")}</Text>
-          <Text style={styles.subtitle}>{t("support.guide.subtitle")}</Text>
-          <View style={styles.buttonWrapper}>
-            <Link href="/wiki" asChild>
+              <View
+                style={[
+                  styles.checkboxBox,
+                  attachDiagnostics ? styles.checkboxBoxActive : null,
+                ]}
+              >
+                {attachDiagnostics ? <View style={styles.checkboxDot} /> : null}
+              </View>
+              <View style={styles.checkboxTextGroup}>
+                <Text style={styles.checkboxTitle}>
+                  {t("support.report.attachDiagnostics")}
+                </Text>
+                <Text style={styles.checkboxSubtitle}>
+                  {t("support.report.attachDiagnosticsSubtitle")}
+                </Text>
+              </View>
+            </Pressable>
+            <View style={styles.buttonWrapper}>
               <MyButton
-                text={t("support.guide.button")}
-                color="my_green"
+                text={t("support.report.button")}
+                onPress={handleSendEmail}
                 width={160}
+                disabled={busy}
               />
-            </Link>
-          </View>
-        </View>
-
-        <View style={styles.panel}>
-          <View style={styles.panelHeader}>
-            <Text style={styles.panelTitle}>{t("support.about.title")}</Text>
-            <Text style={styles.panelSubtitle}>{t("support.about.subtitle")}</Text>
+            </View>
+            {status ? <Text style={styles.status}>{status}</Text> : null}
           </View>
 
-          <View style={styles.panelBody}>
-            <View style={styles.staticList}>
-              {diagnosticEntries.map((entry) => (
-                <View style={styles.staticRow} key={entry.key}>
-                  <View style={styles.chipBox}>
-                    <View style={styles.chipCheck} />
+          <View style={[styles.section, isLandscapeLayout && styles.sectionLandscape]}>
+            <Text style={styles.header}>{t("support.suggestion.title")}</Text>
+            <Text style={styles.subtitle}>{t("support.suggestion.subtitle")}</Text>
+            <View style={styles.buttonWrapper}>
+              <MyButton
+                text={t("support.suggestion.button")}
+                onPress={handleSendSuggestion}
+                width={160}
+                disabled={busy}
+              />
+            </View>
+          </View>
+
+          <View style={[styles.section, isLandscapeLayout && styles.sectionLandscape]}>
+            <Text style={styles.header}>{t("support.guide.title")}</Text>
+            <Text style={styles.subtitle}>{t("support.guide.subtitle")}</Text>
+            <View style={styles.buttonWrapper}>
+              <Link href="/wiki" asChild>
+                <MyButton
+                  text={t("support.guide.button")}
+                  color="my_green"
+                  width={160}
+                />
+              </Link>
+            </View>
+          </View>
+
+          <View style={[styles.panel, isLandscapeLayout && styles.sectionLandscape]}>
+            <View style={styles.panelHeader}>
+              <Text style={styles.panelTitle}>{t("support.about.title")}</Text>
+              <Text style={styles.panelSubtitle}>{t("support.about.subtitle")}</Text>
+            </View>
+
+            <View style={styles.panelBody}>
+              <View style={styles.staticList}>
+                {diagnosticEntries.map((entry) => (
+                  <View style={styles.staticRow} key={entry.key}>
+                    <View style={styles.chipBox}>
+                      <View style={styles.chipCheck} />
+                    </View>
+                    <View style={styles.staticContent}>
+                      <Text style={styles.chipText}>{entry.label}</Text>
+                      <Text style={styles.staticValue}>{entry.value}</Text>
+                    </View>
                   </View>
-                  <View style={styles.staticContent}>
-                    <Text style={styles.chipText}>{entry.label}</Text>
-                    <Text style={styles.staticValue}>{entry.value}</Text>
-                  </View>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.header}>{t("support.legal.title")}</Text>
-          <Text style={styles.subtitle}>{t("support.legal.subtitle")}</Text>
-          <View style={styles.buttonWrapper}>
-            <Link href="/privacy-policy" asChild>
-              <MyButton
-                text={t("legal.entry.privacyButton")}
-                color="my_yellow"
-                width={160}
-              />
-            </Link>
-          </View>
-          <View style={styles.buttonWrapper}>
-            <Link href="/licenses" asChild>
-              <MyButton
-                text={t("legal.entry.licensesButton")}
-                color="my_green"
-                width={160}
-                textStyle={styles.legalButtonText}
-              />
-            </Link>
+          <View style={[styles.section, isLandscapeLayout && styles.sectionLandscape]}>
+            <Text style={styles.header}>{t("support.legal.title")}</Text>
+            <Text style={styles.subtitle}>{t("support.legal.subtitle")}</Text>
+            <View style={styles.buttonWrapper}>
+              <Link href="/privacy-policy" asChild>
+                <MyButton
+                  text={t("legal.entry.privacyButton")}
+                  color="my_yellow"
+                  width={160}
+                />
+              </Link>
+            </View>
+            <View style={styles.buttonWrapper}>
+              <Link href="/licenses" asChild>
+                <MyButton
+                  text={t("legal.entry.licensesButton")}
+                  color="my_green"
+                  width={160}
+                  textStyle={styles.legalButtonText}
+                />
+              </Link>
+            </View>
           </View>
         </View>
       </ScrollView>

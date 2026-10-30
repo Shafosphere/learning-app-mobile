@@ -30,6 +30,24 @@ export const useStyles = createThemeStylesHook((colors) => {
       flex: 1,
       gap: 12,
     },
+    inputContainerLandscape: {
+      flexDirection: "row" as const,
+      alignItems: "flex-start" as const,
+      gap: 24,
+    },
+    promptContainer: {
+      gap: 12,
+      minWidth: 0,
+    },
+    editorColumn: {
+      flex: 1,
+      minWidth: 0,
+    },
+    answersLandscape: {
+      borderLeftWidth: 1,
+      borderColor: colors.border,
+      paddingLeft: 24,
+    },
     cardinput: {
       flex: 1,
       fontSize: 16,

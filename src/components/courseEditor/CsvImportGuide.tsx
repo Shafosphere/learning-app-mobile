@@ -13,6 +13,7 @@ interface CsvImportGuideProps {
   downloadingTemplateKey?: CsvTemplateKey | null;
   selectedFileName: string | null;
   isAnalyzing?: boolean;
+  landscape?: boolean;
 }
 
 type GuideSectionKey = CsvTemplateKey;
@@ -35,6 +36,40 @@ type GuideSection = {
 const useStyles = createThemeStylesHook((colors) => ({
   container: {
     gap: 12,
+  },
+  containerLandscape: {
+    flexDirection: "row" as const,
+    alignItems: "stretch" as const,
+    gap: 16,
+  },
+  column: {
+    gap: 12,
+  },
+  overviewLandscape: {
+    flex: 1,
+    minWidth: 0,
+  },
+  detailsLandscape: {
+    flex: 1,
+    minWidth: 0,
+  },
+  panelLandscape: {
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.secondBackground,
+  },
+  flatCardLandscape: {
+    padding: 0,
+    borderWidth: 0,
+    backgroundColor: "transparent",
+  },
+  imagesLandscape: {
+    paddingTop: 14,
+    borderRadius: 0,
+    borderTopWidth: 1,
+    borderColor: colors.border,
   },
   card: {
     backgroundColor: colors.background,
@@ -145,6 +180,7 @@ const useStyles = createThemeStylesHook((colors) => ({
   },
   fieldHeaderRow: {
     flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
     gap: 8,
@@ -370,11 +406,14 @@ export function CsvImportGuide({
   downloadingTemplateKey = null,
   selectedFileName,
   isAnalyzing = false,
+  landscape = false,
 }: CsvImportGuideProps) {
   const { t, i18n } = useTranslation();
   const styles = useStyles();
   const locale: "pl" | "en" = i18n.resolvedLanguage?.startsWith("en") ? "en" : "pl";
-  const [expandedKey, setExpandedKey] = useState<GuideSectionKey>("self_assess");
+  const [expandedKey, setExpandedKey] = useState<GuideSectionKey | null>(
+    landscape ? null : "self_assess"
+  );
 
   const guideSections: GuideSection[] = [
     {
@@ -460,58 +499,68 @@ export function CsvImportGuide({
     },
   ];
 
+  const imagesGuide = (
+    <View style={[styles.card, landscape && styles.flatCardLandscape, landscape && styles.imagesLandscape]}>
+      <Text style={styles.cardTitle}>{t("courseCreator.csvGuide.imagesTitle")}</Text>
+      <Text style={styles.paragraph}>{t("courseCreator.csvGuide.imagesDescription")}</Text>
+    </View>
+  );
+
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>{t("courseCreator.csvGuide.importTitle")}</Text>
-        <Text style={styles.listItem}>{t("courseCreator.csvGuide.step1")}</Text>
-        <Text style={styles.listItem}>{t("courseCreator.csvGuide.step2")}</Text>
-      </View>
-
-      <View style={styles.actionsRow}>
-        <MyButton
-          text={
-            isAnalyzing
-              ? t("courseCreator.csvGuide.analyzing")
-              : t("courseCreator.csvGuide.pickFile")
-          }
-          onPress={isAnalyzing ? undefined : onPickFile}
-          disabled={isAnalyzing}
-          width={140}
-        />
-      </View>
-
-      {selectedFileName ? (
-        <View style={styles.fileInfo}>
-          <Ionicons
-            name="document-text"
-            size={18}
-            color={styles.fileText.color}
-          />
-          <Text style={styles.fileText}>{selectedFileName}</Text>
-          <Ionicons name="checkmark-circle" size={18} color="#16A34A" />
+    <View style={[styles.container, landscape && styles.containerLandscape]}>
+      <View style={[styles.column, landscape && styles.overviewLandscape, landscape && styles.panelLandscape]}>
+        <View style={[styles.card, landscape && styles.flatCardLandscape]}>
+          <Text style={styles.cardTitle}>{t("courseCreator.csvGuide.importTitle")}</Text>
+          <Text style={styles.listItem}>{t("courseCreator.csvGuide.step1")}</Text>
+          <Text style={styles.listItem}>{t("courseCreator.csvGuide.step2")}</Text>
         </View>
-      ) : null}
 
-      <Text style={styles.sectionTitle}>{t("courseCreator.csvGuide.cardTypes")}</Text>
-      {guideSections.map((section, index) => (
-        <GuideAccordionSection
-          key={section.key}
-          section={section}
-          index={index}
-          expanded={expandedKey === section.key}
-          locale={locale}
-          onDownloadTemplate={onDownloadTemplate}
-          downloadingTemplateKey={downloadingTemplateKey}
-          onPress={() => setExpandedKey(section.key)}
-          styles={styles}
-        />
-      ))}
+        <View style={styles.actionsRow}>
+          <MyButton
+            text={
+              isAnalyzing
+                ? t("courseCreator.csvGuide.analyzing")
+                : t("courseCreator.csvGuide.pickFile")
+            }
+            onPress={isAnalyzing ? undefined : onPickFile}
+            disabled={isAnalyzing}
+            width={landscape ? "100%" : 140}
+          />
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>{t("courseCreator.csvGuide.imagesTitle")}</Text>
-        <Text style={styles.paragraph}>{t("courseCreator.csvGuide.imagesDescription")}</Text>
+        {selectedFileName ? (
+          <View style={styles.fileInfo}>
+            <Ionicons
+              name="document-text"
+              size={18}
+              color={styles.fileText.color}
+            />
+            <Text style={styles.fileText}>{selectedFileName}</Text>
+            <Ionicons name="checkmark-circle" size={18} color="#16A34A" />
+          </View>
+        ) : null}
+
+        {landscape && imagesGuide}
       </View>
+
+      <View style={[styles.column, landscape && styles.detailsLandscape, landscape && styles.panelLandscape]}>
+        <Text style={landscape ? styles.cardTitle : styles.sectionTitle}>{t("courseCreator.csvGuide.cardTypes")}</Text>
+        {guideSections.map((section, index) => (
+          <GuideAccordionSection
+            key={section.key}
+            section={section}
+            index={index}
+            expanded={expandedKey === section.key}
+            locale={locale}
+            onDownloadTemplate={onDownloadTemplate}
+            downloadingTemplateKey={downloadingTemplateKey}
+            onPress={() => setExpandedKey((current) => current === section.key ? null : section.key)}
+            styles={styles}
+          />
+        ))}
+
+      </View>
+      {!landscape && imagesGuide}
     </View>
   );
 }

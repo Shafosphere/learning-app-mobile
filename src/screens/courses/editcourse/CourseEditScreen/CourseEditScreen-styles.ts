@@ -1,9 +1,12 @@
+import { SCREEN_ACTION_BOTTOM_PADDING } from "@/src/theme/layout";
+import { useMemo } from "react";
+import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import { settingsWorkspaceStyles } from "@/src/components/settings/settingsWorkspaceStyles";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 const COURSE_SETTINGS_TABLET_MAX_WIDTH = 500;
 
-export const useCourseEditStyles = createThemeStylesHook((colors) => ({
+const useBaseStyles = createThemeStylesHook((colors) => ({
   ...settingsWorkspaceStyles,
   container: {
     flex: 1,
@@ -324,7 +327,7 @@ export const useCourseEditStyles = createThemeStylesHook((colors) => ({
   },
   footerBar: {
     paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
     paddingTop: 16,
     borderTopWidth: 2,
     borderTopColor: colors.border,
@@ -342,7 +345,7 @@ export const useCourseEditStyles = createThemeStylesHook((colors) => ({
   },
   buttonscontainer: {
     width: "100%",
-    paddingBottom: 8,
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
     paddingHorizontal: 18,
     backgroundColor: colors.background,
     alignItems: "center",
@@ -361,3 +364,15 @@ export const useCourseEditStyles = createThemeStylesHook((colors) => ({
     alignSelf: "center" as const,
   },
 }));
+
+
+export function useCourseEditStyles() {
+  const styles = useBaseStyles();
+  const isPhoneLandscape = useSideNavbarLayout();
+  return useMemo(() => isPhoneLandscape ? {
+    ...styles,
+    settingsBodyLandscape: { ...styles.settingsBodyLandscape, paddingHorizontal: 12 },
+    sectionCard: { ...styles.sectionCard, padding: 8, paddingTop: 8, gap: 12 },
+    settingsSectionHeader: { ...styles.settingsSectionHeader, marginBottom: 12 },
+  } : styles, [styles, isPhoneLandscape]);
+}

@@ -10,7 +10,7 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
   },
   dialog: {
     width: "100%",
-    maxWidth: 420,
+    maxWidth: 720,
     borderRadius: 24,
     backgroundColor: colors.secondBackground,
     padding: 0,
@@ -48,6 +48,7 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
     paddingTop: 10,
     paddingBottom: 16,
     flexGrow: 1,
+    flexShrink: 1,
   },
   headerContent: {
     flex: 1,
@@ -115,6 +116,7 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
   },
   cardsList: {
     width: "100%",
+    flexShrink: 1,
   },
   cardsListContent: {
     paddingHorizontal: 8,

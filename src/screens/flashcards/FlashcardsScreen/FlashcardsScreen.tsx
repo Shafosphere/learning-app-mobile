@@ -87,7 +87,7 @@ export default function Flashcards() {
     orientation,
     widthClass,
     heightClass,
-  } = useDeviceLayout();
+  } = useDeviceLayout({ sizeSource: "screen" });
   const flashcardsContentWidth = isTabletLayout ? cardMetrics.width : undefined;
   const { t } = useTranslation();
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);

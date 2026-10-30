@@ -126,6 +126,26 @@ export const useStyles = createThemeStylesHook((colors) => ({
     lineHeight: 14,
     minHeight: 14,
   },
+  tileVisualAreaPhoneLandscape: {
+    top: 8,
+    bottom: 52,
+    left: 8,
+    right: 8,
+  },
+  tileTextPhoneLandscape: {
+    bottom: 8,
+    left: 8,
+    right: 8,
+    minHeight: 40,
+    justifyContent: "flex-end",
+  },
+  tileTitlePhoneLandscape: {
+    fontSize: 18,
+  },
+  tileSubtitlePhoneLandscape: {
+    fontSize: 11,
+    lineHeight: 14,
+  },
   tileSubtitleHidden: {
     opacity: 0,
   },

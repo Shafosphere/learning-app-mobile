@@ -107,6 +107,29 @@ describe("HomeScreen responsive grid", () => {
     expect(getListProps().scrollEnabled).toBe(false);
   });
 
+  it("fits all phone landscape destinations and restores square tiles on rotation", () => {
+    mockWindowDimensions = { width: 923, height: 411, scale: 1, fontScale: 1 };
+    const { rerender } = render(<HomeScreen />);
+    measureGrid(650, 333);
+    expect(getListProps().numColumns).toBe(3);
+    expect(getListProps().scrollEnabled).toBe(false);
+    const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(5);
+    const tile = StyleSheet.flatten(buttons[0].props.style);
+    expect(tile.width).toBe(tile.height);
+    expect(2 * tile.height + getListProps().columnWrapperStyle.gap
+      + StyleSheet.flatten(getListProps().style).marginTop).toBeLessThanOrEqual(333);
+    fireEvent.press(buttons[4]);
+    expect(mockPush).toHaveBeenCalledWith("/support");
+
+    mockWindowDimensions = { width: 411, height: 923, scale: 1, fontScale: 1 };
+    rerender(<HomeScreen />);
+    measureGrid(371, 675);
+    expect(getListProps().numColumns).toBe(2);
+    const portraitTile = StyleSheet.flatten(screen.getAllByRole("button")[0].props.style);
+    expect(portraitTile.width).toBe(portraitTile.height);
+  });
+
   it("allows the small phone's final row to be reached by scrolling", () => {
     mockWindowDimensions = { width: 360, height: 640, scale: 1, fontScale: 1 };
     render(<HomeScreen />);

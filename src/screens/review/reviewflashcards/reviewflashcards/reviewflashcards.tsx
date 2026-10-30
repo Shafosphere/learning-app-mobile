@@ -54,7 +54,7 @@ export default function ReviewFlashcardsScreen() {
   const styles = useStyles();
   const { width: windowWidth } = useWindowDimensions();
   const cardMetrics = getResponsiveFlashcardMetrics(windowWidth);
-  const { isTabletLayout } = useDeviceLayout();
+  const { isTabletLayout } = useDeviceLayout({ sizeSource: "screen" });
   const flashcardsContentWidth = isTabletLayout ? cardMetrics.width : undefined;
   const isFocused = useIsFocused();
   const { t } = useTranslation();

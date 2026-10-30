@@ -1,5 +1,5 @@
 import { useDueReviews } from "@/src/contexts/DueReviewsContext";
-import { createNavbarLayoutTransition, NavbarLayoutContext, NavbarLayoutTransitionContext } from "@/src/contexts/NavbarLayoutContext";
+import { createNavbarLayoutTransition, NavbarContentWidthContext, NavbarLayoutContext, NavbarLayoutTransitionContext } from "@/src/contexts/NavbarLayoutContext";
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
@@ -33,6 +33,7 @@ import {
   Platform,
   Pressable,
   StatusBar,
+  ScrollView,
   Text,
   TouchableOpacity,
   useWindowDimensions,
@@ -43,6 +44,7 @@ import { useTranslation } from "react-i18next";
 import NavbarStatsRotator from "./NavbarStatsRotator";
 import NavbarMascot from "./NavbarMascot";
 import { useStyles } from "./navbar-styles";
+import { useSideNavbarLayout } from "./useSideNavbarLayout";
 import { TabSelectionIndicator, useTabIndicatorLayout } from "@/src/components/navigation/TabSelectionIndicator";
 
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -178,6 +180,15 @@ const NavbarFrame = memo(function NavbarFrame({
   const insets = useSafeAreaInsets();
   const statusBarHeight =
     Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0;
+  const isSideNavigation = useSideNavbarLayout();
+  const [contentWidth, setContentWidth] = useState<number | null>(null);
+  const onContentLayout = useCallback(({ nativeEvent }: LayoutChangeEvent) => {
+    setContentWidth(nativeEvent.layout.width);
+  }, []);
+  const RailScroller = isSideNavigation ? ScrollView : View;
+  const railScrollProps = isSideNavigation
+    ? { style: { flex: 1 }, contentContainerStyle: { flexGrow: 1 }, showsVerticalScrollIndicator: false, keyboardShouldPersistTaps: "handled" as const }
+    : {};
   const topPad = Math.max(statusBarHeight, insets.top);
   const bottomPad = Math.max(insets.bottom, 12);
   const { width: screenWidth } = useWindowDimensions();
@@ -192,7 +203,7 @@ const NavbarFrame = memo(function NavbarFrame({
   const layoutTransition = useMemo(createNavbarLayoutTransition, []);
   const settledTopBarVisibilityRef = useRef(1);
   const isStudyRoute = pathname === "/flashcards" || pathname === "/review/reviewflashcards";
-  const collapseTopBar = isStudyRoute && compactStudyLayout && keyboardVisible;
+  const collapseTopBar = !isSideNavigation && isStudyRoute && compactStudyLayout && keyboardVisible;
 
   useEffect(() => {
     const subscriptions = [
@@ -356,19 +367,21 @@ const NavbarFrame = memo(function NavbarFrame({
   return (
     <NavbarLayoutContext.Provider value={setCompactStudyLayout}>
     <NavbarLayoutTransitionContext.Provider value={layoutTransition}>
-    <View style={styles.layout}>
-      <View style={[styles.topBarContainer, { paddingTop: topPad }]}>
+    <View testID="navbar-layout" style={[styles.layout, isSideNavigation && { paddingTop: topPad, paddingBottom: bottomPad, paddingLeft: insets.left, paddingRight: insets.right }]}>
+      <View style={[styles.topBarContainer, { paddingTop: isSideNavigation ? 0 : topPad }]}>
         <Animated.View
           testID="navbar-top-bar-collapse"
           pointerEvents={collapseTopBar ? "none" : "auto"}
           accessibilityElementsHidden={collapseTopBar}
           importantForAccessibility={collapseTopBar ? "no-hide-descendants" : "auto"}
           style={{
-            height: topBarVisibility.interpolate({ inputRange: [0, 1], outputRange: [0, 50] }),
+            height: isSideNavigation ? undefined : topBarVisibility.interpolate({ inputRange: [0, 1], outputRange: [0, 50] }),
+            flex: isSideNavigation ? 1 : undefined,
             opacity: topBarVisibility,
             overflow: collapseTopBar ? "hidden" : "visible",
           }}
         >
+        <RailScroller {...railScrollProps}>
         <View style={styles.topBar} onLayout={updatePopupAnchor}>
           <View style={styles.leftGroup}>
             <TouchableOpacity
@@ -412,15 +425,19 @@ const NavbarFrame = memo(function NavbarFrame({
             </CoachmarkAnchor>
           </View>
         </View>
+        </RailScroller>
         </Animated.View>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.contentInner}>{children}</View>
+      <View testID="navbar-content" style={styles.content} onLayout={onContentLayout}>
+        <NavbarContentWidthContext.Provider value={contentWidth}>
+          <View style={styles.contentInner}>{children}</View>
+        </NavbarContentWidthContext.Provider>
       </View>
 
       {shouldHideBottomBar ? null : (
-        <View style={[styles.bottomBarContainer, { paddingBottom: bottomPad }]}>
+        <View style={[styles.bottomBarContainer, { paddingBottom: isSideNavigation ? 0 : bottomPad }]}>
+          <RailScroller {...railScrollProps}>
           <View style={styles.bottomBar} onLayout={bottomIndicator.onLayout}>
             {activeBottomSection && bottomIndicator.frames[activeBottomSection] ? (
               <TabSelectionIndicator
@@ -554,6 +571,7 @@ const NavbarFrame = memo(function NavbarFrame({
               </BottomNavVisual>
             </Pressable>
           </View>
+          </RailScroller>
         </View>
       )}
     </View>
@@ -563,6 +581,7 @@ const NavbarFrame = memo(function NavbarFrame({
 });
 
 const ActiveCourseButton = memo(function ActiveCourseButton() {
+  const isSideNavigation = useSideNavbarLayout();
   const { t } = useTranslation();
   const openCoursePanel = useOpenCoursePanel();
   const pathname = usePathname();
@@ -735,14 +754,24 @@ const ActiveCourseButton = memo(function ActiveCourseButton() {
         accessibilityLabel={courseAccessibilityLabel}
       >
         {courseGraphic}
-        {displayedCustomCourse ? (
+        {isSideNavigation ? (
+          <>
+            <Text style={styles.courseNameText} numberOfLines={2}>
+              {displayedCustomCourse?.name ?? (displayedBuiltinCourse
+                ? [displayedBuiltinCourse.sourceLang?.toUpperCase(), selectedLevel].filter(Boolean).join(" ")
+                : t("repeats.labels.courses"))}
+            </Text>
+            <MaterialIcons name="push-pin" size={12} color={colors.headline}
+              style={{ position: "absolute", top: 2, right: 4 }} />
+          </>
+        ) : displayedCustomCourse ? (
           <CourseTitleMarquee
             text={displayedCustomCourse.name}
             containerStyle={styles.courseName}
             textStyle={styles.courseNameText}
           />
         ) : null}
-        {displayedBuiltinCourse && selectedLevel ? (
+        {!isSideNavigation && displayedBuiltinCourse && selectedLevel ? (
           <Text style={styles.courseLevel} allowFontScaling>
             {selectedLevel}
           </Text>

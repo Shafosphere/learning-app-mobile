@@ -17,11 +17,14 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import React from "react";
 import { Pressable, ScrollView, View, Text } from "react-native";
 import type { ThemeColors } from "@/src/theme/theme";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
 type WikiTopicBoxProps = {
+  title: string;
   isCurrent: boolean;
   isDone: boolean;
   isLeft: boolean;
+  isGrid?: boolean;
   onPress: () => void;
   styles: ReturnType<typeof useStyles>;
   colors: ThemeColors;
@@ -29,9 +32,11 @@ type WikiTopicBoxProps = {
 };
 
 const WikiTopicBox = React.memo(function WikiTopicBox({
+  title,
   isCurrent,
   isDone,
   isLeft,
+  isGrid = false,
   onPress,
   styles,
   colors,
@@ -56,15 +61,24 @@ const WikiTopicBox = React.memo(function WikiTopicBox({
       : colors.border;
 
   return (
-    <Pressable onPress={onPress} hitSlop={12}>
+    <Pressable
+      onPress={onPress}
+      hitSlop={isGrid ? 0 : 12}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ selected: isCurrent }}
+      style={isGrid ? styles.topicGridItem : undefined}
+    >
       <View
         style={[
           styles.box,
-          isLeft ? styles.boxLeft : styles.boxRight,
+          isGrid ? styles.topicGridCard : isLeft ? styles.boxLeft : styles.boxRight,
           { borderColor },
         ]}
       >
         {icon}
+        {isGrid && <Text style={styles.topicGridTitle}>{title}</Text>}
+        {isGrid && isDone && <Ionicons name="checkmark-circle" size={24} color={colors.my_green} />}
       </View>
     </Pressable>
   );
@@ -72,6 +86,8 @@ const WikiTopicBox = React.memo(function WikiTopicBox({
 
 export default function WikiScreen() {
   const styles = useStyles();
+  const { isTabletLayout, orientation } = useDeviceLayout();
+  const isTabletLandscape = isTabletLayout && orientation === "landscape";
   const { colors } = useSettings();
   const topics = WIKI_TOPICS;
   const [currentIndex, setCurrentIndex] = usePersistedState<number>(
@@ -221,21 +237,21 @@ export default function WikiScreen() {
   const renderBoxIcon = React.useCallback(
     (title: string) => {
       switch (title) {
-        case "Przypinanie kursu":
+        case "pin":
           return <Octicons name="pin" {...iconProps} />;
-        case "Ustawienia":
+        case "settings":
           return <Ionicons name="settings-sharp" {...iconProps} />;
-        case "Fiszki":
+        case "flashcards":
           return <FontAwesome5 name="gamepad" {...iconProps} />;
-        case "Tworzenie kursu":
+        case "create":
           return <FontAwesome6 name="hammer" {...iconProps} />;
-        case "Powtórki":
+        case "review":
           return <FontAwesome5 name="hourglass-end" {...iconProps} />;
         case "Intro":
           return (
             <MaterialCommunityIcons name="information-box" {...iconProps} />
           );
-        case "Aktywacja kursu":
+        case "activate":
           return <MaterialCommunityIcons name="book-check" {...iconProps} />;
         default:
           return null;
@@ -247,27 +263,29 @@ export default function WikiScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, isTabletLandscape && styles.contentLandscape]}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.boxContainer}>
+      <View style={[styles.boxContainer, isTabletLandscape && styles.boxContainerLandscape]}>
         {topics.map((topic, index) => {
           const isLeft = index % 2 === 0;
           const isLast = index === topics.length - 1;
           const isCurrent = index === currentIndex;
           const isDone = index < currentIndex;
           return (
-            <React.Fragment key={index}>
+            <React.Fragment key={topic.id}>
               <WikiTopicBox
+                title={topic.title}
                 isCurrent={isCurrent}
                 isDone={isDone}
                 isLeft={isLeft}
+                isGrid={isTabletLandscape}
                 onPress={() => openPeek(index)}
                 styles={styles}
                 colors={colors}
-                icon={renderBoxIcon(topic.title)}
+                icon={renderBoxIcon(topic.id)}
               />
-              {!isLast && (
+              {!isLast && !isTabletLandscape && (
                 <View pointerEvents="none" style={styles.connectorArea}>
                   <ChevronStripe
                     count={5}

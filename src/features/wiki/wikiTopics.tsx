@@ -323,6 +323,7 @@ export type WikiBlock =
     };
 
 type WikiTopic = {
+  id: "pin" | "activate" | "settings" | "flashcards" | "create" | "review";
   title: string;
   subtitle: string;
   blocks: WikiBlock[];
@@ -362,6 +363,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
   //   ],
   // },
   {
+    id: "pin",
     title: wt("features.wiki.wikiTopics.title.przypinanieKursu"),
     subtitle: "Jak przypiąć kurs",
     blocks: [
@@ -454,6 +456,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
     ],
   },
   {
+    id: "activate",
     title: wt("features.wiki.wikiTopics.title.aktywacjaKursu"),
     subtitle: "Jak aktywować kurs",
     blocks: [
@@ -523,6 +526,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
     ],
   },
   {
+    id: "settings",
     title: wt("features.wiki.wikiTopics.title.ustawienia"),
     subtitle: "Dostosuj pod siebie",
     blocks: [
@@ -637,6 +641,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
     ],
   },
   {
+    id: "flashcards",
     title: wt("features.wiki.wikiTopics.title.fiszki"),
     subtitle: "Jak działa gra?",
     blocks: [
@@ -897,6 +902,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
   },
 
   {
+    id: "create",
     title: wt("features.wiki.wikiTopics.title.tworzenieKursu"),
     subtitle: "Jak stworzyć własny kurs",
     blocks: [
@@ -1008,6 +1014,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
     ],
   },
   {
+    id: "review",
     title: wt("repeats.labels.reviews"),
     subtitle: "Jak robić powtórki",
     blocks: [

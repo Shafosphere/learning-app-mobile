@@ -33,6 +33,8 @@ export type HomeTile = {
 
 type RenderHomeTileOptions = {
   tileSize: number;
+  tileHeight?: number;
+  isPhoneLandscape?: boolean;
   isTabletLayout?: boolean;
 };
 
@@ -68,10 +70,12 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
       setPressed(false);
     }, remaining);
   };
-  const { isTabletLayout = false, tileSize } = options;
+  const { isTabletLayout = false, tileSize, tileHeight = tileSize, isPhoneLandscape = false } = options;
   const isCompactTile = tileSize < 160;
-  const tileSizeStyle = { width: tileSize, height: tileSize };
-  const iconSize = Math.min(isTabletLayout ? 132 : 90, tileSize * 0.54);
+  const tileSizeStyle = { width: tileSize, height: tileHeight };
+  const iconSize = isPhoneLandscape
+    ? Math.min(90, tileSize * 0.54)
+    : Math.min(isTabletLayout ? 132 : 90, tileSize * 0.54);
   const iconSizeStyle = { width: iconSize, height: iconSize };
   const mascotScale = iconSize / 122;
   const face = pressed ? item.pressedFace ?? item.face : item.face;
@@ -142,6 +146,7 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
           styles.tileVisualArea,
           isTabletLayout && styles.tileVisualAreaTablet,
           isCompactTile && styles.tileVisualAreaCompact,
+          isPhoneLandscape && styles.tileVisualAreaPhoneLandscape,
         ]}
       >
         <View
@@ -179,6 +184,7 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
           styles.tileText,
           isTabletLayout && styles.tileTextTablet,
           isCompactTile && styles.tileTextCompact,
+          isPhoneLandscape && styles.tileTextPhoneLandscape,
         ]}
       >
         <Text
@@ -186,6 +192,7 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
             styles.tileTitle,
             isTabletLayout && styles.tileTitleTablet,
             isCompactTile && styles.tileTitleCompact,
+            isPhoneLandscape && styles.tileTitlePhoneLandscape,
           ]}
           numberOfLines={1}
           adjustsFontSizeToFit
@@ -198,6 +205,7 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
             styles.tileSubtitle,
             isTabletLayout && styles.tileSubtitleTablet,
             isCompactTile && styles.tileSubtitleCompact,
+            isPhoneLandscape && styles.tileSubtitlePhoneLandscape,
             !item.subtitle && styles.tileSubtitleHidden,
           ]}
           numberOfLines={2}

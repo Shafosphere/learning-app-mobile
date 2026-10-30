@@ -1,10 +1,16 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React from "react";
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
+import { fireEvent, render, waitFor, within } from "@testing-library/react-native";
 
 import CompletedCoursesScreen from "@/src/screens/courses/completedcourses/CompletedCoursesScreen/CompletedCoursesScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getCompletedCustomCoursesWithCardCounts } from "@/src/db/sqlite/db";
+
+let mockDeviceLayout = { isTabletLayout: false, orientation: "portrait" };
+jest.mock("@/src/hooks/useDeviceLayout", () => ({
+  useDeviceLayout: () => mockDeviceLayout,
+}));
 
 const mockPush = jest.fn();
 const mockBack = jest.fn();
@@ -56,15 +62,6 @@ jest.mock("@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActiv
   useStyles: jest.fn(() => new Proxy({}, { get: () => ({}) })),
 }));
 
-jest.mock("@/src/components/button/button", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
-  function MockButton({ text, onPress }: { text: string; onPress?: () => void }) {
-    return <Text onPress={onPress}>{text}</Text>;
-  }
-  return MockButton;
-});
-
 jest.mock("@/src/components/course/CourseListCard", () => {
   const React = require("react");
   const { Text } = require("react-native");
@@ -83,6 +80,7 @@ const mockedGetCompletedCustomCoursesWithCardCounts =
 describe("CompletedCoursesScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDeviceLayout = { isTabletLayout: false, orientation: "portrait" };
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,
       activeCustomCourseIdHydrated: true,
@@ -251,6 +249,47 @@ describe("CompletedCoursesScreen", () => {
 
     expect(setActiveCustomCourseId).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])("places a long course list beside the fixed trophy (tablet: %s)", async (isTabletLayout) => {
+    mockDeviceLayout = { isTabletLayout, orientation: "landscape" };
+    mockedGetCompletedCustomCoursesWithCardCounts.mockResolvedValue(
+      Array.from({ length: 20 }, (_, index) => ({
+        id: index + 1,
+        name: `Completed course ${index + 1}`,
+        cardsCount: 4,
+        isOfficial: false,
+      })),
+    );
+    const screen = render(<CompletedCoursesScreen />);
+    await screen.findByText("Completed course 20");
+    const list = within(screen.getByTestId("completed-courses-scroll"));
+    expect(list.getAllByText(/^Completed course \d+$/)).toHaveLength(20);
+    expect(list.queryByTestId("completed-courses-trophy")).toBeNull();
+    expect(list.queryByText("Completed courses")).toBeNull();
+    expect(screen.getByTestId("completed-courses-trophy")).toBeTruthy();
+    expect(screen.queryByText("Back")).toBeNull();
+    fireEvent.press(list.getByText("Completed course 20"));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/flashcards"));
+    expect(mockedUseSettings.mock.results[0].value.setActiveCustomCourseId).toHaveBeenCalledWith(20);
+  });
+
+  it.each([false, true])("keeps the trophy fixed and restores portrait flow on rotation (tablet: %s)", async (isTabletLayout) => {
+    mockDeviceLayout = { isTabletLayout, orientation: "landscape" };
+    const screen = render(<CompletedCoursesScreen />);
+    await screen.findByText("Courses you complete will appear here.");
+    const size = isTabletLayout ? 200 : 120;
+    expect(StyleSheet.flatten(screen.getByTestId("completed-courses-trophy").props.style)).toMatchObject({ width: size, height: size });
+    expect(within(screen.getByTestId("completed-courses-scroll")).queryByTestId("completed-courses-trophy")).toBeNull();
+    expect(screen.queryByText("Back")).toBeNull();
+
+    mockDeviceLayout = { isTabletLayout, orientation: "portrait" };
+    screen.rerender(<CompletedCoursesScreen />);
+    expect(screen.getByText("Courses you complete will appear here.")).toBeTruthy();
+    expect(StyleSheet.flatten(screen.getByTestId("completed-courses-trophy").props.style)).toMatchObject({ width: 160, height: 160 });
+    expect(within(screen.getByTestId("completed-courses-scroll")).getByTestId("completed-courses-trophy")).toBeTruthy();
+    expect(screen.queryByText("Back")).toBeNull();
+    expect(mockedGetCompletedCustomCoursesWithCardCounts).toHaveBeenCalledTimes(1);
   });
 
   it("shows an empty state when there are no completed courses", async () => {

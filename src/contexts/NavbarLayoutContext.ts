@@ -1,5 +1,8 @@
 import { createContext, useContext } from "react";
 
+// Available content width after navigation rails and safe-area insets.
+export const NavbarContentWidthContext = createContext<number | null>(null);
+
 // Screens opt in; the navbar owns keyboard timing and its animation.
 export const NavbarLayoutContext = createContext<(compact: boolean) => void>(() => {});
 

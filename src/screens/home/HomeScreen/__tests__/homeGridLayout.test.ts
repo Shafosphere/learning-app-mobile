@@ -200,8 +200,24 @@ describe("landscape tablet home", () => {
     expect(layout.scrollEnabled).toBe(true);
   });
 
-  it("keeps phones in two columns in landscape", () => {
-    expect(getHomeGridLayout({ width: 760, height: 240, isLandscape: true }).columns).toBe(2);
+  it.each([[650, 333], [550, 324], [760, 400]])(
+    "fits phone destinations in two centered square rows at %s × %s", (width, height) => {
+      const layout = getHomeGridLayout({ width, height, isLandscape: true });
+      expect(layout.columns).toBe(3);
+      expect(layout.tileHeight).toBe(layout.tileSize);
+      expect(layout.tileHeight).toBeGreaterThanOrEqual(140);
+      const visibleHeight = 2 * layout.tileSize + layout.gap;
+      expect(layout.topPadding).toBeCloseTo((height - visibleHeight) / 2);
+      expect(layout.gridWidth).toBeLessThanOrEqual(width);
+      expect(layout.topPadding + layout.contentHeight).toBeLessThanOrEqual(height);
+      expect(layout.scrollEnabled).toBe(false);
+    },
+  );
+
+  it("allows landscape phones to scroll when enlarged text needs more height", () => {
+    const layout = getHomeGridLayout({ width: 760, height: 194, fontScale: 1.5, isLandscape: true });
+    expect(layout.tileHeight).toBe(210);
+    expect(layout.scrollEnabled).toBe(true);
   });
 
   it.each([0, 8, -10])("avoids negative dimensions in a collapsed window of width %s", (width) => {

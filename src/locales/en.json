@@ -216,10 +216,6 @@
         "title": "Box faces",
         "subtitle": "Happy or sad boxes, depending on their status."
       },
-      "landscapeFlashcards": {
-        "title": "Landscape flashcards (experimental)",
-        "subtitle": "Allows the entire flashcards and review screen to rotate to landscape. It may display incorrectly — enable at your own risk. By default, the entire study screen is locked in portrait."
-      },
       "layoutSelector": {
         "title": "Choose box layout",
         "subtitle": "Preferred flashcard list view during learning.",

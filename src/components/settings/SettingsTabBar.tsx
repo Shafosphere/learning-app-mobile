@@ -15,6 +15,7 @@ export type SettingsTabOption<T extends string> = {
 type Props<T extends string> = {
   options: readonly SettingsTabOption<T>[];
   vertical?: boolean;
+  compact?: boolean;
   value: T;
   onChange: (value: T) => void;
 };
@@ -24,6 +25,7 @@ export function SettingsTabBar<T extends string>({
   value,
   onChange,
   vertical = false,
+  compact = false,
 }: Props<T>) {
   const styles = useStyles();
   const { reduceMotion } = useSettingsPagerAccessibility();
@@ -35,7 +37,7 @@ export function SettingsTabBar<T extends string>({
 
   const content = (
     <View
-      style={[styles.inner, isTabletLayout && styles.innerTablet, vertical && styles.innerVertical]}
+      style={[styles.inner, isTabletLayout && styles.innerTablet, vertical && styles.innerVertical, compact && styles.innerCompact]}
       onLayout={indicator.onLayout}
       testID="settings-tab-bar"
     >
@@ -59,20 +61,20 @@ export function SettingsTabBar<T extends string>({
             onPress={() => {
               if (!selected) onChange(option.key);
             }}
-            style={[styles.button, vertical && styles.buttonVertical]}
+            style={[styles.button, vertical && styles.buttonVertical, compact && styles.buttonCompact]}
             onLayout={(event) => indicator.onTabLayout(option.key, event)}
             accessibilityRole="tab"
             accessibilityLabel={option.label}
             accessibilityState={{ selected }}
           >
-            <View style={[styles.buttonInner, vertical && styles.buttonInnerVertical]}>
+            <View style={[styles.buttonInner, vertical && styles.buttonInnerVertical, compact && styles.buttonInnerCompact]}>
               <Ionicons
                 name={option.icon}
                 size={22}
                 style={[styles.icon, selected && styles.iconActive]}
               />
               {vertical ? (
-                <Text style={[styles.label, selected && styles.labelActive]}>{option.label}</Text>
+                <Text style={[styles.label, compact && styles.labelCompact, selected && styles.labelActive]}>{option.label}</Text>
               ) : null}
             </View>
           </TouchableOpacity>
@@ -82,7 +84,7 @@ export function SettingsTabBar<T extends string>({
   );
 
   return vertical ? (
-    <ScrollView style={styles.sidebar} contentContainerStyle={styles.sidebarContent}
+    <ScrollView style={[styles.sidebar, compact && styles.sidebarCompact]} contentContainerStyle={[styles.sidebarContent, compact && styles.sidebarContentCompact]}
       showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       {content}
     </ScrollView>

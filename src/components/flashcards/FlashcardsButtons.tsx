@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 
 import { CardActions } from "@/src/components/card/subcomponents/CardActions";
-import { useSettings, type TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
+import { type TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/features/flashcards/study/study.styles";
 import { TrueFalseActions, TrueFalseActionsAnimated } from "@/src/components/flashcards/TrueFalseActions";
 
@@ -64,10 +64,8 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   addFlashcardsDisabled = false,
 }) => {
   const styles = useStyles();
-  const { isTabletLayout, orientation } = useDeviceLayout();
-  const { flashcardsLandscapeEnabled } = useSettings();
-  const edgeAligned = flashcardsLandscapeEnabled === true
-    && isTabletLayout && orientation === "landscape";
+  const { isTabletLayout, orientation } = useDeviceLayout({ sizeSource: "screen" });
+  const edgeAligned = isTabletLayout && orientation === "landscape";
   const noopAsync = React.useCallback(async () => undefined, []);
   const noop = React.useCallback(() => undefined, []);
   const hiddenStyle = { opacity: 0, height: 0, overflow: "hidden" as const };

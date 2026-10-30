@@ -57,13 +57,13 @@ const defaultProps = {
   selectedFileName: null,
 };
 
-describe("CsvImportGuide file picker", () => {
+describe.each([false, true])("CsvImportGuide file picker (landscape: %s)", (landscape) => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("shows one generic file action and invokes its callback", () => {
-    const screen = render(<CsvImportGuide {...defaultProps} />);
+    const screen = render(<CsvImportGuide {...defaultProps} landscape={landscape} />);
 
     expect(screen.getByText("Wybierz plik")).toBeTruthy();
     expect(screen.queryByText("Wybierz CSV")).toBeNull();
@@ -74,7 +74,7 @@ describe("CsvImportGuide file picker", () => {
   });
 
   it("disables the file action while analysis is running", () => {
-    const screen = render(<CsvImportGuide {...defaultProps} isAnalyzing />);
+    const screen = render(<CsvImportGuide {...defaultProps} landscape={landscape} isAnalyzing />);
 
     const button = screen.getByLabelText("Analizuję...");
     expect(button.props.accessibilityState.disabled).toBe(true);

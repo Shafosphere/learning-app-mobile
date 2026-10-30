@@ -5,8 +5,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     backgroundColor: colors.background,
   },
+  scrollView: { flex: 1 },
   content: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 22,
@@ -16,6 +17,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: "100%",
     maxWidth: 460,
   },
+  contentLandscape: { paddingVertical: 16 },
+  cardLandscape: { maxWidth: 720 },
+  confirmWrapLandscape: { marginTop: 24 },
   title: {
     fontSize: 32,
     fontWeight: "900",

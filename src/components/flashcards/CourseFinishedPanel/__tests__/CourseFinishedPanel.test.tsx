@@ -155,6 +155,21 @@ describe("CourseFinishedPanel", () => {
     expect(onBackToCourses).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps results readable and continuation available on a short landscape viewport", () => {
+    const onBackToCourses = jest.fn();
+    const screen = render(
+      <CourseFinishedPanel courseName="Flags of Africa" cardsCountLabel="55" accuracyLabel="100%" learningTimeLabel="12 min" onBackToCourses={onBackToCourses} />
+    );
+    fireEvent(screen.getByTestId("course-finished-panel"), "layout", {
+      nativeEvent: { layout: { width: 960, height: 428, x: 0, y: 0 } },
+    });
+    expect(StyleSheet.flatten(screen.getByTestId("course-finished-heading").props.style).fontSize).toBeGreaterThanOrEqual(30);
+    for (const value of ["55", "100%", "12 min"]) expect(screen.getByText(value)).toBeTruthy();
+    expect(StyleSheet.flatten(screen.getByTestId("course-finished-action-region").props.style).minHeight).toBeGreaterThanOrEqual(48);
+    fireEvent.press(screen.getByRole("button", { name: "Wróć do kursów" }));
+    expect(onBackToCourses).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps vertical regions proportional to the measured viewport", () => {
     const { getByTestId } = render(
       <CourseFinishedPanel

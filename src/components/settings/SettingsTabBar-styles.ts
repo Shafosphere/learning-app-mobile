@@ -26,6 +26,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
   buttonVertical: { flex: 0, minHeight: 56 },
   buttonInnerVertical: { flexDirection: "row", justifyContent: "flex-start", paddingHorizontal: 12, paddingVertical: 12, gap: 12 },
   label: { flex: 1, minWidth: 0, fontSize: 15, fontWeight: "700", color: colors.paragraph },
+  sidebarCompact: { width: 174 },
+  sidebarContentCompact: { paddingHorizontal: 8, paddingTop: 4, paddingBottom: 8 },
+  innerCompact: { gap: 2 },
+  buttonCompact: { minHeight: 44 },
+  buttonInnerCompact: { paddingHorizontal: 10, paddingVertical: 8, gap: 8 },
+  labelCompact: { fontSize: 13 },
   labelActive: { color: colors.headline },
   button: { flex: 1, borderRadius: 16, zIndex: 2, minHeight: 48 },
   buttonInner: {

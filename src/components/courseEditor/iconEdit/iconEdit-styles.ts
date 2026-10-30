@@ -4,6 +4,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
   root: {
     gap: 16,
   },
+  twoColumnRoot: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    alignItems: "stretch" as const,
+  },
+  columnCard: {
+    flexBasis: "47%",
+    flexGrow: 1,
+    minWidth: 0,
+  },
   sectionLabel: {
     fontSize: 12,
     textTransform: "uppercase" as const,
@@ -233,6 +243,37 @@ export const useStyles = createThemeStylesHook((colors) => ({
   compactColorSheet: {
     maxHeight: "94%",
   },
+  iconSheetCompact: {
+    height: "100%",
+    maxHeight: "100%",
+  },
+  iconSheetHeader: {
+    flexDirection: "column" as const,
+    alignItems: "stretch" as const,
+  },
+  iconSheetHeaderCompact: {
+    flexDirection: "row-reverse" as const,
+    alignItems: "center" as const,
+  },
+  iconTitleRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+  },
+  iconTitleRowCompact: {
+    flexShrink: 0,
+  },
+  iconTitleHidden: {
+    display: "none" as const,
+  },
+  iconSearchCompact: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 40,
+  },
+  iconCategoriesRow: {
+    flexWrap: "nowrap" as const,
+  },
   sheetGrabber: {
     alignSelf: "center" as const,
     marginTop: 8,
@@ -289,6 +330,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
   iconGridScroll: {
     height: 360,
     flexGrow: 0,
+    flexShrink: 1,
+    minHeight: 0,
   },
   iconGridScrollContent: {
     paddingHorizontal: 12,
@@ -296,12 +339,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   iconGrid: {
     width: "100%",
+  },
+  iconGridRow: {
     flexDirection: "row" as const,
-    flexWrap: "wrap" as const,
-    marginHorizontal: -5,
   },
   iconTileCell: {
-    width: "20%",
+    flex: 1,
+    minWidth: 0,
     paddingHorizontal: 5,
     paddingVertical: 5,
   },
@@ -363,6 +407,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   colorScroll: {
     flexGrow: 0,
+    flexShrink: 1,
+    minHeight: 0,
   },
   colorScrollContent: {
     padding: 14,
@@ -373,6 +419,18 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingHorizontal: 12,
     paddingTop: 12,
     gap: 10,
+  },
+  colorScrollContentLandscape: {
+    flexDirection: "row" as const,
+    alignItems: "flex-start" as const,
+    gap: 24,
+  },
+  colorControls: {
+    gap: 14,
+  },
+  colorControlsLandscape: {
+    flex: 1,
+    minWidth: 0,
   },
   colorActionRow: {
     flexDirection: "row" as const,
@@ -437,6 +495,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   compactSvPlaneWrap: {
     aspectRatio: 2.25,
+  },
+  svPlaneWrapLandscape: {
+    flex: 1,
+    width: undefined,
+    aspectRatio: undefined,
   },
   svSvg: {
     width: "100%",

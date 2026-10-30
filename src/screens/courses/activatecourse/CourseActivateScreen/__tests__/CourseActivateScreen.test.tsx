@@ -1,3 +1,4 @@
+import { StyleSheet } from "react-native";
 import React from "react";
 import { act, fireEvent, render, waitFor, within } from "@testing-library/react-native";
 
@@ -11,6 +12,11 @@ import {
   getOfficialCustomCoursesWithCardCounts,
 } from "@/src/db/sqlite/db";
 import { getOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
+
+let mockDeviceLayout = { isTabletLayout: false, orientation: "portrait", width: 390 };
+jest.mock("@/src/hooks/useDeviceLayout", () => ({
+  useDeviceLayout: () => mockDeviceLayout,
+}));
 
 const EMPTY_TEXT = "Nic tu nie ma :(, czas wybrać kurs!";
 
@@ -47,7 +53,10 @@ jest.mock("@/src/contexts/PopupContext", () => ({
 
 jest.mock("@/src/contexts/SettingsContext", () => {
   const useSettings = jest.fn();
-  return { useSettings, useThemeSettings: useSettings };
+  return {
+    useSettings,
+    useThemeSettings: () => ({ ...useSettings(), fontScaleMultiplier: 1 }),
+  };
 });
 
 jest.mock("react-i18next", () => {
@@ -110,40 +119,6 @@ jest.mock("@/src/services/onboardingCheckpoint", () => ({
   subscribeOnboardingCheckpoint: jest.fn(() => jest.fn()),
 }));
 
-jest.mock("@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActivateScreen-styles", () => ({
-  useStyles: jest.fn(() => new Proxy({}, { get: () => ({}) })),
-}));
-
-jest.mock("@/src/components/button/button", () => {
-  const React = jest.requireActual<typeof import("react")>("react");
-  const { Pressable, Text } =
-    jest.requireActual<typeof import("react-native")>("react-native");
-  function MockButton({
-    text,
-    onPress,
-    disabled = false,
-    accessibilityLabel,
-  }: {
-    text: string;
-    onPress?: () => void;
-    disabled?: boolean;
-    accessibilityLabel?: string;
-  }) {
-    return (
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel ?? text}
-        accessibilityState={{ disabled }}
-        disabled={disabled}
-        onPress={onPress}
-      >
-        <Text>{text}</Text>
-      </Pressable>
-    );
-  }
-  return MockButton;
-});
-
 jest.mock("@/src/components/course/CourseListCard", () => {
   const React = jest.requireActual<typeof import("react")>("react");
   const { Text, View } =
@@ -173,6 +148,7 @@ const mockedGetCompletedCustomCoursesWithCardCounts =
 describe("CourseActivateScreen loading state", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDeviceLayout = { isTabletLayout: false, orientation: "portrait", width: 390 };
     mockedGetOnboardingCheckpoint.mockResolvedValue("done");
     mockedUseCoachmarkFlow.mockReturnValue({
       isActive: false,
@@ -201,6 +177,84 @@ describe("CourseActivateScreen loading state", () => {
     mockedGetCustomCoursesWithCardCounts.mockResolvedValue([]);
     mockedGetOfficialCustomCoursesWithCardCounts.mockResolvedValue([]);
     mockedGetCompletedCustomCoursesWithCardCounts.mockResolvedValue([]);
+  });
+
+  it("fits two course columns to the measured space between side rails and falls back on narrow windows", async () => {
+    mockDeviceLayout = { isTabletLayout: false, orientation: "landscape", width: 923 };
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), activeCustomCourseId: 21, pinnedOfficialCourseIds: [21, 22] });
+    mockedGetOfficialCustomCoursesWithCardCounts.mockResolvedValue([
+      { id: 21, name: "Spanish PL", slug: "es_to_pl_first_50", iconId: "flag:es", iconColor: "#000", cardsCount: 50, isOfficial: true },
+      { id: 22, name: "Spanish EN", slug: "es_to_en_first_50", iconId: "flag:es", iconColor: "#000", cardsCount: 50, isOfficial: true },
+    ]);
+    const screen = render(<CourseActivateScreen />);
+    fireEvent(screen.getByTestId("course-activate-viewport"), "layout", { nativeEvent: { layout: { width: 720, height: 333 } } });
+    await screen.findByText("Spanish EN");
+    expect(StyleSheet.flatten(screen.getByTestId("course-activate-content").props.style).width).toBe(688);
+    expect(StyleSheet.flatten(screen.getByTestId("official-course-row-21").props.style).width).toBe(336);
+    const list = within(screen.getByTestId("course-activate-scroll"));
+    expect(list.queryByRole("button", { name: "Przypnij kurs" })).toBeNull();
+    fireEvent.press(screen.getByRole("button", { name: "Graj w aktywny kurs" }));
+    expect(mockPush).toHaveBeenCalledWith("/flashcards");
+
+    fireEvent(screen.getByTestId("course-activate-viewport"), "layout", { nativeEvent: { layout: { width: 480, height: 280 } } });
+    expect(StyleSheet.flatten(screen.getByTestId("course-activate-content").props.style).width).toBe(448);
+    expect(StyleSheet.flatten(screen.getByTestId("official-course-row-21").props.style)?.width).toBeUndefined();
+    expect(screen.getByText("Spanish EN")).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: "Przypnij kurs" }));
+    expect(mockPush).toHaveBeenCalledWith("/createcourse");
+
+    mockDeviceLayout = { isTabletLayout: false, orientation: "portrait", width: 390 };
+    screen.rerender(<CourseActivateScreen />);
+    expect(list.queryByRole("button", { name: "Przypnij kurs" })).toBeNull();
+    fireEvent.press(screen.getByRole("button", { name: "Graj w aktywny kurs" }));
+    expect(mockPush).toHaveBeenCalledWith("/flashcards");
+  });
+
+  it("restores the portrait footer after repeated rotations with an active course", async () => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), activeCustomCourseId: 21 });
+    const screen = render(<CourseActivateScreen />);
+    await screen.findByText(EMPTY_TEXT);
+
+    const getPinStyle = () => StyleSheet.flatten(
+      screen.getByRole("button", { name: "Przypnij kurs" }).props.style,
+    );
+    const getPlayStyle = () => StyleSheet.flatten(
+      screen.getByRole("button", { name: "Graj w aktywny kurs" }).props.style,
+    );
+    const initialPinStyle = getPinStyle();
+    const initialPlayStyle = getPlayStyle();
+    expect(initialPinStyle).toMatchObject({
+      width: "auto", minWidth: 130, flexGrow: 0, flexShrink: 0, flexBasis: "auto",
+    });
+    expect(initialPlayStyle).toMatchObject({ width: 0, flexGrow: 1, flexBasis: 0 });
+
+    for (let rotation = 0; rotation < 2; rotation++) {
+      mockDeviceLayout = { isTabletLayout: false, orientation: "landscape", width: 923 };
+      screen.rerender(<CourseActivateScreen />);
+      fireEvent(screen.getByTestId("course-activate-viewport"), "layout", {
+        nativeEvent: { layout: { width: 720, height: 333 } },
+      });
+      expect(getPinStyle()).toMatchObject({ width: 0, flexGrow: 1, flexShrink: 1, flexBasis: 0 });
+      expect(getPlayStyle()).toMatchObject({ width: 0, flexGrow: 1, flexShrink: 1, flexBasis: 0 });
+
+      mockDeviceLayout = { isTabletLayout: false, orientation: "portrait", width: 390 };
+      screen.rerender(<CourseActivateScreen />);
+      fireEvent(screen.getByTestId("course-activate-viewport"), "layout", {
+        nativeEvent: { layout: { width: 390, height: 780 } },
+      });
+      expect(getPinStyle()).toEqual(initialPinStyle);
+      expect(getPlayStyle()).toEqual(initialPlayStyle);
+    }
+  });
+
+  it("keeps the fixed pin action available on an empty landscape phone", async () => {
+    mockDeviceLayout = { isTabletLayout: false, orientation: "landscape", width: 923 };
+    const screen = render(<CourseActivateScreen />);
+    await screen.findByText(EMPTY_TEXT);
+    expect(within(screen.getByTestId("course-activate-scroll")).queryByRole("button", { name: "Przypnij kurs" })).toBeNull();
+    fireEvent.press(screen.getByRole("button", { name: "Przypnij kurs" }));
+    expect(mockPush).toHaveBeenCalledWith("/createcourse");
+    expect(screen.queryByRole("button", { name: "Graj w aktywny kurs" })).toBeNull();
   });
 
   it("reveals audio controls only for the active course without activating on download", async () => {

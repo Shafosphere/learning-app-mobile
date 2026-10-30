@@ -1,23 +1,20 @@
-import { useSettings } from "@/src/contexts/SettingsContext";
-import { usePathname } from "expo-router";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect } from "react";
 import { Platform } from "react-native";
 
-// Route changes and settings hydration may overlap a native rotation request.
-// Apply them in order so an older request cannot leave the next screen locked.
+// Display resizing and unmounting may overlap a native rotation request.
+// Apply them in order so an older request cannot override the latest display policy.
 let orientationQueue = Promise.resolve();
 function applyOrientation(lock: ScreenOrientation.OrientationLock) {
   orientationQueue = orientationQueue
     .then(() => ScreenOrientation.lockAsync(lock))
-    .catch((error) => console.warn("[StudyOrientation] Could not set screen orientation", error));
+    .catch((error) => console.warn("[AppOrientation] Could not set screen orientation", error));
 }
 
-export function StudyOrientationController() {
-  const pathname = usePathname();
-  const { flashcardsLandscapeEnabled } = useSettings();
-  const isStudyRoute = pathname === "/flashcards" || pathname === "/review/reviewflashcards";
-  const portraitOnly = isStudyRoute && flashcardsLandscapeEnabled !== true;
+export function AppOrientationController() {
+  const { isTabletLayout } = useDeviceLayout({ sizeSource: "screen" });
+  const portraitOnly = !isTabletLayout;
 
   useEffect(() => {
     if (Platform.OS === "web") return;

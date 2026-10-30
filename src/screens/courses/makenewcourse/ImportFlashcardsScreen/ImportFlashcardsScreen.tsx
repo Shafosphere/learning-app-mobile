@@ -52,6 +52,7 @@ import {
   normalizeDraftCards,
 } from "@/src/features/customCourse/contentDraft";
 import { useStyles } from "./ImportFlashcardsScreen-styles";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
 type CsvStep = "idle" | "analyzing" | "importing";
 
@@ -93,6 +94,8 @@ const getNonEmptyManualCards = (cards: ManualCard[]): ManualCard[] =>
 
 export default function CustomCourseContentScreen() {
   const styles = useStyles();
+  const { orientation, width } = useDeviceLayout({ sizeSource: "screen" });
+  const isLandscapeLayout = orientation === "landscape" && width >= 600;
   const setPopup = usePopup();
   const router = useRouter();
   const pathname = usePathname();
@@ -802,27 +805,43 @@ export default function CustomCourseContentScreen() {
     </View>
   ) : null;
 
+  const contentHeader = (
+    <>
+      <Text style={[styles.sectionHeader, isLandscapeLayout && styles.sectionHeaderLandscape]}>
+        {t("courseCreator.import.sectionHeader")}
+      </Text>
+      <SegmentedTabs
+        options={segmentOptions}
+        value={addMode}
+        onChange={handleAddModeChange}
+        accessibilityLabel={t("courseCreator.import.addModeA11y")}
+        containerStyle={isLandscapeLayout ? styles.addModeTabsLandscape : styles.addModeTabs}
+      />
+    </>
+  );
+
   return (
-    <View style={styles.container}>
-      <ScrollView keyboardShouldPersistTaps="handled">
+    <View style={[styles.container, isLandscapeLayout && styles.containerLandscape]}>
+      {isLandscapeLayout && <View style={styles.headerLandscape}>{contentHeader}</View>}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
         <View
           style={[
             styles.section,
-            shouldShowManualToolbar && styles.sectionWithManualToolbar,
+            shouldShowManualToolbar && !isLandscapeLayout && styles.sectionWithManualToolbar,
+            isLandscapeLayout && styles.sectionLandscape,
           ]}
         >
-          <Text style={styles.sectionHeader}>{t("courseCreator.import.sectionHeader")}</Text>
-          <SegmentedTabs
-            options={segmentOptions}
-            value={addMode}
-            onChange={handleAddModeChange}
-            accessibilityLabel={t("courseCreator.import.addModeA11y")}
-            containerStyle={styles.addModeTabs}
-          />
+          {!isLandscapeLayout && contentHeader}
 
           {addMode === "csv" ? (
-            <View style={styles.modeContainer}>
+            <View style={[styles.modeContainer, isLandscapeLayout && styles.modeContainerLandscape]}>
               <CsvImportGuide
+                landscape={isLandscapeLayout}
                 onPickFile={handlePickFile}
                 onDownloadTemplate={handleDownloadTemplate}
                 downloadingTemplateKey={downloadingTemplateKey}
@@ -832,7 +851,7 @@ export default function CustomCourseContentScreen() {
               {pendingImportPreview ?? importPreview}
             </View>
           ) : (
-            <View style={styles.modeContainer}>
+            <View style={[styles.modeContainer, isLandscapeLayout && styles.modeContainerLandscape]}>
               {importPreview}
               <Text style={styles.miniSectionHeader}>{t("courseCreator.import.flashcardsHeader")}</Text>
               <ManualCardsEditor
@@ -856,55 +875,57 @@ export default function CustomCourseContentScreen() {
         </View>
       </ScrollView>
 
-      {shouldShowManualToolbar ? (
-        <Animated.View
-          style={styles.manualToolbarWrap}
-        >
-          <View style={styles.manualToolbar}>
-            <CardTypeSelector
-              options={cardTypeOptions}
-              value={newCardType}
-              onChange={setNewCardType}
-              label={t("courseCreator.import.cardTypeLabel")}
-              labelHidden
-              size="compact"
-              dropdownDirection="up"
-              containerStyle={styles.manualTypeSelector}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("courseCreator.import.addCardA11y")}
-              style={styles.manualAddButton}
-              hitSlop={8}
-              onPress={() => handleAddCard(newCardType)}
-            >
-              <Text style={styles.manualAddIcon}>+</Text>
-            </Pressable>
-          </View>
-        </Animated.View>
-      ) : null}
-
-      <View style={styles.divider} />
-
-      <View style={styles.footer}>
-        <View style={styles.buttonsRow}>
-          <MyButton
-            color="my_yellow"
-            onPress={handleGoBack}
-            disabled={isImportBusy}
-            width={60}
-            accessibilityLabel={t("courseCreator.import.backA11y")}
+      <View style={isLandscapeLayout && styles.actionBarLandscape}>
+        {shouldShowManualToolbar ? (
+          <Animated.View
+            style={[styles.manualToolbarWrap, isLandscapeLayout && styles.manualToolbarWrapLandscape]}
           >
-            <Ionicons name="arrow-back" size={28} style={styles.returnbtn} />
-          </MyButton>
+            <View style={styles.manualToolbar}>
+              <CardTypeSelector
+                options={cardTypeOptions}
+                value={newCardType}
+                onChange={setNewCardType}
+                label={t("courseCreator.import.cardTypeLabel")}
+                labelHidden
+                size="compact"
+                dropdownDirection="up"
+                containerStyle={styles.manualTypeSelector}
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("courseCreator.import.addCardA11y")}
+                style={styles.manualAddButton}
+                hitSlop={8}
+                onPress={() => handleAddCard(newCardType)}
+              >
+                <Text style={styles.manualAddIcon}>+</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        ) : null}
 
-          <MyButton
-            text={t("app.actions.next")}
-            color="my_green"
-            onPress={handleNavigateToSettings}
-            disabled={isImportBusy}
-            accessibilityLabel={t("courseCreator.import.nextA11y")}
-          />
+        {!isLandscapeLayout && <View style={styles.divider} />}
+
+        <View style={[styles.footer, isLandscapeLayout && styles.footerLandscape]}>
+          <View style={[styles.buttonsRow, isLandscapeLayout && styles.buttonsRowLandscape]}>
+            <MyButton
+              color="my_yellow"
+              onPress={handleGoBack}
+              disabled={isImportBusy}
+              width={60}
+              accessibilityLabel={t("courseCreator.import.backA11y")}
+            >
+              <Ionicons name="arrow-back" size={28} style={styles.returnbtn} />
+            </MyButton>
+
+            <MyButton
+              text={t("app.actions.next")}
+              color="my_green"
+              onPress={handleNavigateToSettings}
+              disabled={isImportBusy}
+              accessibilityLabel={t("courseCreator.import.nextA11y")}
+            />
+          </View>
         </View>
       </View>
     </View>

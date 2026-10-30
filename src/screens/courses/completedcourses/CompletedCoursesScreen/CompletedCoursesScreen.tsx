@@ -1,4 +1,4 @@
-import MyButton from "@/src/components/button/button";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { CourseGroupList } from "@/src/components/course/CourseGroupList";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
 import { COURSE_CATEGORIES, type CourseCategory } from "@/src/constants/courseCategories";
@@ -39,6 +39,60 @@ const completedStyles = StyleSheet.create({
     alignItems: "center",
     marginTop: 24,
     marginBottom: 12,
+  },
+  heroTabletLandscape: {
+    width: "32%",
+    minWidth: 200,
+    alignSelf: "center",
+    marginTop: 0,
+    marginBottom: 0,
+    gap: 16,
+  },
+  titleTabletLandscape: {
+    fontSize: 30,
+    lineHeight: 38,
+  },
+  listTabletLandscape: {
+    width: "100%",
+    maxWidth: 720,
+    paddingHorizontal: 0,
+  },
+  scrollContentLandscape: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingVertical: 24,
+  },
+  workspace: {
+    flex: 1,
+  },
+  workspaceLandscape: {
+    width: "90%",
+    maxWidth: 960,
+    alignSelf: "center",
+    flexDirection: "row",
+    gap: 24,
+  },
+  listContent: {
+    paddingBottom: 24,
+  },
+  listLandscape: {
+    width: "100%",
+  },
+  heroLandscape: {
+    width: "32%",
+    minWidth: 180,
+    alignSelf: "center",
+    justifyContent: "center",
+    marginTop: 0,
+    marginBottom: 0,
+    gap: 0,
+  },
+  titleLandscape: {
+    fontSize: 22,
+    marginTop: 0,
+    marginBottom: 0,
+    flexShrink: 1,
+    textAlign: "center",
   },
   emptyContainer: {
     minHeight: 0,
@@ -148,6 +202,10 @@ export default function CompletedCoursesScreen() {
     setActiveCustomCourseId,
   } = useSettings();
   const styles = useStyles();
+  const { isTabletLayout, orientation } = useDeviceLayout();
+  const isPhoneLandscape = !isTabletLayout && orientation === "landscape";
+  const isTabletLandscape = isTabletLayout && orientation === "landscape";
+  const isLandscapeLayout = isPhoneLandscape || isTabletLandscape;
   const router = useRouter();
   const scrollRef = useRef<ScrollView | null>(null);
   const [completedCourses, setCompletedCourses] = useState<
@@ -241,106 +299,103 @@ export default function CompletedCoursesScreen() {
     [router]
   );
 
+  const hero = (
+    <View style={[completedStyles.hero, isPhoneLandscape && completedStyles.heroLandscape, isTabletLandscape && completedStyles.heroTabletLandscape]}>
+      <TrophyEntrance ready={!isLoadingCourses} size={isPhoneLandscape ? 120 : isTabletLandscape ? 200 : 160} />
+      <Text style={[styles.title, isLandscapeLayout && completedStyles.titleLandscape, isTabletLandscape && completedStyles.titleTabletLandscape]}>
+        {t("screens.courses.completedCourses.title")}
+      </Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <ScrollView
-        ref={scrollRef}
-        style={styles.scrollArea}
-        contentContainerStyle={[
-          styles.scrollContent,
-          !isLoadingCourses && isEmptyState && completedStyles.emptyScrollContent,
-        ]}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.minicontainer}>
-          <View style={completedStyles.hero}>
-            <TrophyEntrance ready={!isLoadingCourses} />
-            <Text style={styles.title}>
-              {t("screens.courses.completedCourses.title")}
-            </Text>
-          </View>
+      <View style={[completedStyles.workspace, isLandscapeLayout && completedStyles.workspaceLandscape]}>
+        {isLandscapeLayout && hero}
+        <ScrollView
+          testID="completed-courses-scroll"
+          ref={scrollRef}
+          style={styles.scrollArea}
+          contentContainerStyle={[
+            styles.scrollContent,
+            completedStyles.listContent,
+            isLandscapeLayout && completedStyles.scrollContentLandscape,
+            !isLoadingCourses && isEmptyState && completedStyles.emptyScrollContent,
+          ]}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={[styles.minicontainer, isPhoneLandscape && completedStyles.listLandscape, isTabletLandscape && completedStyles.listTabletLandscape]}>
+            {!isLandscapeLayout && hero}
+            {!isLoadingCourses && isEmptyState ? (
+              <View style={[styles.emptyContainer, completedStyles.emptyContainer]}>
+                <Text style={[styles.emptyState, completedStyles.emptyText]}>
+                  {t("screens.courses.completedCourses.empty")}
+                </Text>
+              </View>
+            ) : (
+              <>
+                {officialCourses.length ? (
+                  <CourseGroupList
+                    groups={courseGroups}
+                    activeCourseId={activeCustomCourseId}
+                    colors={colors}
+                    onPress={handleCoursePress}
+                    onEdit={handleEditCourse}
+                    firstCoachmarkCourseId={null}
+                    scrollRef={scrollRef}
+                  />
+                ) : null}
 
-          {!isLoadingCourses && isEmptyState ? (
-            <View style={[styles.emptyContainer, completedStyles.emptyContainer]}>
-              <Text style={[styles.emptyState, completedStyles.emptyText]}>
-                {t("screens.courses.completedCourses.empty")}
-              </Text>
-            </View>
-          ) : (
-            <>
-              {officialCourses.length ? (
-                <CourseGroupList
-                  groups={courseGroups}
-                  activeCourseId={activeCustomCourseId}
-                  colors={colors}
-                  onPress={handleCoursePress}
-                  onEdit={handleEditCourse}
-                  firstCoachmarkCourseId={null}
-                  scrollRef={scrollRef}
-                />
-              ) : null}
-
-              {userCustomCourses.length ? (
-                <View style={styles.customSection}>
-                  <Text style={styles.customSectionTitle}>
-                    {t(
-                      "screens.courses.activatecourse.courseActivate.courseActivate.textChild.stworzonePrzezCiebie"
-                    )}
-                  </Text>
-                  <View style={styles.customList}>
-                    {userCustomCourses.map((course) => (
-                      <CourseListCard
-                        key={course.id}
-                        title={course.name}
-                        subtitle={t("repeats.format.flashcardsValue", {
-                          value: course.cardsCount,
-                        })}
-                        iconId={course.iconId}
-                        iconColor={course.iconColor}
-                        flagCode={null}
-                        isHighlighted={activeCustomCourseId === course.id}
-                        onPress={() => handleCoursePress(course.id)}
-                        rightAccessory={
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t(
-                              "screens.courses.completedCourses.editA11y",
-                              { value: course.name }
-                            )}
-                            style={styles.customEditButton}
-                            onPress={(event) => {
-                              event.stopPropagation();
-                              handleEditCourse(course);
-                            }}
-                            hitSlop={8}
-                          >
-                            <FontAwesome6
-                              name="edit"
-                              size={24}
-                              color={colors.headline}
-                            />
-                          </Pressable>
-                        }
-                      />
-                    ))}
+                {userCustomCourses.length ? (
+                  <View style={styles.customSection}>
+                    <Text style={styles.customSectionTitle}>
+                      {t(
+                        "screens.courses.activatecourse.courseActivate.courseActivate.textChild.stworzonePrzezCiebie"
+                      )}
+                    </Text>
+                    <View style={styles.customList}>
+                      {userCustomCourses.map((course) => (
+                        <CourseListCard
+                          key={course.id}
+                          title={course.name}
+                          subtitle={t("repeats.format.flashcardsValue", {
+                            value: course.cardsCount,
+                          })}
+                          iconId={course.iconId}
+                          iconColor={course.iconColor}
+                          flagCode={null}
+                          isHighlighted={activeCustomCourseId === course.id}
+                          onPress={() => handleCoursePress(course.id)}
+                          rightAccessory={
+                            <Pressable
+                              accessibilityRole="button"
+                              accessibilityLabel={t(
+                                "screens.courses.completedCourses.editA11y",
+                                { value: course.name }
+                              )}
+                              style={styles.customEditButton}
+                              onPress={(event) => {
+                                event.stopPropagation();
+                                handleEditCourse(course);
+                              }}
+                              hitSlop={8}
+                            >
+                              <FontAwesome6
+                                name="edit"
+                                size={24}
+                                color={colors.headline}
+                              />
+                            </Pressable>
+                          }
+                        />
+                      ))}
+                    </View>
                   </View>
-                </View>
-              ) : null}
-            </>
-          )}
-        </View>
-      </ScrollView>
-
-      <View style={styles.buttonscontainer}>
-        <View style={styles.buttonsRow}>
-          <MyButton
-            text={t("app.actions.back")}
-            accessibilityLabel={t("app.actions.back")}
-            color="my_green"
-            onPress={() => router.back()}
-            width={96}
-          />
-        </View>
+                ) : null}
+              </>
+            )}
+          </View>
+        </ScrollView>
       </View>
 
       {isLoadingCourses ? (

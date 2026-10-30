@@ -107,8 +107,8 @@ it("keeps the bottom selection in sync after native selection", async () => {
 });
 
 
-it("keeps the selected settings page when rotating between the bottom tabs and sidebar", async () => {
-  mockDeviceLayout = { isTabletLayout: true, width: 960, orientation: "landscape" };
+it.each([true, false])("keeps the selected settings page when rotating between bottom tabs and sidebar (tablet: %s)", async (isTabletLayout) => {
+  mockDeviceLayout = { isTabletLayout, width: 960, orientation: "landscape" };
   const screen = render(<SettingsScreen />);
   await act(async () => {});
   expect(screen.getByText("settings.tabs.learning")).toBeTruthy();
@@ -117,12 +117,12 @@ it("keeps the selected settings page when rotating between the bottom tabs and s
   expect(screen.getByText("Learning content")).toBeTruthy();
   mockSectionRender.mockClear();
 
-  mockDeviceLayout = { isTabletLayout: true, width: 600, orientation: "portrait" };
+  mockDeviceLayout = { isTabletLayout, width: isTabletLayout ? 600 : 390, orientation: "portrait" };
   screen.rerender(<SettingsScreen />);
   expect(screen.queryByText("settings.tabs.learning")).toBeNull();
   expect(screen.getByRole("tab", { name: "settings.tabs.learning", selected: true })).toBeTruthy();
   expect(screen.getByText("Learning content")).toBeTruthy();
-  mockDeviceLayout = { isTabletLayout: true, width: 960, orientation: "landscape" };
+  mockDeviceLayout = { isTabletLayout, width: 960, orientation: "landscape" };
   screen.rerender(<SettingsScreen />);
   expect(screen.getByText("settings.tabs.learning")).toBeTruthy();
   expect(screen.getByRole("tab", { name: "settings.tabs.learning", selected: true })).toBeTruthy();

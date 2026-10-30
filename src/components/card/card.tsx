@@ -1,6 +1,7 @@
 import { isFrontImageRoleApplicable, resolveCardPromptPresentation } from "@/src/utils/frontImageRole";
 import { useCourseFrontImageRole } from "@/src/hooks/useCourseFrontImageRole";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { NavbarContentWidthContext } from "@/src/contexts/NavbarLayoutContext";
 import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
@@ -173,13 +174,14 @@ export default function Card({
   const styles = useStyles();
   const { t } = useTranslation();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const { isTabletLayout, orientation } = useDeviceLayout();
+  const contentWidth = useContext(NavbarContentWidthContext);
+  const viewportWidth = Math.min(windowWidth, contentWidth ?? windowWidth);
+  const { isTabletLayout, orientation } = useDeviceLayout({ sizeSource: "screen" });
   const visibleStudyHeight = useContext(VisibleStudyViewportContext);
-  const { flashcardsLandscapeEnabled } = useSettings();
-  const isLandscapeStudy = flashcardsLandscapeEnabled === true && isTabletLayout && orientation === "landscape"
+  const isLandscapeStudy = isTabletLayout && orientation === "landscape"
     && (contentDebugSource === "flashcards" || contentDebugSource === "review");
   const landscapeLayout = isLandscapeStudy
-    ? getLandscapeStudyLayout(windowWidth, visibleStudyHeight ?? windowHeight - 120, Boolean(inlineAction))
+    ? getLandscapeStudyLayout(viewportWidth, visibleStudyHeight ?? windowHeight - 120, Boolean(inlineAction))
     : null;
   const cardMetrics = landscapeLayout
     ? {
@@ -187,7 +189,10 @@ export default function Card({
         width: landscapeLayout.cardWidth,
         contentScale: 1,
       }
-    : getResponsiveFlashcardMetrics(windowWidth, { isTabletLayout, widthOverride });
+    : getResponsiveFlashcardMetrics(viewportWidth, {
+        isTabletLayout,
+        widthOverride: widthOverride == null ? undefined : Math.min(widthOverride, viewportWidth),
+      });
 
   const editTabScale = cardMetrics.contentScale;
   const checkSpelling = useSpellchecking();

@@ -106,11 +106,9 @@ it("shows the description belonging to the selected progressive group", () => {
   expect(screen.queryByText(pl.courses.progressive.roadSignsDescription)).toBeNull();
 });
 
-it("keeps existing modals unscrollable and enables scrolling only when requested", () => {
+it("makes modal content scrollable by default", () => {
   const props = { visible: true, title: "Tytuł", description: "Opis", confirmLabel: "OK", onConfirm: jest.fn(), onClose: jest.fn() };
   const screen = render(<NudgeModal {...props} />);
-  expect(screen.UNSAFE_queryByType(ScrollView)).toBeNull();
-  screen.rerender(<NudgeModal {...props} scrollableContent />);
   expect(screen.UNSAFE_getByType(ScrollView)).toBeTruthy();
   fireEvent.press(screen.getByText("OK"));
   expect(props.onConfirm).toHaveBeenCalledTimes(1);

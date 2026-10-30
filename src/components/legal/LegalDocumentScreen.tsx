@@ -80,8 +80,9 @@ export default function LegalDocumentScreen({
 }: LegalDocumentScreenProps) {
   const { t } = useTranslation();
   const styles = useStyles();
-  const { isTabletLayout, shortestSide } = useDeviceLayout();
+  const { isTabletLayout, shortestSide, orientation, width } = useDeviceLayout();
   const useCenteredTabletLayout = isTabletLayout || shortestSide >= 560;
+  const isLandscapeLayout = orientation === "landscape" && width >= 840;
   const onlineUrl = getOptionalText(t, `${heroKey}.hero.onlineUrl`);
   const onlineButton = getOptionalText(t, `${heroKey}.hero.onlineButton`);
   const sections = useLegalSections({
@@ -96,6 +97,7 @@ export default function LegalDocumentScreen({
         style={[
           styles.scrollView,
           useCenteredTabletLayout && styles.scrollViewTablet,
+          isLandscapeLayout && styles.scrollViewLandscape,
         ]}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -128,39 +130,42 @@ export default function LegalDocumentScreen({
           </View>
         </View>
 
-        {sections.map((section) => (
-          <View
-            key={section.key}
-            style={[
-              styles.sectionCard,
-              section.emphasis ? styles.sectionCardEmphasis : null,
-            ]}
-          >
-            <Text style={styles.sectionTitle}>{section.title}</Text>
-            <Text style={styles.sectionBody}>{section.body}</Text>
+        <View style={[styles.sections, isLandscapeLayout && styles.sectionsLandscape]}>
+          {sections.map((section) => (
+            <View
+              key={section.key}
+              style={[
+                styles.sectionCard,
+                isLandscapeLayout && styles.sectionCardLandscape,
+                section.emphasis ? styles.sectionCardEmphasis : null,
+              ]}
+            >
+              <Text style={styles.sectionTitle}>{section.title}</Text>
+              <Text style={styles.sectionBody}>{section.body}</Text>
 
-            {section.bullets?.length ? (
-              <View style={styles.bulletList}>
-                {section.bullets.map((bullet) => (
-                  <View key={bullet} style={styles.bulletRow}>
-                    <View style={styles.bulletDot} />
-                    <Text style={styles.bulletText}>{bullet}</Text>
-                  </View>
-                ))}
-              </View>
-            ) : null}
+              {section.bullets?.length ? (
+                <View style={styles.bulletList}>
+                  {section.bullets.map((bullet) => (
+                    <View key={bullet} style={styles.bulletRow}>
+                      <View style={styles.bulletDot} />
+                      <Text style={styles.bulletText}>{bullet}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
 
-            {section.note ? (
-              <View style={styles.inlineNote}>
-                {section.noteLabel ? (
-                  <Text style={styles.inlineNoteLabel}>{section.noteLabel}</Text>
-                ) : null}
-                <Text style={styles.sectionBody}>{section.note}</Text>
-              </View>
-            ) : null}
+              {section.note ? (
+                <View style={styles.inlineNote}>
+                  {section.noteLabel ? (
+                    <Text style={styles.inlineNoteLabel}>{section.noteLabel}</Text>
+                  ) : null}
+                  <Text style={styles.sectionBody}>{section.note}</Text>
+                </View>
+              ) : null}
 
-          </View>
-        ))}
+            </View>
+          ))}
+        </View>
         {children}
       </ScrollView>
     </View>

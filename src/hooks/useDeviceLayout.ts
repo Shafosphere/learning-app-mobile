@@ -1,4 +1,5 @@
-import { useWindowDimensions } from "react-native";
+import { useEffect, useState } from "react";
+import { Dimensions, Platform, useWindowDimensions } from "react-native";
 
 export type WidthClass = "compact" | "medium" | "expanded";
 export type HeightClass = "compact" | "medium" | "expanded";
@@ -72,8 +73,25 @@ export function getDeviceLayout(width: number, height: number): DeviceLayout {
   };
 }
 
-export function useDeviceLayout(): DeviceLayout {
-  const { width, height } = useWindowDimensions();
+export function useDeviceLayout({ sizeSource = "window" }: {
+  sizeSource?: "window" | "screen";
+} = {}): DeviceLayout {
+  const window = useWindowDimensions();
+  const [screen, setScreen] = useState(() => Dimensions.get("screen"));
+  const useScreen = sizeSource === "screen" && Platform.OS !== "web";
+
+  useEffect(() => {
+    if (!useScreen) return;
+    const subscription = Dimensions.addEventListener("change", ({ screen: nextScreen }) => {
+      setScreen(nextScreen);
+    });
+    setScreen(Dimensions.get("screen"));
+    return () => subscription.remove();
+  }, [useScreen]);
+
+  // Study orientation must not change when Android resizes the window for
+  // the keyboard. Screen dimensions still update on rotation and folding.
+  const { width, height } = useScreen ? screen : window;
 
   return getDeviceLayout(width, height);
 }

@@ -14,6 +14,7 @@ import { useHydratedPersistedState } from "@/src/hooks/usePersistedState";
 
 let mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
 beforeEach(() => {
+  jest.clearAllMocks();
   mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
 });
 const mockPopup = jest.fn();
@@ -82,7 +83,7 @@ jest.mock("@/src/components/courseEditor/CourseSettingsPanel", () => {
   ) };
 });
 
-it("preserves unsaved cards, course name and undo history when the answer-side getter changes", async () => {
+it.each([true, false])("preserves unsaved cards, course name and undo history when the answer-side getter changes", async (isTabletLayout) => {
   const settings: Record<string, any> = {
     getCustomCourseFrontImageRole: jest.fn(() => "standard"),
     setCustomCourseFrontImageRole: jest.fn(),
@@ -128,11 +129,11 @@ it("preserves unsaved cards, course name and undo history when the answer-side g
   fireEvent.press(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title" }));
   completePagerSelection("appearance");
   expect(screen.getByText("category:appearance")).toBeTruthy();
-  mockDeviceLayout = { isTabletLayout: true, width: 960, orientation: "landscape" };
+  mockDeviceLayout = { isTabletLayout, width: 960, orientation: "landscape" };
   screen.rerender(<CustomCourseEditor {...props} />);
   expect(screen.getByText("courseSettingsGroups.appearance.title")).toBeTruthy();
   expect(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title", selected: true })).toBeTruthy();
-  mockDeviceLayout = { isTabletLayout: true, width: 600, orientation: "portrait" };
+  mockDeviceLayout = { isTabletLayout, width: isTabletLayout ? 600 : 390, orientation: "portrait" };
   screen.rerender(<CustomCourseEditor {...props} />);
   expect(screen.queryByText("courseSettingsGroups.appearance.title")).toBeNull();
   expect(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title", selected: true })).toBeTruthy();
@@ -143,6 +144,19 @@ it("preserves unsaved cards, course name and undo history when the answer-side g
   fireEvent.press(screen.getByText("options"));
   expect(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title", selected: true })).toBeTruthy();
   fireEvent.press(screen.getByText("content"));
+  mockDeviceLayout = { isTabletLayout, width: 960, orientation: "landscape" };
+  screen.rerender(<CustomCourseEditor {...props} />);
+  expect(screen.getByTestId("front").props.value).toBe("Unsaved front");
+  expect(screen.getByTestId("name").props.value).toBe("Unsaved course");
+  expect(screen.getByRole("tab", { name: "courseSettingsGroups.learning.title", selected: false })).toBeTruthy();
+  fireEvent.press(screen.getByRole("tab", { name: "courseSettingsGroups.answers.title" }));
+  expect(screen.getByText("category:answers")).toBeTruthy();
+  expect(screen.getByRole("tab", { name: "courseSettingsGroups.answers.title", selected: true })).toBeTruthy();
+  fireEvent.press(screen.getByText("content"));
+  expect(screen.getByTestId("front").props.value).toBe("Unsaved front");
+  expect(screen.getByTestId("name").props.value).toBe("Unsaved course");
+  mockDeviceLayout = { isTabletLayout, width: isTabletLayout ? 600 : 390, orientation: "portrait" };
+  screen.rerender(<CustomCourseEditor {...props} />);
   expect(screen.getByTestId("front").props.value).toBe("Unsaved front");
   expect(screen.getByTestId("name").props.value).toBe("Unsaved course");
   expect(getCustomCourseById).toHaveBeenCalledTimes(1);

@@ -11,6 +11,24 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingHorizontal: 20,
     alignItems: "center",
   },
+  containerLandscape: {
+    paddingHorizontal: 32,
+    paddingVertical: 24,
+    justifyContent: "center",
+  },
+  workspace: {
+    width: "100%",
+  },
+  workspaceLandscape: {
+    maxWidth: 1000,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 40,
+  },
+  hero: { width: "100%" },
+  heroLandscape: { flex: 1, width: "auto", minWidth: 0 },
+  results: { width: "100%" },
+  resultsLandscape: { flex: 1.2, width: "auto", minWidth: 0 },
   titleBlock: {
     width: "100%",
     alignItems: "center",

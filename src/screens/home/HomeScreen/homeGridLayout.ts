@@ -92,7 +92,29 @@ export function getHomeGridLayout({
   isTabletLayout?: boolean;
   isLandscape?: boolean;
 }) {
-  const columns: GridColumns = isTabletLayout && isLandscape ? 3 : 2;
+  const columns: GridColumns = isLandscape ? 3 : 2;
+  // Side navigation gives landscape phones room for two rows of square tiles.
+  if (isLandscape && !isTabletLayout) {
+    const { availableWidth } = getGridWidthMetrics(width, columns);
+    const gap = Math.min(12, availableWidth / 2);
+    const widthLimit = Math.floor((availableWidth - 2 * gap) / columns);
+    const minimumSize = Math.ceil(COMPACT_MIN_TILE_SIZE * Math.max(1, fontScale));
+    const heightLimit = Math.floor((height - 2 * HOME_GRID_BOTTOM_PADDING - gap) / 2);
+    const tileSize = Math.min(widthLimit, Math.max(minimumSize, Math.min(180, heightLimit)));
+    const contentHeight = 2 * tileSize + gap + HOME_GRID_BOTTOM_PADDING;
+    const scrollEnabled = contentHeight + HOME_GRID_BOTTOM_PADDING > height;
+    const topPadding = scrollEnabled ? 8 : (height - (contentHeight - HOME_GRID_BOTTOM_PADDING)) / 2;
+    return {
+      tileSize,
+      tileHeight: tileSize,
+      gridWidth: 3 * tileSize + 2 * gap,
+      gap,
+      contentHeight,
+      scrollEnabled,
+      topPadding,
+      columns,
+    };
+  }
   const reservedTopPadding = getHomeGridTopPadding({ width, height, columns });
   const metrics = getHomeGridMetrics({
     width,
@@ -106,5 +128,5 @@ export function getHomeGridLayout({
     ? (height - (metrics.contentHeight - HOME_GRID_BOTTOM_PADDING)) / 2
     : reservedTopPadding;
 
-  return { ...metrics, topPadding, columns };
+  return { ...metrics, tileHeight: metrics.tileSize, topPadding, columns };
 }

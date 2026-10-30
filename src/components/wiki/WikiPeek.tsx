@@ -37,8 +37,9 @@ export function WikiPeek({
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const { width, height } = useWindowDimensions();
 
-  const sheetWidth = Math.min(width - 32, 480);
-  const sheetHeight = Math.min(height - 32, Math.max(360, height * 0.75));
+  const isLandscape = width > height;
+  const sheetWidth = Math.max(0, Math.min(width - 32, isLandscape ? 720 : 480));
+  const sheetHeight = Math.max(0, Math.min(height - 32, height * (isLandscape ? 0.85 : 0.75)));
 
   useEffect(() => {
     if (!visible) return;

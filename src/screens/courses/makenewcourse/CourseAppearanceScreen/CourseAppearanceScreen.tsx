@@ -18,7 +18,8 @@ export default function CustomCourseScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
   const router = useRouter();
-  const { isTabletLayout } = useDeviceLayout();
+  const { isTabletLayout, orientation, width } = useDeviceLayout({ sizeSource: "screen" });
+  const isLandscapeLayout = orientation === "landscape" && width >= 600;
   const useCenteredTabletLayout = isTabletLayout;
   const {
     courseName,
@@ -135,19 +136,20 @@ export default function CustomCourseScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isLandscapeLayout && styles.containerLandscape]}>
       <ScrollView
         style={[
           styles.scrollView,
           useCenteredTabletLayout && styles.scrollViewTablet,
+          isLandscapeLayout && styles.scrollViewLandscape,
         ]}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, isLandscapeLayout && styles.scrollContentLandscape]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
         <View style={styles.section}>
-          <Text style={styles.sectionHeader}>
+          <Text style={[styles.sectionHeader, isLandscapeLayout && styles.sectionHeaderLandscape]}>
             {t(
               "screens.courses.makenewcourse.courseAppearance.courseAppearance.textChild.nowyKurs"
             )}
@@ -156,6 +158,7 @@ export default function CustomCourseScreen() {
           <View style={styles.formContent}>
             <View>
               <CourseIconColorSelector
+                twoColumn={isLandscapeLayout}
                 courseName={courseName}
                 onCourseNameChange={setCourseName}
                 selectedIcon={iconId}
@@ -171,10 +174,10 @@ export default function CustomCourseScreen() {
                 nameValidationState={nameConflict.kind}
                 nameValidationMessage={nameValidationMessage}
                 iconSectionDescription={t(
-                  "components.courseEditor.customEditor.appearance.iconDescription"
+                  "courseCreator.customEditor.appearance.iconDescription"
                 )}
                 colorSectionDescription={t(
-                  "components.courseEditor.customEditor.appearance.colorDescription"
+                  "courseCreator.customEditor.appearance.colorDescription"
                 )}
               />
             </View>
@@ -182,11 +185,12 @@ export default function CustomCourseScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, isLandscapeLayout && styles.footerLandscape]}>
         <View
           style={[
             styles.buttonsRow,
             useCenteredTabletLayout && styles.buttonsRowTablet,
+            isLandscapeLayout && styles.buttonsRowLandscape,
           ]}
         >
           <MyButton

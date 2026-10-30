@@ -1,3 +1,4 @@
+import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import type { CourseSettingsSectionProps } from "@/src/components/courseEditor/SettingsCourse";
 import type { CourseSettingsTabKey } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
 import { SettingsTabPager } from "@/src/components/settings/SettingsTabPager";
@@ -292,8 +293,9 @@ export default function CustomCourseEditor({
     hasResetActions: true,
   });
   const shouldShowTabSwitcher = !isOfficialCourse;
-  const isLandscapeLayout = isTabletLayout && orientation === "landscape" && width >= 840
-    && (isOfficialCourse || activeTab === "options");
+  const isPhoneLandscape = useSideNavbarLayout();
+  const isLandscapeLayout = isPhoneLandscape || (isTabletLayout && orientation === "landscape" && width >= 840);
+  const isContentLandscape = isLandscapeLayout && !isOfficialCourse && activeTab === "content";
   const shouldShowManualToolbar =
     !isOfficialCourse && !loading && !loadError && activeTab === "content";
   const nameConflict = useMemo(
@@ -670,9 +672,11 @@ export default function CustomCourseEditor({
     {shouldShowTabSwitcher ? (
       <View style={styles.topSection}>
         <Text style={styles.topSectionTitle}>
-          {activeTab === "options"
+          {isLandscapeLayout
             ? t("courseCreator.customEditor.tabs.options")
-            : t("courseCreator.customEditor.tabs.content")}
+            : activeTab === "options"
+              ? t("courseCreator.customEditor.tabs.options")
+              : t("courseCreator.customEditor.tabs.content")}
         </Text>
         <SegmentedTabs
           options={[
@@ -700,6 +704,7 @@ export default function CustomCourseEditor({
 
   </>), [
     activeTab,
+    isLandscapeLayout,
     categoryTabs.pagerRef,
     shouldShowTabSwitcher,
     styles.topSection,
@@ -817,7 +822,7 @@ export default function CustomCourseEditor({
   ]);
   const renderSettingsPage = useCallback((pageTab: CourseSettingsTabKey) => (
     <>
-      {tabSwitcher}
+      {!isLandscapeLayout && tabSwitcher}
       {isOfficialCourse || activeTab === "options" ? (
         <>
           <View style={styles.sectionCard}>
@@ -833,12 +838,117 @@ export default function CustomCourseEditor({
       ) : null}
 
     </>
-  ), [activeTab, courseSettingsProps, isOfficialCourse, resetControls.resetActions, styles, tabSwitcher]);
+  ), [activeTab, courseSettingsProps, isOfficialCourse, isLandscapeLayout, resetControls.resetActions, styles, tabSwitcher]);
+
+  const appearanceContent = (
+    <View style={[styles.sectionCard, isContentLandscape && styles.contentSectionLandscape]}>
+      <View style={styles.sectionGroup}>
+        <Text style={styles.settingsGroupLabel}>
+          {t("courseCreator.customEditor.appearance.section")}
+        </Text>
+        <View style={styles.iconSelectorWrapper}>
+          <CourseIconColorSelector
+            courseName={courseName}
+            onCourseNameChange={setCourseName}
+            selectedIcon={iconId}
+            selectedColor={iconColor}
+            selectedColorId={colorId ?? undefined}
+            onIconChange={(value) => setIconId(value)}
+            onColorChange={handleColorChange}
+            onColorHexChange={(hex) => {
+              setIconColor(hex);
+              setColorId(null);
+            }}
+            previewName={courseName}
+            nameValidationState={nameConflict.kind}
+            nameValidationMessage={nameValidationMessage}
+            nameEditable={!isOfficialCourse}
+            disabled={isSaving}
+            styles={{
+              container: styles.iconSection,
+            }}
+            iconSectionDescription={t(
+              "courseCreator.customEditor.appearance.iconDescription"
+            )}
+            colorSectionDescription={t(
+              "courseCreator.customEditor.appearance.colorDescription"
+            )}
+          />
+        </View>
+      </View>
+    </View>
+  );
+  const flashcardsContent = (
+    <View style={[styles.sectionCard, isContentLandscape && styles.contentSectionLandscape]}>
+      {loading ? (
+        <View style={{ alignItems: "center", paddingVertical: 32 }}>
+          <ActivityIndicator size="large" />
+        </View>
+      ) : loadError ? (
+        <Text style={{ color: "#ff5470", fontSize: 16 }}>
+          {loadError}
+        </Text>
+      ) : (
+        <View style={styles.sectionGroup}>
+          <View style={styles.manualHeader}>
+            <Text style={styles.settingsGroupLabel}>
+              {t("courseCreator.customEditor.flashcardsSection")}
+            </Text>
+          </View>
+          <ManualCardsEditor
+            manualCards={manualCards}
+            cardType={newCardType}
+            styles={{} as ManualCardsEditorStyles}
+            onCardFrontChange={(id, value) => {
+              setContentDirty(true);
+              handleManualCardFrontChange(id, value);
+            }}
+            onCardAnswerChange={(id, answerIndex, value) => {
+              setContentDirty(true);
+              handleManualCardAnswerChange(id, answerIndex, value);
+            }}
+            onAddAnswer={(id) => {
+              setContentDirty(true);
+              handleAddAnswer(id);
+            }}
+            onRemoveAnswer={(id, answerIndex) => {
+              setContentDirty(true);
+              handleRemoveAnswer(id, answerIndex);
+            }}
+            onAddCard={() => {
+              setContentDirty(true);
+              handleAddCard(newCardType);
+            }}
+            onRemoveCard={(id) => {
+              setContentDirty(true);
+              handleRemoveCard(id);
+            }}
+            onToggleFlipped={(id) => {
+              setContentDirty(true);
+              handleToggleFlipped(id);
+            }}
+            onCardImageChange={(id, side, uri) => {
+              setContentDirty(true);
+              handleManualCardImageChange(id, side, uri);
+            }}
+            onCardExplanationChange={(id, value) => {
+              setContentDirty(true);
+              handleManualCardExplanationChange(id, value);
+            }}
+            showDefaultBottomAddButton={false}
+          />
+        </View>
+      )}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
       <View style={[styles.settingsWorkspace, isLandscapeLayout && styles.settingsWorkspaceLandscape]}>
       <View style={[styles.settingsBody, isLandscapeLayout && styles.settingsBodyLandscape]}>
+      {isLandscapeLayout && shouldShowTabSwitcher && (
+        <View style={styles.contentHeaderLandscape}>{tabSwitcher}</View>
+      )}
       {isOfficialCourse || activeTab === "options" ? (
       <SettingsTabPager
         ref={categoryTabs.pagerRef}
@@ -850,119 +960,27 @@ export default function CustomCourseEditor({
         renderPage={renderSettingsPage}
       />
       ) : (
-        <ScrollView {...settingsScrollProps}>
-          {tabSwitcher}
-            {!isOfficialCourse && activeTab === "content" ? (
-              <>
-                <View style={styles.sectionCard}>
-                  <View style={styles.sectionGroup}>
-                    <Text style={styles.settingsGroupLabel}>
-                      {t("courseCreator.customEditor.appearance.section")}
-                    </Text>
-                    <View style={styles.iconSelectorWrapper}>
-                      <CourseIconColorSelector
-                        courseName={courseName}
-                        onCourseNameChange={setCourseName}
-                        selectedIcon={iconId}
-                        selectedColor={iconColor}
-                        selectedColorId={colorId ?? undefined}
-                        onIconChange={(value) => setIconId(value)}
-                        onColorChange={handleColorChange}
-                        onColorHexChange={(hex) => {
-                          setIconColor(hex);
-                          setColorId(null);
-                        }}
-                        previewName={courseName}
-                        nameValidationState={nameConflict.kind}
-                        nameValidationMessage={nameValidationMessage}
-                        nameEditable={!isOfficialCourse}
-                        disabled={isSaving}
-                        styles={{
-                          container: styles.iconSection,
-                        }}
-                        iconSectionDescription={t(
-                          "courseCreator.customEditor.appearance.iconDescription"
-                        )}
-                        colorSectionDescription={t(
-                          "courseCreator.customEditor.appearance.colorDescription"
-                        )}
-                      />
-                    </View>
-                  </View>
-                </View>
-
-                <View style={styles.sectionCard}>
-                  {loading ? (
-                    <View style={{ alignItems: "center", paddingVertical: 32 }}>
-                      <ActivityIndicator size="large" />
-                    </View>
-                  ) : loadError ? (
-                    <Text style={{ color: "#ff5470", fontSize: 16 }}>
-                      {loadError}
-                    </Text>
-                  ) : (
-                    <View style={styles.sectionGroup}>
-                      <View style={styles.manualHeader}>
-                        <Text style={styles.settingsGroupLabel}>
-                          {t("courseCreator.customEditor.flashcardsSection")}
-                        </Text>
-                      </View>
-                      <ManualCardsEditor
-                        manualCards={manualCards}
-                        cardType={newCardType}
-                        styles={{} as ManualCardsEditorStyles}
-                        onCardFrontChange={(id, value) => {
-                          setContentDirty(true);
-                          handleManualCardFrontChange(id, value);
-                        }}
-                        onCardAnswerChange={(id, answerIndex, value) => {
-                          setContentDirty(true);
-                          handleManualCardAnswerChange(id, answerIndex, value);
-                        }}
-                        onAddAnswer={(id) => {
-                          setContentDirty(true);
-                          handleAddAnswer(id);
-                        }}
-                        onRemoveAnswer={(id, answerIndex) => {
-                          setContentDirty(true);
-                          handleRemoveAnswer(id, answerIndex);
-                        }}
-                        onAddCard={() => {
-                          setContentDirty(true);
-                          handleAddCard(newCardType);
-                        }}
-                        onRemoveCard={(id) => {
-                          setContentDirty(true);
-                          handleRemoveCard(id);
-                        }}
-                        onToggleFlipped={(id) => {
-                          setContentDirty(true);
-                          handleToggleFlipped(id);
-                        }}
-                        onCardImageChange={(id, side, uri) => {
-                          setContentDirty(true);
-                          handleManualCardImageChange(id, side, uri);
-                        }}
-                        onCardExplanationChange={(id, value) => {
-                          setContentDirty(true);
-                          handleManualCardExplanationChange(id, value);
-                        }}
-                        showDefaultBottomAddButton={false}
-                      />
-                    </View>
-                  )}
-                </View>
-              </>
-            ) : null}
-
+        <ScrollView
+          {...settingsScrollProps}
+          contentContainerStyle={[
+            settingsScrollProps.contentContainerStyle,
+            isContentLandscape && styles.contentScrollLandscape,
+          ]}
+          keyboardDismissMode="on-drag"
+        >
+          {!isLandscapeLayout && tabSwitcher}
+          {appearanceContent}
+          {flashcardsContent}
         </ScrollView>
       )}
 
+      <View>
       {shouldShowManualToolbar ? (
         <Animated.View
           style={[
             styles.manualToolbarWrap,
             useCenteredTabletLayout && styles.manualToolbarWrapTablet,
+            isContentLandscape && styles.manualToolbarWrapLandscape,
           ]}
         >
           <View style={styles.manualToolbar}>
@@ -995,14 +1013,14 @@ export default function CustomCourseEditor({
       <View
         style={[
           styles.buttonscontainer,
-          (isOfficialCourse || activeTab === "options") && styles.settingsButtonsContainer,
+          styles.settingsButtonsContainer,
           isLandscapeLayout && styles.buttonsContainerLandscape,
         ]}
       >
         <View
           style={[
             styles.buttonsRow,
-            (isOfficialCourse || activeTab === "options") && styles.settingsButtonsRow,
+            styles.settingsButtonsRow,
             useCenteredTabletLayout && styles.buttonsRowTablet,
             isLandscapeLayout && styles.buttonsRowLandscape,
           ]}
@@ -1056,12 +1074,22 @@ export default function CustomCourseEditor({
         </View>
       </View>
       </View>
-      {isOfficialCourse || activeTab === "options" ? (
+      </View>
+      {isLandscapeLayout || isOfficialCourse || activeTab === "options" ? (
         <SettingsTabBar
           vertical={isLandscapeLayout}
+          compact={isPhoneLandscape}
           options={categoryTabs.options}
-          value={categoryTabs.activeTab}
-          onChange={categoryTabs.onChange}
+          value={activeTab === "content" ? "content" : categoryTabs.activeTab}
+          onChange={(tab) => {
+            if (tab === "content") return;
+            if (activeTab === "content") {
+              categoryTabs.onCommit(tab);
+              setActiveTab("options");
+            } else {
+              categoryTabs.onChange(tab);
+            }
+          }}
         />
       ) : null}
       </View>

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, TouchableOpacity, Modal } from "react-native";
+import { View, Text, TouchableOpacity, Modal, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings, type DominantHand } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
@@ -306,7 +306,12 @@ const AccessibilitySection: React.FC = () => {
           style={styles.languageModalBackdrop}
           onPress={handleColorBlindBackdropPress}
         >
-          <View style={styles.languageModalCard}>
+          <ScrollView
+            style={styles.languageModalCard}
+            contentContainerStyle={styles.languageModalContent}
+            keyboardShouldPersistTaps="handled"
+            bounces={false}
+          >
             {colorBlindModeOptions.map((option) => {
               const isActive = colorBlindMode === option.key;
               const label = t(option.labelKey, {
@@ -333,7 +338,7 @@ const AccessibilitySection: React.FC = () => {
                 </TouchableOpacity>
               );
             })}
-          </View>
+          </ScrollView>
         </TouchableOpacity>
       </Modal>
     </View>

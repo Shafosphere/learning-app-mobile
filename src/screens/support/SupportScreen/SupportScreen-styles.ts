@@ -8,11 +8,28 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.background,
   },
   scrollView: {
+    flex: 1,
     width: "100%",
     alignSelf: "center" as const,
   },
   scrollViewTablet: {
     maxWidth: SUPPORT_TABLET_MAX_WIDTH,
+  },
+  scrollViewLandscape: {
+    maxWidth: 1000,
+  },
+  workspace: {
+    gap: 16,
+  },
+  workspaceLandscape: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-start",
+  },
+  sectionLandscape: {
+    flexBasis: "48%",
+    flexGrow: 1,
+    minWidth: 0,
   },
   content: {
     paddingHorizontal: 16,
@@ -23,7 +40,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.secondBackground,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 16,
     shadowColor: "#00000011",
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -117,7 +133,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderColor: colors.border,
     backgroundColor: colors.secondBackground,
     borderRadius: 22,
-    marginBottom: 16,
     shadowColor: "#00000011",
     shadowOpacity: 0.12,
     shadowRadius: 10,

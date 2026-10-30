@@ -1,5 +1,6 @@
+import LearningHistoryList from "@/src/components/stats/LearningHistoryList";
 import React from "react";
-import { render, waitFor, within } from "@testing-library/react-native";
+import { fireEvent, render, waitFor, within } from "@testing-library/react-native";
 import { Text as MockText } from "react-native";
 
 import StatsScreen from "@/src/screens/stats/StatsScreen/StatsScreen";
@@ -8,6 +9,9 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { themeMap } from "@/src/theme/theme";
 import { getDailyActivitySummariesCustom } from "@/src/db/sqlite/db";
 import { getProtectedDailyStreakState } from "@/src/services/streakProtection";
+
+let mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
+jest.mock("@/src/hooks/useDeviceLayout", () => ({ useDeviceLayout: () => mockDeviceLayout }));
 
 jest.mock("@expo/vector-icons/Ionicons", () => {
   function MockIonicons({ testID, name, color }: { testID?: string; name: string; color: string }) {
@@ -25,6 +29,7 @@ jest.mock("@expo/vector-icons/MaterialIcons", () => {
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({
+    i18n: { language: "pl" },
     t: (key: string) => ({
       "screens.stats.stats.stats.textChild.codziennaPassa": "Codzienna passa",
       "repeats.labels.jumps": "Skoki",
@@ -60,14 +65,18 @@ jest.mock("@/src/components/stats/ActivityHeatmap", () => {
     data,
     shieldedDates,
     isLoading,
+    compact,
+    sideBySide,
   }: {
     data: unknown[];
     shieldedDates?: string[];
     isLoading?: boolean;
+    compact?: boolean;
+    sideBySide?: boolean;
   }) {
     return (
       <MockText testID="activity-heatmap-props">
-        {JSON.stringify({ data, shieldedDates, isLoading })}
+        {JSON.stringify({ data, shieldedDates, isLoading, compact, sideBySide })}
       </MockText>
     );
   }
@@ -128,12 +137,30 @@ function mockStats(shieldCount: 0 | 1 | 2, streakDays = 12, promotionsCount = 4)
 describe("StatsScreen streak shields", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
     mockedUseSettings.mockReturnValue({
       statsBookshelfEnabled: false,
       theme: "light",
       colors: themeMap.light,
       fontScaleMultiplier: 1,
     });
+  });
+
+  it("fits dashboard and history columns to the available phone viewport and preserves the tab on rotation", () => {
+    mockDeviceLayout = { isTabletLayout: false, width: 923, orientation: "landscape" };
+    mockStats(2);
+    const screen = render(<StatsScreen />);
+    fireEvent(screen.getByTestId("stats-viewport"), "layout", { nativeEvent: { layout: { width: 720, height: 333 } } });
+    expect(JSON.parse(screen.getByTestId("activity-heatmap-props").props.children)).toMatchObject({ compact: true, sideBySide: true });
+    fireEvent.press(screen.getByRole("tab", { name: "screens.stats.stats.stats.history.tabs.history" }));
+    expect(screen.UNSAFE_getByType(LearningHistoryList).props.columns).toBe(2);
+
+    fireEvent(screen.getByTestId("stats-viewport"), "layout", { nativeEvent: { layout: { width: 480, height: 280 } } });
+    expect(screen.UNSAFE_getByType(LearningHistoryList).props.columns).toBe(1);
+    mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
+    screen.rerender(<StatsScreen />);
+    expect(screen.getByRole("tab", { name: "screens.stats.stats.stats.history.tabs.history", selected: true })).toBeTruthy();
+    expect(screen.UNSAFE_getByType(LearningHistoryList).props.columns).toBe(1);
   });
 
   it.each([0, 1, 2] as const)("renders two shield slots with %i owned shields", (shieldCount) => {

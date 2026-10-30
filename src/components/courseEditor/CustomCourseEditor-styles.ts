@@ -1,9 +1,12 @@
+import { SCREEN_ACTION_BOTTOM_PADDING } from "@/src/theme/layout";
+import { useMemo } from "react";
+import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import { settingsWorkspaceStyles } from "@/src/components/settings/settingsWorkspaceStyles";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 const CUSTOM_COURSE_EDITOR_TABLET_MAX_WIDTH = 500;
 
-export const useStyles = createThemeStylesHook((colors) => ({
+const useBaseStyles = createThemeStylesHook((colors) => ({
   ...settingsWorkspaceStyles,
   container: {
     flex: 1,
@@ -16,6 +19,29 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   scrollViewTablet: {
     maxWidth: CUSTOM_COURSE_EDITOR_TABLET_MAX_WIDTH,
+  },
+  contentHeaderLandscape: {
+    width: "100%",
+    maxWidth: 720,
+    alignSelf: "center" as const,
+    paddingBottom: 12,
+  },
+  contentScrollLandscape: {
+    gap: 24,
+    paddingBottom: 16,
+  },
+  contentSectionLandscape: {
+    padding: 0,
+    paddingTop: 0,
+  },
+  manualToolbarWrapLandscape: {
+    width: "100%",
+    maxWidth: 720,
+    alignSelf: "center" as const,
+    paddingHorizontal: 0,
+    paddingTop: 8,
+    paddingBottom: 8,
+    zIndex: 1,
   },
   scrollContent: {
     paddingHorizontal: 18,
@@ -363,7 +389,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   footerBar: {
     paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
     paddingTop: 16,
     borderTopWidth: 2,
     borderTopColor: colors.border,
@@ -379,7 +405,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "flex-end" as const,
     gap: 10,
   },
-  settingsButtonsContainer: { paddingBottom: 8, paddingHorizontal: 18 },
+  settingsButtonsContainer: { paddingBottom: SCREEN_ACTION_BOTTOM_PADDING, paddingHorizontal: 18 },
   settingsButtonsRow: {
     width: "100%",
     borderTopWidth: 1,
@@ -388,7 +414,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   buttonscontainer: {
     width: "100%",
-    paddingBottom: 24,
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
     backgroundColor: colors.background,
     alignItems: "center",
   },
@@ -416,3 +442,17 @@ export const useStyles = createThemeStylesHook((colors) => ({
     gap: 10,
   },
 }));
+
+
+export function useStyles() {
+  const styles = useBaseStyles();
+  const isPhoneLandscape = useSideNavbarLayout();
+  return useMemo(() => isPhoneLandscape ? {
+    ...styles,
+    settingsBodyLandscape: { ...styles.settingsBodyLandscape, paddingHorizontal: 12 },
+    sectionCard: { ...styles.sectionCard, padding: 8, paddingTop: 8, gap: 12 },
+    settingsSectionHeader: { ...styles.settingsSectionHeader, marginBottom: 12 },
+    buttonscontainer: { ...styles.buttonscontainer, paddingBottom: SCREEN_ACTION_BOTTOM_PADDING },
+    buttonsRow: { ...styles.buttonsRow, width: "100%" as const, paddingTop: 8, borderTopWidth: 1 },
+  } : styles, [styles, isPhoneLandscape]);
+}

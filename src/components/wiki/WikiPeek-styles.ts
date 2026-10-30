@@ -10,7 +10,7 @@ export const useWikiPeekStyles = createThemeStylesHook((colors) => ({
   },
   dialog: {
     width: "100%",
-    maxWidth: 420,
+    maxWidth: 720,
     borderRadius: 24,
     backgroundColor: colors.secondBackground,
     padding: 0,
@@ -74,7 +74,7 @@ export const useWikiPeekStyles = createThemeStylesHook((colors) => ({
   body: {
     paddingHorizontal: 16,
     paddingVertical: 18,
-    minHeight: 200,
+    minHeight: 0,
     backgroundColor: colors.secondBackground,
     gap: 16,
     paddingBottom: 20,
@@ -92,6 +92,7 @@ export const useWikiPeekStyles = createThemeStylesHook((colors) => ({
     flexGrow: 1,
   },
   footer: {
+    flexShrink: 0,
     width: "100%",
     alignItems: "flex-end",
     paddingTop: 12,

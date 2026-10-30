@@ -1,11 +1,29 @@
-import { fireEvent, render } from "@testing-library/react-native";
+import { fireEvent, render, within } from "@testing-library/react-native";
 import { NudgeModal } from "../NudgeModal";
 import { defaultValue } from "@/src/contexts/settings/defaults";
+import * as ReactNative from "react-native";
 
 jest.mock("@expo/vector-icons/Ionicons", () => () => null);
 jest.mock("@/src/contexts/SettingsContext", () => {
   const { defaultValue } = jest.requireActual("@/src/contexts/settings/defaults");
   return { useSettings: () => defaultValue, useThemeSettings: () => defaultValue };
+});
+
+it("scrolls long content in a short window while keeping confirmation outside the scroll area", () => {
+  const dimensions = jest.spyOn(ReactNative, "useWindowDimensions").mockReturnValue({
+    width: 740, height: 320, scale: 1, fontScale: 2,
+  });
+  const onConfirm = jest.fn();
+  try {
+    const screen = render(<NudgeModal visible title="Reminder" description={"Long description ".repeat(80)} confirmLabel="Export" onConfirm={onConfirm} onClose={jest.fn()} />);
+    const body = screen.UNSAFE_getByType(ReactNative.ScrollView);
+    expect(within(body).getByText("Reminder")).toBeTruthy();
+    expect(within(body).queryByText("Export")).toBeNull();
+    fireEvent.press(screen.getByRole("button", { name: "Export" }));
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+  } finally {
+    dimensions.mockRestore();
+  }
 });
 
 it.each([undefined, "my_yellow", "my_red"] as const)("uses confirmColor %s and preserves modal actions", (confirmColor) => {

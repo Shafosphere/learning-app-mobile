@@ -7,8 +7,15 @@ import { defaultValue } from "@/src/contexts/settings/defaults";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCourseOverrideSettings } from "@/src/contexts/settings/useCourseOverrideSettings";
 
+let mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
+jest.mock("@/src/hooks/useDeviceLayout", () => ({
+  useDeviceLayout: () => mockDeviceLayout,
+}));
+
 const mockStorageWrite = (AsyncStorage.setItem as jest.Mock).getMockImplementation()!;
 beforeEach(() => {
+  mockParams.name = "Test course";
+  mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
   (AsyncStorage.setItem as jest.Mock).mockReset().mockImplementation(mockStorageWrite);
   mockPopup.mockClear();
 });
@@ -188,7 +195,8 @@ it("persists the latest built-in toggle while an earlier write is delayed", asyn
     await act(async () => { finish(); });
     await waitFor(() => expect(write).toHaveBeenCalledTimes(2));
     const stored = JSON.parse((await AsyncStorage.getItem("flashcards.courseAutoflowOverrides"))!);
-    expect(stored.builtin["en|pl|A1"]).toBeUndefined();
+    // Default-valued choices are persisted explicitly so pack seeding cannot undo them.
+    expect(stored.builtin["en|pl|A1"]).toBe(true);
     screen.unmount();
     const restored = render(<PersistedBuiltinEditor />);
     await waitFor(() => expect((useSettings as jest.Mock)().courseSettingsResetHydrated).toBe(true));
@@ -196,4 +204,27 @@ it("persists the latest built-in toggle while an earlier write is delayed", asyn
   } finally {
     write.mockReset().mockImplementation(mockStorageWrite);
   }
+});
+
+
+it("keeps the selected course settings tab when a phone rotates to the sidebar", async () => {
+  (useSettings as jest.Mock).mockReturnValue({ ...defaultValue });
+  const screen = render(<CourseEditScreen />);
+  fireEvent.press(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title" }));
+  completePagerSelection("appearance");
+  expect(screen.queryByText("courseSettingsGroups.audio.title")).toBeNull();
+
+  mockDeviceLayout = { isTabletLayout: false, width: 923, orientation: "landscape" };
+  screen.rerender(<CourseEditScreen />);
+  expect(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title", selected: true })).toBeTruthy();
+  expect(screen.getByRole("header", { name: "courseSettingsGroups.appearance.title" })).toBeTruthy();
+  expect(screen.getByText("courseSettingsGroups.audio.title")).toBeTruthy();
+  fireEvent.press(screen.getByRole("tab", { name: "courseSettingsGroups.audio.title" }));
+  completePagerSelection("audio");
+  expect(screen.getByRole("header", { name: "courseSettingsGroups.audio.title" })).toBeTruthy();
+
+  mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
+  screen.rerender(<CourseEditScreen />);
+  expect(screen.getByRole("tab", { name: "courseSettingsGroups.audio.title", selected: true })).toBeTruthy();
+  expect(screen.queryByText("courseSettingsGroups.appearance.title")).toBeNull();
 });

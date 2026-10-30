@@ -1,3 +1,4 @@
+import { SCREEN_ACTION_BOTTOM_PADDING } from "@/src/theme/layout";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { Platform } from "react-native";
 
@@ -19,13 +20,47 @@ export const useStyles = createThemeStylesHook((colors) => ({
   contentContainerInner: {
     paddingHorizontal: 20,
     paddingTop: 30,
-    paddingBottom: 200,
+    paddingBottom: 24,
     flexGrow: 1,
   },
   content: {
     width: "100%",
     maxWidth: 460,
     alignSelf: "center",
+  },
+  contentContainerInnerLandscape: {
+    paddingTop: 20,
+    paddingBottom: 16,
+  },
+  contentLandscape: {
+    maxWidth: 1000,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 32,
+  },
+  introLandscape: {
+    flex: 1,
+    minWidth: 0,
+    paddingTop: 8,
+  },
+  optionsLandscape: {
+    flex: 1.5,
+    minWidth: 0,
+  },
+  titleLandscape: {
+    fontSize: 30,
+    lineHeight: 34,
+  },
+  optionLandscape: {
+    paddingVertical: 12,
+  },
+  buttonscontainerLandscape: {
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
+  },
+  buttonsRowLandscape: {
+    maxWidth: 1000,
+    borderTopWidth: 1,
+    paddingTop: 12,
   },
   title: {
     fontSize: 34,
@@ -100,7 +135,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   buttonscontainer: {
     width: "100%",
-    paddingBottom: 24,
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
     paddingHorizontal: 20,
     backgroundColor: colors.background,
     alignItems: "center",
@@ -117,6 +152,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   ctaButton: {
     minHeight: 50,
+  },
+  ctaAnchorLandscape: {
+    flex: 1,
   },
   ctaButtonPressed: {
     transform: [{ scale: 1.02 }],

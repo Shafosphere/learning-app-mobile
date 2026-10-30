@@ -79,8 +79,6 @@ export const defaultValue: SettingsContextValue = {
   toggleTheme: async () => {},
   boxesLayout: "classic",
   setBoxesLayout: async () => {},
-  flashcardsLandscapeEnabled: false,
-  setFlashcardsLandscapeEnabled: async () => {},
   actionButtonsPosition: "bottom",
   setActionButtonsPosition: async () => {},
   courses: [],

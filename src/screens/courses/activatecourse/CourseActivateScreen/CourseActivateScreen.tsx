@@ -1,3 +1,4 @@
+import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { CourseAudioDownloadRow } from "@/Audio/runtime/CourseAudioDownloadRow";
 import { CourseAudioRevealProvider } from "@/Audio/runtime/CourseAudioRevealCoordinator";
@@ -33,6 +34,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  type LayoutChangeEvent,
   Pressable,
   ScrollView,
   Text,
@@ -109,8 +111,14 @@ function renderCourseAudioFooter(course: OfficialCourseListItem, isHighlighted: 
 export default function CourseActivateScreen() {
   const { t } = useTranslation();
   const { width, isTabletLayout, orientation } = useDeviceLayout();
-  const isLandscapeGrid = isTabletLayout && orientation === "landscape" && width >= 840;
-  const contentWidth = Math.min(1100, Math.max(0, width - 96));
+  const isPhoneLandscape = useSideNavbarLayout();
+  const isLandscapeLayout = isPhoneLandscape || (isTabletLayout && orientation === "landscape" && width >= 840);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const onViewportLayout = useCallback((event: LayoutChangeEvent) => {
+    setViewportWidth(event.nativeEvent.layout.width);
+  }, []);
+  const contentWidth = Math.min(1100, Math.max(0, viewportWidth - (isPhoneLandscape ? 32 : 96)));
+  const isLandscapeGrid = isLandscapeLayout && contentWidth >= 600;
   const cardWidth = isLandscapeGrid ? (contentWidth - 16) / 2 : undefined;
   const {
     activeCustomCourseId,
@@ -468,7 +476,7 @@ export default function CourseActivateScreen() {
 
   return profileCourseActivation("course-activation", (
     <CourseAudioRevealProvider>
-    <View style={styles.container}>
+    <View style={styles.container} onLayout={onViewportLayout} testID="course-activate-viewport">
       <CoachmarkAnchor
         id="course-activate-bubble-anchor"
         shape="rect"
@@ -478,10 +486,11 @@ export default function CourseActivateScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.scrollArea}
-        contentContainerStyle={[styles.scrollContent, isLandscapeGrid && styles.scrollContentLandscape]}
+        testID="course-activate-scroll"
+        contentContainerStyle={[styles.scrollContent, isLandscapeLayout && styles.scrollContentLandscape]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={[styles.minicontainer, isLandscapeGrid && { width: contentWidth }]}>
+        <View testID="course-activate-content" style={[styles.minicontainer, isLandscapeLayout && { width: contentWidth }]}>
           {!isLoadingCourses && isEmptyState ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyState}>
@@ -494,7 +503,7 @@ export default function CourseActivateScreen() {
             <>
               {hasPinnedOfficialCourses ? (
                 <>
-                  <Text style={[styles.title, isLandscapeGrid && styles.titleLandscape]}>
+                  <Text style={[styles.title, isLandscapeLayout && styles.titleLandscape]}>
                     {t(
                       "screens.courses.activatecourse.courseActivate.courseActivate.textChild.stworzonePrzezNas"
                     )}
@@ -542,8 +551,8 @@ export default function CourseActivateScreen() {
       </ScrollView>
 
       {showOnboardingNext ? (
-        <View style={styles.buttonscontainer}>
-          <View style={[styles.buttonsRow, isLandscapeGrid && { width: contentWidth }, isLandscapeGrid && styles.buttonsRowLandscape]}>
+        <View style={[styles.buttonscontainer, isPhoneLandscape && styles.buttonscontainerPhoneLandscape]}>
+          <View style={[styles.buttonsRow, isLandscapeLayout && { width: contentWidth }, isLandscapeLayout && styles.buttonsRowLandscape]}>
             <CoachmarkAnchor
               id="course-activate-next-button"
               shape="rect"
@@ -583,10 +592,10 @@ export default function CourseActivateScreen() {
           </View>
         </View>
       ) : (
-        <View style={styles.buttonscontainer}>
-          <View style={[styles.buttonsRow, isLandscapeGrid && { width: contentWidth }, isLandscapeGrid && styles.buttonsRowLandscape]}>
+        <View style={[styles.buttonscontainer, isPhoneLandscape && styles.buttonscontainerPhoneLandscape]}>
+          <View style={[styles.buttonsRow, isLandscapeLayout && { width: contentWidth }, isLandscapeLayout && styles.buttonsRowLandscape]}>
             <MyButton
-              text={isLandscapeGrid
+              text={isLandscapeLayout
                 ? t("screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs").replace(/\s+/g, " ")
                 : t("screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs")}
               accessibilityLabel={t(
@@ -596,7 +605,10 @@ export default function CourseActivateScreen() {
               onPress={() => router.push("/createcourse")}
               disabled={false}
               autoWidth
-              style={isLandscapeGrid ? styles.landscapeAction : undefined}
+              style={[
+                styles.footerAction,
+                isLandscapeLayout ? styles.landscapeAction : styles.pinAction,
+              ]}
             />
             {hasActiveCourse ? (
               <MyButton
@@ -616,7 +628,11 @@ export default function CourseActivateScreen() {
                   if (route) router.push(route);
                 }}
                 disabled={!activeCustomCourseIdHydrated || !customCourseEntrySettingsSeenHydrated}
-                style={isLandscapeGrid ? styles.landscapeAction : { flex: 1 }}
+                width={0}
+                style={[
+                  styles.footerAction,
+                  isLandscapeLayout && styles.landscapeAction,
+                ]}
               />
             ) : null}
           </View>

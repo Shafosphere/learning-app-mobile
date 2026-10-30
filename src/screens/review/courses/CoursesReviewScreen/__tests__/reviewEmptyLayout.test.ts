@@ -43,3 +43,20 @@ it("keeps the full clock below the header on the reported phone viewport", () =>
   expect(layout.paddingTop - 150 * layout.scale).toBeGreaterThanOrEqual(16);
   expect(layout.boxWidth).toBe(144.5);
 });
+
+it("uses a larger illustration on landscape tablets while keeping the clock inside the viewport", () => {
+  const options = { width: 960, height: 428, isCompact: false, messageHeight: 100, isLandscape: true };
+  const tablet = getReviewEmptyLayout({ ...options, isTablet: true });
+  const phone = getReviewEmptyLayout({ ...options, isTablet: false });
+  expect(tablet.boxWidth).toBeGreaterThan(phone.boxWidth);
+  expect(272 * tablet.scale + 32).toBeLessThanOrEqual(options.height + 0.001);
+});
+
+
+it.each([[720, 333], [480, 260], [650, 300]])("fits the full clock beside the caption in a %s × %s landscape viewport", (width, height) => {
+  const layout = getReviewEmptyLayout({ width, height, isCompact: true, isTablet: false, messageHeight: 100, isLandscape: true });
+  expect(layout.boxWidth).toBeGreaterThan(0);
+  expect(layout.paddingTop).toBe(16);
+  expect(272 * layout.scale + 32).toBeLessThanOrEqual(height + 0.001);
+  expect(layout.boxWidth + 32).toBeLessThan(width - 48);
+});

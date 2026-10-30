@@ -1,6 +1,9 @@
+import { useMemo } from "react";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
+import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
-export const useStyles = createThemeStylesHook((colors) => ({
+const useBaseStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -222,3 +225,24 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontStyle: "italic",
   },
 }));
+
+
+export function useStyles() {
+  const styles = useBaseStyles();
+  const isPhoneLandscape = useSideNavbarLayout();
+  const { isTabletLayout, orientation } = useDeviceLayout();
+  const isTabletLandscape = isTabletLayout && orientation === "landscape";
+  return useMemo(() => isPhoneLandscape ? {
+    ...styles,
+    minicontainer: { ...styles.minicontainer, width: "100%" as const, maxWidth: 1100, paddingHorizontal: 16, paddingTop: 12 },
+    courseGrid: { ...styles.courseGrid, justifyContent: "flex-start" as const, gap: 16 },
+    courseCardSlot: { ...styles.courseCardSlot, marginBottom: 0 },
+    sectionTitle: { ...styles.sectionTitle, fontSize: 22 },
+    groupHeader: { ...styles.groupHeader, marginTop: 8, marginBottom: 8 },
+  } : isTabletLandscape ? {
+    ...styles,
+    minicontainer: { ...styles.minicontainer, width: "100%" as const, maxWidth: 960, paddingHorizontal: 24, paddingTop: 16 },
+    courseGrid: { ...styles.courseGrid, justifyContent: "flex-start" as const, gap: 20 },
+    courseCardSlot: { ...styles.courseCardSlot, marginBottom: 0 },
+  } : styles, [styles, isPhoneLandscape, isTabletLandscape]);
+}

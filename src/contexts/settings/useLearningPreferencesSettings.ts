@@ -17,8 +17,6 @@ export function useLearningPreferencesSettings() {
   const [boxesLayout, setBoxesLayoutState] = usePersistedState<
     "classic" | "carousel"
   >("boxesLayout", "classic");
-  const [flashcardsLandscapeEnabled, setFlashcardsLandscapeEnabled] =
-    usePersistedState<boolean>("flashcards.landscapeEnabled", false);
   const [actionButtonsPosition, setActionButtonsPositionState] =
     usePersistedState<"top" | "bottom">(
       "flashcards.actionsPosition",
@@ -139,14 +137,12 @@ export function useLearningPreferencesSettings() {
       setShowBoxFaces(true),
       setBoxesLayoutState("classic"),
       setActionButtonsPositionState("bottom"),
-      setFlashcardsLandscapeEnabled(false),
       setFlashcardsBatchSize(defaultValue.flashcardsBatchSize),
       setFlashcardsSuggestionsEnabled(false),
       setAutoSubmitCorrectAnswer(false),
     ]);
   }, [
     setActionButtonsPositionState,
-    setFlashcardsLandscapeEnabled,
     setBoxesLayoutState,
     setFlashcardsBatchSize,
     setFlashcardsSuggestionsEnabled,
@@ -163,8 +159,6 @@ export function useLearningPreferencesSettings() {
     setLevel,
     boxesLayout,
     setBoxesLayout,
-    flashcardsLandscapeEnabled,
-    setFlashcardsLandscapeEnabled,
     actionButtonsPosition,
     setActionButtonsPosition,
     spellChecking,

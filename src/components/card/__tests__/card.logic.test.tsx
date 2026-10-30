@@ -1,4 +1,5 @@
 import React from "react";
+import { NavbarContentWidthContext } from "@/src/contexts/NavbarLayoutContext";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import { Text, type TextInput } from "react-native";
 import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
@@ -11,6 +12,8 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CardProps } from "@/src/components/card/card-types";
 import type { WordWithTranslations } from "@/src/types/boxes";
 import { isStudyCardReversed } from "@/src/utils/flashcardDirection";
+
+let mockScreenDimensions: typeof mockWindowDimensions | null = null;
 
 let mockTextInputFocus = jest.fn();
 let mockTextInputBlur = jest.fn();
@@ -51,6 +54,12 @@ jest.mock("react-native", () => {
 
   return new Proxy(RN, {
     get(target: Record<string, unknown>, prop: string | symbol) {
+      if (prop === "Dimensions") return {
+        get: (source: string) => source === "screen"
+          ? mockScreenDimensions ?? mockWindowDimensions
+          : RN.Dimensions.get(source),
+        addEventListener: RN.Dimensions.addEventListener,
+      };
       if (prop === "TextInput") return TextInput;
       if (prop === "useWindowDimensions") return () => mockWindowDimensions;
       return target[prop as keyof typeof target];
@@ -197,6 +206,7 @@ function renderCard(
 
 describe("Card logic props", () => {
   beforeEach(() => {
+    mockScreenDimensions = null;
     latestResolverProps = null;
     latestCardHintProps = null;
     latestNudgeModalProps = null;
@@ -508,6 +518,33 @@ describe("Card logic props", () => {
       24 * (218.68 / 126),
       2,
     );
+  });
+
+  it("fits cards, hints, and controls into the measured viewport between rails", () => {
+    mockWindowDimensions = { width: 740, height: 390, scale: 1, fontScale: 1 };
+    const props = createProps();
+    const screen = render(
+      <NavbarContentWidthContext.Provider value={584}>
+        <Card {...props} />
+      </NavbarContentWidthContext.Provider>,
+    );
+    expect(latestCardFrameProps?.cardWidth).toBe(536);
+    expect(latestCardHintProps?.cardWidth).toBe(536);
+    expect((latestResolverProps?.cardMetrics as any)?.width).toBe(536);
+
+    screen.rerender(
+      <NavbarContentWidthContext.Provider value={300}>
+        <Card {...props} widthOverride={630} />
+      </NavbarContentWidthContext.Provider>,
+    );
+    expect(latestCardFrameProps?.cardWidth).toBe(300);
+  });
+
+  it("keeps tablet content scaling when the keyboard resizes its window", () => {
+    mockWindowDimensions = { width: 1024, height: 320, scale: 1, fontScale: 1 };
+    mockScreenDimensions = { ...mockWindowDimensions, height: 768 };
+    renderCard(createProps());
+    expect((latestResolverProps?.cardMetrics as any)?.contentScale).toBeGreaterThan(1);
   });
 
   it("keeps phone card metrics at base size", async () => {

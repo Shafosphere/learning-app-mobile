@@ -8,11 +8,28 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.background,
   },
   scrollView: {
+    flex: 1,
     width: "100%",
     alignSelf: "center" as const,
   },
   scrollViewTablet: {
     maxWidth: LEGAL_TABLET_MAX_WIDTH,
+  },
+  scrollViewLandscape: {
+    maxWidth: 1000,
+  },
+  sections: {
+    gap: 16,
+  },
+  sectionsLandscape: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-start",
+  },
+  sectionCardLandscape: {
+    flexBasis: "48%",
+    flexGrow: 1,
+    minWidth: 0,
   },
   content: {
     paddingHorizontal: 16,

@@ -1,3 +1,4 @@
+import { SCREEN_ACTION_BOTTOM_PADDING } from "@/src/theme/layout";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 export const useStyles = createThemeStylesHook((colors) => ({
@@ -17,7 +18,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
   scrollContentLandscape: { paddingBottom: 24 },
   titleLandscape: { marginTop: 16, marginBottom: 12 },
   buttonsRowLandscape: { paddingTop: 12, borderTopWidth: 1 },
-  landscapeAction: { flex: 1, minHeight: 52 },
+  landscapeAction: { flex: 0, flexBasis: "auto", paddingHorizontal: 18, minHeight: 52 },
+  buttonscontainerPhoneLandscape: { paddingBottom: SCREEN_ACTION_BOTTOM_PADDING },
+  groupHeaderPhoneLandscape: { marginBottom: 8 },
+  subTitlePhoneLandscape: { marginTop: 8, marginBottom: 8 },
+  header: { width: "100%" },
+  titlePhoneLandscape: { fontSize: 22, marginTop: 12, marginBottom: 8 },
   minicontainer: {
     width: "75%",
   },
@@ -401,7 +407,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   buttonscontainer: {
     width: "100%",
-    paddingBottom: 24,
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
     backgroundColor: colors.background,
     alignItems: "center",
   },

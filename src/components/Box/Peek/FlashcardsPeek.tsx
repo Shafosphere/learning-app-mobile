@@ -69,7 +69,7 @@ export default function FlashcardsPeekOverlay({
   const [resetErrorVisible, setResetErrorVisible] = useState(false);
   const [, setCountdownTick] = useState(0);
 
-  const sheetWidth = Math.min(width - 32, 480);
+  const sheetWidth = Math.max(0, Math.min(width - 32, width > height ? 720 : 480));
   const boxLabel = boxKey ? BOX_LABELS[boxKey] ?? "?" : "?";
 
   useEffect(() => {
@@ -532,7 +532,7 @@ export default function FlashcardsPeekOverlay({
               styles.dialog,
               {
                 width: sheetWidth,
-                maxHeight: Math.max(300, height * 0.75),
+                maxHeight: Math.max(0, Math.min(height - 32, height * 0.85)),
                 opacity: opacityAnim,
                 transform: [{ scale: scaleAnim }],
               },

@@ -1,7 +1,9 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
+import { useMemo } from "react";
+import { useSideNavbarLayout } from "./useSideNavbarLayout";
 import { StyleSheet } from "react-native";
 const LOGO_ASPECT_RATIO = 523 / 555;
-export const useStyles = createThemeStylesHook((colors) => ({
+const useBaseStyles = createThemeStylesHook((colors) => ({
   layout: {
     flex: 1,
     backgroundColor: colors.background,
@@ -42,6 +44,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   content: {
     flex: 1,
+    minWidth: 0,
     backgroundColor: colors.background,
   },
   contentInner: {
@@ -291,3 +294,27 @@ export const useStyles = createThemeStylesHook((colors) => ({
     padding: 0,
   },
 }));
+
+
+export function useStyles() {
+  const styles = useBaseStyles();
+  const sideLayout = useSideNavbarLayout();
+  return useMemo(() => sideLayout ? {
+    ...styles,
+    ...StyleSheet.create({
+      layout: { ...styles.layout, flexDirection: "row" },
+      topBarContainer: { ...styles.topBarContainer, width: 88, paddingHorizontal: 4, flexShrink: 0 },
+      topBar: { ...styles.topBar, height: undefined, minHeight: 292, flex: 1, flexDirection: "column", paddingVertical: 8 },
+      leftGroup: { ...styles.leftGroup, flex: 0, width: "100%", flexDirection: "column", paddingRight: 0, gap: 12 },
+      rightGroup: { ...styles.rightGroup, flexDirection: "column", marginLeft: 0, gap: 4 },
+      logoButton: { ...styles.logoButton, marginBottom: 0 },
+      courseAnchor: { ...styles.courseAnchor, width: "100%" },
+      courseButton: { ...styles.courseButton, width: "100%", minHeight: 76, flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 12 },
+      courseNameText: { ...styles.courseNameText, fontSize: 11, textAlign: "center", marginLeft: 0 },
+      iconButton: { ...styles.iconButton, minHeight: 44, minWidth: 44, alignItems: "center", justifyContent: "center" },
+      bottomBarContainer: { ...styles.bottomBarContainer, width: 68, paddingHorizontal: 4, paddingTop: 4, flexShrink: 0 },
+      bottomBar: { ...styles.bottomBar, flex: 1, minHeight: 252, flexDirection: "column", gap: 4 },
+      bottomIconButton: { ...styles.bottomIconButton, width: "100%", marginHorizontal: 0 },
+    }),
+  } : styles, [styles, sideLayout]);
+}

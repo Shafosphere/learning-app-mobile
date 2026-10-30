@@ -10,11 +10,6 @@ import { QuoteSuppressionContext } from "@/src/contexts/QuoteSuppressionContext"
 jest.mock("@/src/hooks/useKeyboardBottomOffset", () => ({ useKeyboardBottomOffset: jest.fn() }));
 jest.mock("@/src/services/debugEvents", () => ({ appendDebugEvent: jest.fn() }));
 
-let mockLandscapeEnabled = false;
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: () => ({ flashcardsLandscapeEnabled: mockLandscapeEnabled }),
-}));
-
 let mockOrientation = "portrait";
 jest.mock("@/src/hooks/useDeviceLayout", () => ({
   useDeviceLayout: () => ({ orientation: mockOrientation }),
@@ -67,7 +62,6 @@ function measure(result: ReturnType<typeof renderStudy>["result"], height: numbe
 describe("shared study coordination", () => {
   beforeEach(() => {
     mockOrientation = "portrait";
-    mockLandscapeEnabled = false;
     jest.useFakeTimers();
     (useKeyboardBottomOffset as jest.Mock).mockReturnValue({
       keyboardVisible: false, bottomOffset: new Animated.Value(0),
@@ -80,7 +74,6 @@ describe("shared study coordination", () => {
   });
 
   it("fits a landscape carousel to a row without scaling its scroll viewport, and restores portrait", () => {
-    mockLandscapeEnabled = true;
     jest.spyOn(Keyboard, "isVisible").mockReturnValue(false);
     mockOrientation = "landscape";
     const { result, rerender } = renderStudy(undefined, true, "carousel");
@@ -118,7 +111,6 @@ describe("shared study coordination", () => {
   });
 
   it("keeps tablet section transitions disabled through repeated rotation", () => {
-    mockLandscapeEnabled = true;
     const { result, rerender } = renderStudy(undefined, true);
     measure(result, 800);
     for (const orientation of ["portrait", "landscape", "portrait", "landscape"]) {
@@ -129,21 +121,22 @@ describe("shared study coordination", () => {
     }
   });
 
-  it("keeps the vertical layout by default on a rotated tablet and responds to opting in and out", () => {
+  it("automatically uses landscape on tablets and restores portrait", () => {
     mockOrientation = "landscape";
     const { result, rerender } = renderStudy(undefined, true);
     measure(result, 800);
-    expect(result.current.isLandscapeStudy).toBe(false);
-    expect(result.current.boxesLayoutProps.horizontalRowHeight).toBeUndefined();
-    expect(result.current.boxesLayoutProps.isCompactStudyLayout).toBe(false);
-    mockLandscapeEnabled = true;
-    rerender({ eligible: true, focused: true });
     expect(result.current.isLandscapeStudy).toBe(true);
     expect(result.current.boxesLayoutProps.horizontalRowHeight).toBeGreaterThan(0);
-    mockLandscapeEnabled = false;
+    mockOrientation = "portrait";
     rerender({ eligible: true, focused: true });
     expect(result.current.isLandscapeStudy).toBe(false);
     expect(result.current.boxesLayoutProps.horizontalRowHeight).toBeUndefined();
+  });
+
+  it("does not enable the tablet landscape layout on a rotated phone", () => {
+    mockOrientation = "landscape";
+    const { result } = renderStudy();
+    expect(result.current.isLandscapeStudy).toBe(false);
   });
 
   it("preserves section transitions on phones", () => {
@@ -152,7 +145,6 @@ describe("shared study coordination", () => {
   });
 
   it("moves tablet confirmation into the card only in landscape and restores portrait", () => {
-    mockLandscapeEnabled = true;
     jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
     const { result, rerender } = renderStudy(undefined, true);
     measure(result, 800);

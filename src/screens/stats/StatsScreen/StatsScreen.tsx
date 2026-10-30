@@ -1,3 +1,4 @@
+import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Image } from "expo-image";
@@ -36,8 +37,13 @@ export default function StatsScreen() {
   const accents = statsAccent(colors);
   const stats = useNavbarStatsSnapshot();
   const { width, isTabletLayout, orientation } = useDeviceLayout();
-  const isLandscapeLayout = isTabletLayout && orientation === "landscape" && width >= 840;
+  const isPhoneLandscape = useSideNavbarLayout();
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const isLandscapeLayout = (isPhoneLandscape && viewportWidth >= 600) || (isTabletLayout && orientation === "landscape" && width >= 840);
   const useCenteredTabletLayout = isTabletLayout;
+  const phoneColumnStyle = isPhoneLandscape && isLandscapeLayout
+    ? { flex: 0, width: Math.max(0, (Math.min(viewportWidth, 1100) - 48) / 2) }
+    : undefined;
   const [isActivityLoading, setIsActivityLoading] = useState(true);
   const [heatmapData, setHeatmapData] = useState<ActivityDay[]>([]);
   const [shieldedDates, setShieldedDates] = useState<string[]>([]);
@@ -168,7 +174,7 @@ export default function StatsScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="stats-viewport" onLayout={(event) => setViewportWidth(event.nativeEvent.layout.width)}>
       <SegmentedTabs
         options={[
           { key: "stats", label: t("screens.stats.stats.stats.history.tabs.stats") },
@@ -177,25 +183,26 @@ export default function StatsScreen() {
         value={activeTab}
         onChange={setActiveTab}
         accessibilityLabel={t("screens.stats.stats.stats.history.tabs.accessibilityLabel")}
-        containerStyle={styles.tabs}
+        containerStyle={[styles.tabs, isPhoneLandscape && styles.tabsPhoneLandscape, isPhoneLandscape && { width: Math.max(0, viewportWidth - 32), maxWidth: 1100 }]}
       />
       {activeTab === "stats" ? <ScrollView
         style={[styles.content, useCenteredTabletLayout && styles.contentTablet, isLandscapeLayout && styles.contentLandscape]}
-        contentContainerStyle={[styles.scrollContent, isLandscapeLayout && styles.scrollContentLandscape]}
+        contentContainerStyle={[styles.scrollContent, isLandscapeLayout && styles.scrollContentLandscape, isPhoneLandscape && styles.scrollContentPhoneLandscape]}
         scrollEnabled={!isBookshelfEditing}
       >
         <View style={styles.section}>
           <StatsSectionHeader icon="trophy" title={t("screens.stats.stats.stats.sections.achievements")} />
-          <View style={[styles.summary, isLandscapeLayout && styles.summaryLandscape]}>
-            <View style={isLandscapeLayout && styles.dashboardColumn}>
+          <View style={[styles.summary, isLandscapeLayout && styles.summaryLandscape, isPhoneLandscape && styles.summaryPhoneLandscape]}>
+            <View style={[isLandscapeLayout && styles.dashboardColumn, phoneColumnStyle]}>
               <BigKnownWordsCard />
             </View>
-            <View style={[styles.miniStatsRow, isLandscapeLayout && styles.miniStatsLandscape]}>
+            <View style={[styles.miniStatsRow, isLandscapeLayout && styles.miniStatsLandscape, phoneColumnStyle]}>
               <View testID="streak-card" style={[styles.miniStatItem, isLandscapeLayout && styles.miniStatItemLandscape]}>
-                <View style={styles.miniStatCard}>
+                <View style={[styles.miniStatCard, isPhoneLandscape && styles.miniStatCardPhoneLandscape]}>
                   <View
                     style={[
                       styles.miniStatIconTile,
+                      isPhoneLandscape && styles.miniStatIconTilePhoneLandscape,
                       { backgroundColor: statsIconBackground(accents.streak) },
                     ]}
                     accessibilityElementsHidden
@@ -206,11 +213,11 @@ export default function StatsScreen() {
                   <View style={styles.miniStatCopy}>
                     <Text
                       testID="streak-value"
-                      style={styles.miniStatValue}
+                      style={[styles.miniStatValue, isPhoneLandscape && styles.miniStatValuePhoneLandscape]}
                     >
                       {stats.streakDays}
                     </Text>
-                    <Text style={styles.miniStatLabel}>
+                    <Text style={[styles.miniStatLabel, isPhoneLandscape && styles.miniStatLabelPhoneLandscape]}>
                       {t("screens.stats.stats.stats.textChild.codziennaPassa")}
                     </Text>
                   </View>
@@ -223,7 +230,7 @@ export default function StatsScreen() {
                           testID={owned ? `streak-shield-${index}` : `streak-shield-empty-${index}`}
                           source={owned ? SHIELD_SOURCE : SHIELD_BORDER_SOURCE}
                           contentFit="contain"
-                          style={{ width: statsIconSizes.indicator, height: statsIconSizes.indicator }}
+                          style={{ width: isPhoneLandscape ? 24 : statsIconSizes.indicator, height: isPhoneLandscape ? 24 : statsIconSizes.indicator }}
                         />
                       );
                     })}
@@ -231,10 +238,11 @@ export default function StatsScreen() {
                 </View>
               </View>
               <View testID="jumps-card" style={[styles.miniStatItem, isLandscapeLayout && styles.miniStatItemLandscape]}>
-                <View style={styles.miniStatCard}>
+                <View style={[styles.miniStatCard, isPhoneLandscape && styles.miniStatCardPhoneLandscape]}>
                   <View
                     style={[
                       styles.miniStatIconTile,
+                      isPhoneLandscape && styles.miniStatIconTilePhoneLandscape,
                       { backgroundColor: statsIconBackground(accents.progress) },
                     ]}
                     accessibilityElementsHidden
@@ -245,11 +253,11 @@ export default function StatsScreen() {
                   <View style={styles.miniStatCopy}>
                     <Text
                       testID="jumps-value"
-                      style={styles.miniStatValue}
+                      style={[styles.miniStatValue, isPhoneLandscape && styles.miniStatValuePhoneLandscape]}
                     >
                       {stats.promotionsCount}
                     </Text>
-                    <Text style={styles.miniStatLabel}>
+                    <Text style={[styles.miniStatLabel, isPhoneLandscape && styles.miniStatLabelPhoneLandscape]}>
                       {t("repeats.labels.jumps")}
                     </Text>
                   </View>
@@ -280,11 +288,11 @@ export default function StatsScreen() {
             title={t("screens.stats.stats.stats.sections.analysis")}
             subtitle={t("screens.stats.stats.stats.sections.analysisSubtitle")}
           />
-          <View style={[styles.dashboardGroup, isLandscapeLayout && styles.dashboardRow]}>
-            <View style={isLandscapeLayout && styles.dashboardColumn}>
+          <View style={[styles.dashboardGroup, isLandscapeLayout && styles.dashboardRow, isPhoneLandscape && { gap: 16 }]}>
+            <View style={[isLandscapeLayout && styles.dashboardColumn, phoneColumnStyle]}>
               <HardWordsList />
             </View>
-            <View style={isLandscapeLayout && styles.dashboardColumn}>
+            <View style={[isLandscapeLayout && styles.dashboardColumn, phoneColumnStyle]}>
               <LearningTimeCard timeMs={learningTime} />
             </View>
           </View>

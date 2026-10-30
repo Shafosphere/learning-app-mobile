@@ -110,6 +110,7 @@ interface ManualCardsEditorProps {
   actionButtons?: ManualCardsEditorButtonConfig[];
   showDefaultBottomAddButton?: boolean;
   hideRemoveCardAction?: boolean;
+  twoColumn?: boolean;
 }
 
 interface ManualCardsDisplayAction {
@@ -140,6 +141,7 @@ export const ManualCardsEditor = ({
   actionButtons,
   showDefaultBottomAddButton = true,
   hideRemoveCardAction = false,
+  twoColumn = false,
 }: ManualCardsEditorProps) => {
   const { t } = useTranslation();
   const styles = useStyles();
@@ -301,7 +303,8 @@ export const ManualCardsEditor = ({
             >
               {index + 1}
             </Text>
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, twoColumn && styles.inputContainerLandscape]}>
+              <View style={[styles.promptContainer, twoColumn && styles.editorColumn]}>
               <View style={styles.flipRow}>
                   {!isDisplayMode && !isBooleanCardType && (
                     <Pressable
@@ -366,7 +369,7 @@ export const ManualCardsEditor = ({
                     )
                   ) : null}
               </View>
-              <View style={styles.cardDivider} />
+              {!twoColumn && <View style={styles.cardDivider} />}
               {shouldShowImagesRow ? (
                 <>
                   <View style={[styles.imagesRow, styles.imagesRowSingle]}>
@@ -428,7 +431,8 @@ export const ManualCardsEditor = ({
                   <View style={styles.cardDivider} />
                 </>
               ) : null}
-              <View style={styles.answersContainer}>
+              </View>
+              <View style={[styles.answersContainer, twoColumn && styles.editorColumn, twoColumn && styles.answersLandscape]}>
                 {isTrueFalseType ? (
                   <View style={styles.trueFalseContainer}>
                     <Text style={styles.trueFalseLabel}>{t("courseCreator.manualEditor.answerLabel")}</Text>

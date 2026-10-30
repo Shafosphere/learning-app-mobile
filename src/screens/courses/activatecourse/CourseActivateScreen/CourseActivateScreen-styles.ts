@@ -1,3 +1,4 @@
+import { SCREEN_ACTION_BOTTOM_PADDING } from "@/src/theme/layout";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
@@ -38,7 +39,21 @@ export const useStyles = createThemeStylesHook((colors) => ({
   courseList: { gap: 12 },
   groupHeaderLandscape: { marginTop: 8, marginBottom: 4 },
   buttonsRowLandscape: { justifyContent: "center", paddingTop: 12, borderTopWidth: 1 },
-  landscapeAction: { flex: 1, minHeight: 52 },
+  footerAction: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    minWidth: 0,
+  },
+  pinAction: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
+    width: "auto",
+    minWidth: 130,
+  },
+  landscapeAction: { width: 0, minHeight: 52, paddingHorizontal: 18 },
+  buttonscontainerPhoneLandscape: { paddingBottom: SCREEN_ACTION_BOTTOM_PADDING },
   title: {
     fontSize: 25,
     fontWeight: 900,
@@ -244,7 +259,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   buttonscontainer: {
     width: "100%",
-    paddingBottom: 24,
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
     gap: 12,
     backgroundColor: colors.background,
     alignItems: "center",

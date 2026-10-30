@@ -28,6 +28,8 @@ import { useStyles } from "./iconEdit-styles";
 const MAX_HUE = 360;
 const MAX_SATURATION = 100;
 const MAX_VALUE = 100;
+const ICON_CELL_MIN_WIDTH = 88;
+const ICON_CELL_PADDING = 10;
 
 const ICON_CATEGORY_OPTIONS = [
   { id: "all", labelKey: "courseCreator.iconEdit.categories.all" },
@@ -160,6 +162,7 @@ interface CourseIconColorSelectorProps {
   enableIconSearch?: boolean;
   nameValidationState?: "none" | "duplicate" | "similar";
   nameValidationMessage?: string | null;
+  twoColumn?: boolean;
 }
 
 function CourseIconColorSelectorComponent({
@@ -181,6 +184,7 @@ function CourseIconColorSelectorComponent({
   enableIconSearch = true,
   nameValidationState = "none",
   nameValidationMessage = null,
+  twoColumn = false,
 }: CourseIconColorSelectorProps) {
   const { t } = useTranslation();
   const componentStyles = useStyles();
@@ -188,6 +192,9 @@ function CourseIconColorSelectorComponent({
   const deviceLayout = useDeviceLayout();
   const insets = useSafeAreaInsets();
   const [isIconSheetOpen, setIsIconSheetOpen] = useState(false);
+  const [iconGridWidth, setIconGridWidth] = useState(0);
+  const [iconViewportHeight, setIconViewportHeight] = useState(deviceLayout.height);
+  const isCompactIconSheet = iconViewportHeight < 480;
   const [isColorSheetOpen, setIsColorSheetOpen] = useState(false);
   const [iconSearch, setIconSearch] = useState("");
   const [activeIconCategory, setActiveIconCategory] =
@@ -240,9 +247,26 @@ function CourseIconColorSelectorComponent({
   const selectedHex = selectedColor?.trim() || "#000000";
   const currentHex = useMemo(() => hsvToHex(hsv), [hsv]);
   const hueColorHex = useMemo(() => hsvToHex({ h: hsv.h, s: 1, v: 1 }), [hsv.h]);
-  const colorSheetBottomInset = Math.max(insets.bottom, 18);
+  const colorSheetBottomInset = Math.max(insets.bottom, 12);
   const isNameEditable = Boolean(onCourseNameChange) && nameEditable && !disabled;
   const isCompactLayout = deviceLayout.isCompactWidth;
+  const isColorLandscape = deviceLayout.orientation === "landscape" && deviceLayout.width >= 600;
+  const landscapeColorPlaneHeight = clamp(
+    deviceLayout.height * 0.82 - 110 - colorSheetBottomInset,
+    140,
+    300,
+  );
+  const gridWidth = iconGridWidth || Math.max(1, deviceLayout.width - 26);
+  const iconColumns = Math.max(1, Math.floor(gridWidth / ICON_CELL_MIN_WIDTH));
+  const iconTileSize = gridWidth / iconColumns - ICON_CELL_PADDING;
+  const pickerIconSize = Math.round(clamp(iconTileSize * 0.48, 24, 40));
+  const iconRows = useMemo(() => {
+    const rows = [];
+    for (let start = 0; start < filteredIcons.length; start += iconColumns) {
+      rows.push(filteredIcons.slice(start, start + iconColumns));
+    }
+    return rows;
+  }, [filteredIcons, iconColumns]);
 
   useEffect(() => {
     const justOpened = isColorSheetOpen && !wasColorSheetOpenRef.current;
@@ -320,8 +344,8 @@ function CourseIconColorSelectorComponent({
   const SelectedIconComponent = selectedIconMeta.Component;
 
   return (
-    <View style={[componentStyles.root, styles?.container]}>
-      <View style={componentStyles.previewCard}>
+    <View style={[componentStyles.root, twoColumn && componentStyles.twoColumnRoot, styles?.container]}>
+      <View style={[componentStyles.previewCard, twoColumn && componentStyles.columnCard]}>
         <View style={componentStyles.previewRow}>
           <View style={componentStyles.previewBadge}>
             <View
@@ -366,7 +390,7 @@ function CourseIconColorSelectorComponent({
         </Text>
       </View>
 
-      <View style={componentStyles.sectionCard}>
+      <View style={[componentStyles.sectionCard, twoColumn && componentStyles.columnCard]}>
         <View style={componentStyles.sectionHeaderBlock}>
           <Text style={componentStyles.sectionLabel}>
             {t("courseCreator.iconEdit.nameSection")}
@@ -410,7 +434,7 @@ function CourseIconColorSelectorComponent({
         ) : null}
       </View>
 
-      <View style={componentStyles.sectionCard}>
+      <View style={[componentStyles.sectionCard, twoColumn && componentStyles.columnCard]}>
         <View style={componentStyles.pickerRow}>
           <View style={componentStyles.pickerLeft}>
             <View style={componentStyles.sectionHeaderBlock}>
@@ -458,7 +482,7 @@ function CourseIconColorSelectorComponent({
         </View>
       </View>
 
-      <View style={componentStyles.sectionCard}>
+      <View style={[componentStyles.sectionCard, twoColumn && componentStyles.columnCard]}>
         <View style={componentStyles.pickerRow}>
           <View style={componentStyles.pickerLeft}>
             <View style={componentStyles.sectionHeaderBlock}>
@@ -520,90 +544,107 @@ function CourseIconColorSelectorComponent({
       >
         <Pressable
           style={componentStyles.modalBackdrop}
+          onLayout={({ nativeEvent }) => setIconViewportHeight(nativeEvent.layout.height)}
           onPress={() => setIsIconSheetOpen(false)}
         >
-          <Pressable style={componentStyles.sheet} onPress={() => undefined}>
-            <View style={componentStyles.sheetGrabber} />
-            <View style={componentStyles.sheetHeader}>
-              <Text style={componentStyles.sheetTitle}>
-                {t("courseCreator.iconEdit.chooseIcon")}
-              </Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t("courseCreator.iconEdit.closeIconPickerA11y")}
-                onPress={() => setIsIconSheetOpen(false)}
-                style={({ pressed }) => [
-                  componentStyles.closeSquareButton,
-                  pressed && componentStyles.changeButtonPressed,
-                ]}
-              >
-                <Octicons
-                  name="x"
-                  size={18}
-                  color={componentStyles.closeSquareIcon.color}
-                />
-              </Pressable>
-            </View>
-
-            <View style={componentStyles.sheetBody}>
+          <Pressable style={[componentStyles.sheet, isCompactIconSheet && componentStyles.iconSheetCompact]} onPress={() => undefined}>
+            {!isCompactIconSheet && <View style={componentStyles.sheetGrabber} />}
+            <View style={[componentStyles.sheetHeader, componentStyles.iconSheetHeader, isCompactIconSheet && componentStyles.iconSheetHeaderCompact]}>
+              <View style={[componentStyles.iconTitleRow, isCompactIconSheet && componentStyles.iconTitleRowCompact]}>
+                <Text style={[componentStyles.sheetTitle, isCompactIconSheet && componentStyles.iconTitleHidden]}>
+                  {t("courseCreator.iconEdit.chooseIcon")}
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t("courseCreator.iconEdit.closeIconPickerA11y")}
+                  onPress={() => setIsIconSheetOpen(false)}
+                  style={({ pressed }) => [
+                    componentStyles.closeSquareButton,
+                    pressed && componentStyles.changeButtonPressed,
+                  ]}
+                >
+                  <Octicons
+                    name="x"
+                    size={18}
+                    color={componentStyles.closeSquareIcon.color}
+                  />
+                </Pressable>
+              </View>
               {enableIconSearch ? (
                 <TextInput
                   value={iconSearch}
                   onChangeText={setIconSearch}
                   placeholder={t("courseCreator.iconEdit.searchIcon")}
                   placeholderTextColor={componentStyles.searchInput.color}
-                  style={componentStyles.searchInput}
+                  style={[componentStyles.searchInput, isCompactIconSheet && componentStyles.iconSearchCompact]}
                   accessibilityLabel={t("courseCreator.iconEdit.searchIcon")}
                 />
               ) : null}
-              <View style={componentStyles.categoryRow}>
-                {ICON_CATEGORY_OPTIONS.map((category) => {
-                  const isActive = category.id === activeIconCategory;
-                  const categoryLabel = t(category.labelKey);
-                  return (
-                    <Pressable
-                      key={category.id}
-                      accessibilityRole="button"
-                      accessibilityLabel={t("courseCreator.iconEdit.categoryFilterA11y", {
-                        label: categoryLabel,
-                      })}
-                      onPress={() => setActiveIconCategory(category.id)}
-                      style={({ pressed }) => [
-                        componentStyles.categoryButton,
-                        isActive && componentStyles.categoryButtonActive,
-                        pressed && componentStyles.iconTilePressed,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          componentStyles.categoryButtonText,
-                          isActive && componentStyles.categoryButtonTextActive,
+            </View>
+
+            <View style={componentStyles.sheetBody}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                <View style={[componentStyles.categoryRow, componentStyles.iconCategoriesRow]}>
+                  {ICON_CATEGORY_OPTIONS.map((category) => {
+                    const isActive = category.id === activeIconCategory;
+                    const categoryLabel = t(category.labelKey);
+                    return (
+                      <Pressable
+                        key={category.id}
+                        accessibilityRole="button"
+                        accessibilityLabel={t("courseCreator.iconEdit.categoryFilterA11y", {
+                          label: categoryLabel,
+                        })}
+                        onPress={() => setActiveIconCategory(category.id)}
+                        style={({ pressed }) => [
+                          componentStyles.categoryButton,
+                          isActive && componentStyles.categoryButtonActive,
+                          pressed && componentStyles.iconTilePressed,
                         ]}
                       >
-                        {categoryLabel}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
+                        <Text
+                          style={[
+                            componentStyles.categoryButtonText,
+                            isActive && componentStyles.categoryButtonTextActive,
+                          ]}
+                        >
+                          {categoryLabel}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </ScrollView>
             </View>
 
             <ScrollView
               style={componentStyles.iconGridScroll}
-              contentContainerStyle={componentStyles.iconGridScrollContent}
+              contentContainerStyle={[
+                componentStyles.iconGridScrollContent,
+                { paddingBottom: Math.max(insets.bottom, 12) },
+              ]}
               keyboardShouldPersistTaps="handled"
             >
-              <View style={componentStyles.iconGrid}>
-                {filteredIcons.map((icon) => {
-                  const IconComponent = icon.Component;
-                  const isSelected = icon.id === selectedIconMeta.id;
-                  return (
-                    <View key={icon.id} style={componentStyles.iconTileCell}>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t("courseCreator.iconEdit.chooseIconA11y", {
-                          id: icon.id,
-                        })}
+              <View
+                style={componentStyles.iconGrid}
+                onLayout={({ nativeEvent }) => setIconGridWidth(nativeEvent.layout.width)}
+              >
+                {iconRows.map((row) => (
+                  <View key={row[0].id} style={componentStyles.iconGridRow}>
+                    {row.map((icon) => {
+                      const IconComponent = icon.Component;
+                      const isSelected = icon.id === selectedIconMeta.id;
+                      return (
+                        <View
+                          key={icon.id}
+                          style={componentStyles.iconTileCell}
+                        >
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityState={{ selected: isSelected }}
+                            accessibilityLabel={t("courseCreator.iconEdit.chooseIconA11y", {
+                              id: icon.id,
+                            })}
                         onPress={() => {
                           onIconChange(icon.id);
                           setIsIconSheetOpen(false);
@@ -616,13 +657,18 @@ function CourseIconColorSelectorComponent({
                       >
                         <IconComponent
                           name={icon.name as never}
-                          size={32}
+                          size={pickerIconSize}
                           color={componentStyles.previewIcon.color}
                         />
                       </Pressable>
                     </View>
                   );
                 })}
+                    {Array.from({ length: iconColumns - row.length }, (_, index) => (
+                      <View key={`empty-${index}`} style={componentStyles.iconTileCell} />
+                    ))}
+                  </View>
+                ))}
                 {filteredIcons.length === 0 ? (
                   <Text style={componentStyles.emptyStateText}>
                     {t("courseCreator.iconEdit.emptyResults")}
@@ -678,7 +724,8 @@ function CourseIconColorSelectorComponent({
               contentContainerStyle={[
                 componentStyles.colorScrollContent,
                 isCompactLayout && componentStyles.compactColorScrollContent,
-                { paddingBottom: colorSheetBottomInset + 16 },
+                isColorLandscape && componentStyles.colorScrollContentLandscape,
+                { paddingBottom: colorSheetBottomInset },
               ]}
               keyboardShouldPersistTaps="handled"
               scrollEnabled={!isSvDragging}
@@ -687,6 +734,8 @@ function CourseIconColorSelectorComponent({
                 style={[
                   componentStyles.svPlaneWrap,
                   isCompactLayout && componentStyles.compactSvPlaneWrap,
+                  isColorLandscape && componentStyles.svPlaneWrapLandscape,
+                  isColorLandscape && { height: landscapeColorPlaneHeight },
                 ]}
                 onLayout={(event) => {
                   const { width, height } = event.nativeEvent.layout;
@@ -767,107 +816,112 @@ function CourseIconColorSelectorComponent({
                 </Svg>
               </View>
 
-              <View style={componentStyles.sliderGroup}>
-                <Text style={componentStyles.sliderLabel}>
-                  {t("courseCreator.iconEdit.hue")}
-                </Text>
-                <TrackSlider
-                  testID="hue-slider"
-                  value={hsv.h}
-                  onValueChange={(value) => {
-                    setHsv((prev) => ({ ...prev, h: value }));
-                  }}
-                  minimumValue={0}
-                  maximumValue={MAX_HUE}
-                  step={1}
-                  mode="rainbow"
-                  trackHeight={14}
-                  thumbSize={20}
-                  thumbBorderWidth={2}
-                  thumbColor={hueColorHex}
-                  thumbBorderColor={colors.background}
-                  style={componentStyles.sliderControl}
-                  disabled={disabled}
-                />
-              </View>
-
-              <View style={componentStyles.sliderGroup}>
-                <Text style={componentStyles.sliderLabel}>
-                  {t("courseCreator.iconEdit.saturation")}
-                </Text>
-                <TrackSlider
-                  testID="sat-slider"
-                  value={hsv.s * 100}
-                  onValueChange={(value) => {
-                    setHsv((prev) => ({ ...prev, s: clamp(value / 100, 0, 1) }));
-                  }}
-                  minimumValue={0}
-                  maximumValue={MAX_SATURATION}
-                  step={1}
-                  mode="solid"
-                  trackHeight={14}
-                  thumbSize={20}
-                  thumbBorderWidth={2}
-                  trackColor={colors.background}
-                  fillColor={colors.my_green}
-                  thumbColor={colors.my_green}
-                  thumbBorderColor={colors.background}
-                  style={componentStyles.sliderControl}
-                  disabled={disabled}
-                />
-              </View>
-
-              <View style={componentStyles.sliderGroup}>
-                <Text style={componentStyles.sliderLabel}>
-                  {t("courseCreator.iconEdit.value")}
-                </Text>
-                <TrackSlider
-                  testID="val-slider"
-                  value={hsv.v * 100}
-                  onValueChange={(value) => {
-                    setHsv((prev) => ({ ...prev, v: clamp(value / 100, 0, 1) }));
-                  }}
-                  minimumValue={0}
-                  maximumValue={MAX_VALUE}
-                  step={1}
-                  mode="solid"
-                  trackHeight={14}
-                  thumbSize={20}
-                  thumbBorderWidth={2}
-                  trackColor={colors.background}
-                  fillColor={colors.my_green}
-                  thumbColor={colors.my_green}
-                  thumbBorderColor={colors.background}
-                  style={componentStyles.sliderControl}
-                  disabled={disabled}
-                />
-              </View>
-
-              <View style={componentStyles.colorActionRow}>
-                <View style={componentStyles.colorFooterTextWrap}>
-                  <Text style={componentStyles.colorPreviewLabel}>
-                    {t("courseCreator.iconEdit.preview")}
+              <View style={[
+                componentStyles.colorControls,
+                isColorLandscape && componentStyles.colorControlsLandscape,
+              ]}>
+                <View style={componentStyles.sliderGroup}>
+                  <Text style={componentStyles.sliderLabel}>
+                    {t("courseCreator.iconEdit.hue")}
                   </Text>
-                  <Text style={componentStyles.colorPreviewHex}>{currentHex}</Text>
+                  <TrackSlider
+                    testID="hue-slider"
+                    value={hsv.h}
+                    onValueChange={(value) => {
+                      setHsv((prev) => ({ ...prev, h: value }));
+                    }}
+                    minimumValue={0}
+                    maximumValue={MAX_HUE}
+                    step={1}
+                    mode="rainbow"
+                    trackHeight={14}
+                    thumbSize={20}
+                    thumbBorderWidth={2}
+                    thumbColor={hueColorHex}
+                    thumbBorderColor={colors.background}
+                    style={componentStyles.sliderControl}
+                    disabled={disabled}
+                  />
                 </View>
-                <View style={componentStyles.colorActionRight}>
-                  <View style={componentStyles.colorPreviewBadge}>
-                    <SelectedIconComponent
-                      name={selectedIconMeta.name as never}
-                      size={20}
-                      color={currentHex}
+
+                <View style={componentStyles.sliderGroup}>
+                  <Text style={componentStyles.sliderLabel}>
+                    {t("courseCreator.iconEdit.saturation")}
+                  </Text>
+                  <TrackSlider
+                    testID="sat-slider"
+                    value={hsv.s * 100}
+                    onValueChange={(value) => {
+                      setHsv((prev) => ({ ...prev, s: clamp(value / 100, 0, 1) }));
+                    }}
+                    minimumValue={0}
+                    maximumValue={MAX_SATURATION}
+                    step={1}
+                    mode="solid"
+                    trackHeight={14}
+                    thumbSize={20}
+                    thumbBorderWidth={2}
+                    trackColor={colors.background}
+                    fillColor={colors.my_green}
+                    thumbColor={colors.my_green}
+                    thumbBorderColor={colors.background}
+                    style={componentStyles.sliderControl}
+                    disabled={disabled}
+                  />
+                </View>
+
+                <View style={componentStyles.sliderGroup}>
+                  <Text style={componentStyles.sliderLabel}>
+                    {t("courseCreator.iconEdit.value")}
+                  </Text>
+                  <TrackSlider
+                    testID="val-slider"
+                    value={hsv.v * 100}
+                    onValueChange={(value) => {
+                      setHsv((prev) => ({ ...prev, v: clamp(value / 100, 0, 1) }));
+                    }}
+                    minimumValue={0}
+                    maximumValue={MAX_VALUE}
+                    step={1}
+                    mode="solid"
+                    trackHeight={14}
+                    thumbSize={20}
+                    thumbBorderWidth={2}
+                    trackColor={colors.background}
+                    fillColor={colors.my_green}
+                    thumbColor={colors.my_green}
+                    thumbBorderColor={colors.background}
+                    style={componentStyles.sliderControl}
+                    disabled={disabled}
+                  />
+                </View>
+
+                <View style={componentStyles.colorActionRow}>
+                  <View style={componentStyles.colorFooterTextWrap}>
+                    <Text style={componentStyles.colorPreviewLabel}>
+                      {t("courseCreator.iconEdit.preview")}
+                    </Text>
+                    <Text style={componentStyles.colorPreviewHex}>{currentHex}</Text>
+                  </View>
+                  <View style={componentStyles.colorActionRight}>
+                    <View style={componentStyles.colorPreviewBadge}>
+                      <SelectedIconComponent
+                        name={selectedIconMeta.name as never}
+                        size={20}
+                        color={currentHex}
+                      />
+                    </View>
+                    <MyButton
+                      text={t("courseCreator.iconEdit.confirm")}
+                      color="my_green"
+                      width={126}
+                      disabled={disabled}
+                      onPress={() => setIsColorSheetOpen(false)}
+                      accessibilityLabel={t("courseCreator.iconEdit.confirmColorA11y")}
+                      style={componentStyles.applyMyButton}
+                      textStyle={componentStyles.applyMyButtonText}
                     />
                   </View>
-                  <MyButton
-                    text={t("courseCreator.iconEdit.confirm")}
-                    color="my_green"
-                    width={126}
-                    disabled={disabled}
-                    onPress={() => setIsColorSheetOpen(false)}
-                    accessibilityLabel={t("courseCreator.iconEdit.confirmColorA11y")}
-                    style={componentStyles.applyMyButton}
-                    textStyle={componentStyles.applyMyButtonText}
-                  />
                 </View>
               </View>
             </ScrollView>

@@ -7,6 +7,7 @@ import MyButton from "@/src/components/button/button";
 import { CardMathText, hasMathSegments } from "@/src/components/card/subcomponents/CardMathText";
 import { PromptImage } from "@/src/components/card/subcomponents/PromptImage";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { getDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
 import type { ReviewMistakeNudgeCandidate } from "../model/reviewFlashcards.types";
 
@@ -31,7 +32,9 @@ export function ReviewMistakeBatchModal({
 }: ReviewMistakeBatchModalProps) {
   const { t } = useTranslation();
   const { colors } = useSettings();
-  const { height } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+  const { isTabletLayout, orientation } = getDeviceLayout(width, height);
+  const isTabletLandscape = isTabletLayout && orientation === "landscape";
   // Keep the dialog inside the backdrop's 24dp top/bottom breathing room.
   // A minimum here would let the modal exceed short landscape/split-screen windows.
   const maxHeight = Math.min(MAX_DIALOG_HEIGHT, Math.max(0, height - 48));
@@ -63,7 +66,7 @@ export function ReviewMistakeBatchModal({
   return (
     <Modal animationType="fade" transparent visible={visible} onRequestClose={onKeepReviewing}>
       <View style={styles.backdrop}>
-        <View style={[styles.dialog, { maxHeight }]} testID="review-mistake-batch-modal">
+        <View style={[styles.dialog, isTabletLandscape && styles.dialogLandscape, { maxHeight }]} testID="review-mistake-batch-modal">
           <View style={styles.header}>
             <View style={styles.headerText}>
               <Text style={styles.title}>{t("flashcards.card.reviewMistakeNudge.title")}</Text>
@@ -84,12 +87,12 @@ export function ReviewMistakeBatchModal({
           </View>
 
           <ScrollView
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[styles.listContent, isTabletLandscape && styles.listContentLandscape]}
             showsVerticalScrollIndicator
             style={styles.list}
             testID="review-mistake-batch-list"
           >
-            <Pressable accessibilityRole="button" onPress={toggleAll} style={styles.selectionToggle}>
+            <Pressable accessibilityRole="button" onPress={toggleAll} style={[styles.selectionToggle, isTabletLandscape && styles.selectionToggleLandscape]}>
               <Text style={styles.selectionToggleText}>
                 {allSelected
                   ? t("flashcards.card.reviewMistakeNudge.deselectAll")
@@ -105,7 +108,7 @@ export function ReviewMistakeBatchModal({
                 t("flashcards.card.peek.emptyTranslation");
 
               return (
-                <View key={card.id} style={styles.card} testID={`review-mistake-batch-card-${card.id}`}>
+                <View key={card.id} style={[styles.card, isTabletLandscape && styles.cardLandscape]} testID={`review-mistake-batch-card-${card.id}`}>
                   {imageUri ? (
                     <View style={styles.thumbnail}>
                       <PromptImage imageStyle={styles.promptImage} uri={imageUri} />
@@ -182,6 +185,7 @@ const createStyles = (colors: ReturnType<typeof useSettings>["colors"]) =>
   StyleSheet.create({
     backdrop: { alignItems: "center", backgroundColor: "rgba(0,0,0,0.45)", flex: 1, justifyContent: "center", padding: 16 },
     dialog: { backgroundColor: colors.secondBackground, borderColor: colors.border, borderRadius: 24, borderWidth: 1, elevation: 16, maxWidth: 440, overflow: "hidden", shadowColor: "#000", shadowOffset: { height: 12, width: 0 }, shadowOpacity: 0.2, shadowRadius: 24, width: "100%" },
+    dialogLandscape: { maxWidth: 960 },
     header: { flexDirection: "row", gap: 12, paddingHorizontal: 20, paddingTop: 20 },
     headerText: { flex: 1, paddingRight: 4 },
     title: { color: colors.headline, fontSize: 20, fontWeight: "900", lineHeight: 26 },
@@ -189,6 +193,9 @@ const createStyles = (colors: ReturnType<typeof useSettings>["colors"]) =>
     closeButton: { alignItems: "center", backgroundColor: colors.my_red, borderRadius: 7, height: 30, justifyContent: "center", width: 30 },
     list: { flexShrink: 1, marginTop: 16 },
     listContent: { gap: 10, paddingHorizontal: 16, paddingBottom: 12 },
+    listContentLandscape: { flexDirection: "row", flexWrap: "wrap", alignItems: "stretch" },
+    cardLandscape: { flexBasis: "48%", flexGrow: 1, minWidth: 0 },
+    selectionToggleLandscape: { width: "100%", alignItems: "flex-end" },
     selectionToggle: { alignSelf: "flex-end", minHeight: 28, justifyContent: "center" },
     selectionToggleText: { color: colors.paragraph, fontSize: 13, fontWeight: "800" },
     card: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 16, borderWidth: 1, flexDirection: "row", gap: 12, minHeight: 88, overflow: "hidden", padding: 8, paddingRight: 42 },

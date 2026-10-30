@@ -1,5 +1,4 @@
 import { SINGLE_ROW_BOX_MIN_HEIGHT } from "@/src/components/Box/List/BoxList.metrics";
-import { useSettings } from "@/src/contexts/SettingsContext";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { getBoxCarouselNaturalHeight } from "@/src/components/Box/Carousel/BoxCarousel.metrics";
 import { useNavbarCompactLayoutSetter, useNavbarLayoutTransition } from "@/src/contexts/NavbarLayoutContext";
@@ -30,10 +29,8 @@ export function useFlashcardsStudyCoordinator({
   studyLayout, isTabletLayout, boxesLayout, inlineCardActionEligible,
   shouldAnimateScreenLayout, ...dockParams
 }: Params) {
-  const { orientation } = useDeviceLayout();
-  const { flashcardsLandscapeEnabled } = useSettings();
-  const isLandscapeStudy = flashcardsLandscapeEnabled === true
-    && isTabletLayout && orientation === "landscape";
+  const { orientation } = useDeviceLayout({ sizeSource: "screen" });
+  const isLandscapeStudy = isTabletLayout && orientation === "landscape";
   const { isCompactStudyLayout, setActionsHidden } = studyLayout;
   const isCompactBoxesLayout = isCompactStudyLayout || isLandscapeStudy;
   // The 80dp phone fallback makes the boxes disproportionately small on a

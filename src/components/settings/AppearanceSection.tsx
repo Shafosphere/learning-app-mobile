@@ -14,6 +14,7 @@ import React, {
 } from "react";
 import {
   Modal,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -76,8 +77,6 @@ const AppearanceSection: React.FC = () => {
     toggleShowBoxFaces,
     boxesLayout,
     setBoxesLayout,
-    flashcardsLandscapeEnabled,
-    setFlashcardsLandscapeEnabled,
     actionButtonsPosition,
     setActionButtonsPosition,
   } = useSettings();
@@ -353,25 +352,6 @@ const AppearanceSection: React.FC = () => {
         testID="flashcard-audio-volume-slider"
       />
 
-      <View style={styles.appearanceGroupCard}>
-        <ToggleRow
-          style={styles.appearanceGroupRow}
-          value={flashcardsLandscapeEnabled}
-          controlStyle={styles.switch}
-          onPress={() => void setFlashcardsLandscapeEnabled(!flashcardsLandscapeEnabled)}
-          accessibilityLabel={t("settings.appearance.landscapeFlashcards.title")}
-        >
-          <View style={styles.appearanceRowText}>
-            <Text style={styles.appearanceBlockTitle}>
-              {t("settings.appearance.landscapeFlashcards.title")}
-            </Text>
-            <Text style={styles.appearanceBlockDescription}>
-              {preventWidowsPl(t("settings.appearance.landscapeFlashcards.subtitle"))}
-            </Text>
-          </View>
-        </ToggleRow>
-      </View>
-
       <View style={horizontalPreviews ? styles.previewSelectorsLandscape : undefined}>
         <View style={horizontalPreviews ? styles.previewSelectorColumn : undefined}>
           <PreviewOptionSelector
@@ -413,7 +393,12 @@ const AppearanceSection: React.FC = () => {
           style={styles.languageModalBackdrop}
           onPress={() => setLanguageMenuOpen(null)}
         >
-          <View style={styles.languageModalCard}>
+          <ScrollView
+            style={styles.languageModalCard}
+            contentContainerStyle={styles.languageModalContent}
+            keyboardShouldPersistTaps="handled"
+            bounces={false}
+          >
             {(languageMenuOpen === "native"
               ? nativeLanguageOptions
               : uiLanguageOptions
@@ -449,7 +434,7 @@ const AppearanceSection: React.FC = () => {
                 </TouchableOpacity>
               );
             })}
-          </View>
+          </ScrollView>
         </TouchableOpacity>
       </Modal>
     </View>

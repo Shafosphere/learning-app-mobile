@@ -1,6 +1,8 @@
+import { SCREEN_ACTION_BOTTOM_PADDING } from "@/src/theme/layout";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 const COURSE_APPEARANCE_TABLET_MAX_WIDTH = 500;
+const COURSE_APPEARANCE_LANDSCAPE_MAX_WIDTH = 1000;
 
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
@@ -10,6 +12,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingTop: 32,
     paddingBottom: 0,
   },
+  containerLandscape: {
+    paddingHorizontal: 24,
+    paddingTop: 12,
+  },
   scrollView: {
     flex: 1,
     width: "100%",
@@ -18,9 +24,15 @@ export const useStyles = createThemeStylesHook((colors) => ({
   scrollViewTablet: {
     maxWidth: COURSE_APPEARANCE_TABLET_MAX_WIDTH,
   },
+  scrollViewLandscape: {
+    maxWidth: COURSE_APPEARANCE_LANDSCAPE_MAX_WIDTH,
+  },
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 120,
+  },
+  scrollContentLandscape: {
+    paddingBottom: 16,
   },
   section: {
     borderRadius: 16,
@@ -35,6 +47,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginBottom: -16,
     marginRight: 8,
     zIndex: 3,
+  },
+  sectionHeaderLandscape: {
+    marginBottom: 12,
   },
   formContent: {
     gap: 14,
@@ -89,9 +104,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   footer: {
     width: "100%",
-    paddingBottom: 24,
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
     backgroundColor: colors.background,
     alignItems: "center" as const,
+  },
+  footerLandscape: {
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
   },
   buttonsRow: {
     borderColor: colors.border,
@@ -105,5 +123,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
   buttonsRowTablet: {
     maxWidth: COURSE_APPEARANCE_TABLET_MAX_WIDTH,
     alignSelf: "center" as const,
+  },
+  buttonsRowLandscape: {
+    maxWidth: COURSE_APPEARANCE_LANDSCAPE_MAX_WIDTH,
+    borderTopWidth: 1,
+    paddingTop: 10,
   },
 }));

@@ -40,6 +40,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.my_red,
     zIndex: 1,
   },
+  cardLandscape: {
+    maxWidth: 560,
+  },
   scrollableCard: {
     maxHeight: "100%",
   },
@@ -77,6 +80,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 12,
+    flexWrap: "wrap",
   },
   secondaryButton: {
     minHeight: 40,

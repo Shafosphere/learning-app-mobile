@@ -8,6 +8,7 @@ import {
   getCustomCourseById,
   updateCustomCourse,
 } from "@/src/db/sqlite/db";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import {
   getOnboardingCheckpoint,
@@ -36,6 +37,8 @@ export default function CourseEntrySettingsScreen() {
   const router = useRouter();
   const isFocused = useIsFocused();
   const styles = useStyles();
+  const { isTabletLayout, orientation } = useDeviceLayout();
+  const isTabletLandscape = isTabletLayout && orientation === "landscape";
   const { t } = useTranslation();
   const setPopup = usePopup();
   const {
@@ -268,32 +271,38 @@ export default function CourseEntrySettingsScreen() {
       />
       <ScrollView
         style={styles.contentContainer}
-        contentContainerStyle={styles.contentContainerInner}
+        contentContainerStyle={[
+          styles.contentContainerInner,
+          isTabletLandscape && styles.contentContainerInnerLandscape,
+        ]}
         keyboardShouldPersistTaps="handled"
         scrollEnabled={!coachmark.currentStep?.scrollLocked}
         bounces={false}
         overScrollMode="never"
       >
-        <View style={styles.content}>
-          <Text style={styles.title}>
-            {t(
-              "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.ustawStartNaukiPoSwojemu"
-            )}
-          </Text>
-          <Text style={styles.lead}>
-            {t(
-              "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.teOpcjePokazaSieTylko"
-            )}
-          </Text>
+        <View style={[styles.content, isTabletLandscape && styles.contentLandscape]}>
+          <View style={isTabletLandscape && styles.introLandscape}>
+            <Text style={[styles.title, isTabletLandscape && styles.titleLandscape]}>
+              {t(
+                "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.ustawStartNaukiPoSwojemu"
+              )}
+            </Text>
+            <Text style={styles.lead}>
+              {t(
+                "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.teOpcjePokazaSieTylko"
+              )}
+            </Text>
+          </View>
 
           <CoachmarkAnchor
+            style={isTabletLandscape ? styles.optionsLandscape : undefined}
             id="course-entry-settings-options"
             shape="rect"
             radius={24}
           >
             <View style={styles.options}>
               <ToggleRow
-                style={styles.option}
+                style={[styles.option, isTabletLandscape && styles.optionLandscape]}
                 value={autoflowEnabled}
                 onPress={() => setAutoflowEnabledState((prev) => !prev)}
                 accessibilityLabel={t(
@@ -321,7 +330,7 @@ export default function CourseEntrySettingsScreen() {
               </ToggleRow>
 
               <ToggleRow
-                style={styles.option}
+                style={[styles.option, isTabletLandscape && styles.optionLandscape]}
                 value={reviewsEnabled}
                 onPress={() => setReviewsEnabled((prev) => !prev)}
                 accessibilityLabel={t(
@@ -349,7 +358,7 @@ export default function CourseEntrySettingsScreen() {
               </ToggleRow>
 
               <ToggleRow
-                style={styles.option}
+                style={[styles.option, isTabletLandscape && styles.optionLandscape]}
                 value={showExplanationEnabled}
                 onPress={() => setShowExplanationEnabledState((prev) => !prev)}
                 accessibilityLabel={t(
@@ -380,14 +389,14 @@ export default function CourseEntrySettingsScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.buttonscontainer}>
-        <View style={styles.buttonsRow}>
+      <View style={[styles.buttonscontainer, isTabletLandscape && styles.buttonscontainerLandscape]}>
+        <View style={[styles.buttonsRow, isTabletLandscape && styles.buttonsRowLandscape]}>
           <CoachmarkAnchor
             id="course-entry-settings-next-button"
             shape="rect"
             radius={18}
             padding={2}
-            style={{ alignSelf: "flex-end" }}
+            style={isTabletLandscape ? styles.ctaAnchorLandscape : { alignSelf: "flex-end" }}
           >
             <MyButton
               text={t(
@@ -406,7 +415,7 @@ export default function CourseEntrySettingsScreen() {
                 }
                 void handleContinue();
               }}
-              width={140}
+              width={isTabletLandscape ? "100%" : 140}
               style={styles.ctaButton}
               pressedStyle={styles.ctaButtonPressed}
               textStyle={styles.ctaLabel}

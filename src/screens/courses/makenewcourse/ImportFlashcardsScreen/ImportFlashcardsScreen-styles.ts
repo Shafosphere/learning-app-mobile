@@ -1,3 +1,4 @@
+import { SCREEN_ACTION_BOTTOM_PADDING } from "@/src/theme/layout";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 export const useStyles = createThemeStylesHook((colors) => ({
@@ -7,6 +8,74 @@ export const useStyles = createThemeStylesHook((colors) => ({
     padding: 18,
     paddingTop: 32,
     paddingBottom: 0,
+  },
+  containerLandscape: {
+    paddingTop: 8,
+    paddingHorizontal: 16,
+  },
+  scrollView: {
+    flex: 1,
+    width: "100%",
+    maxWidth: 1100,
+    alignSelf: "center" as const,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  headerLandscape: {
+    width: "100%",
+    maxWidth: 1100,
+    alignSelf: "center" as const,
+    gap: 4,
+    paddingBottom: 4,
+  },
+  sectionHeaderLandscape: {
+    position: "relative" as const,
+    top: 0,
+    right: 0,
+    fontSize: 20,
+    alignSelf: "flex-end" as const,
+  },
+  addModeTabsLandscape: {
+    width: "100%",
+  },
+  sectionLandscape: {
+    padding: 0,
+    paddingTop: 0,
+    paddingBottom: 16,
+  },
+  modeContainerLandscape: {
+    marginTop: 4,
+  },
+  actionBarLandscape: {
+    width: "100%",
+    maxWidth: 1100,
+    alignSelf: "center" as const,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "flex-end" as const,
+    gap: 16,
+    borderTopWidth: 1,
+    borderColor: colors.border,
+    paddingTop: 8,
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
+    zIndex: 10,
+  },
+  manualToolbarWrapLandscape: {
+    flex: 1,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    zIndex: 1,
+  },
+  footerLandscape: {
+    width: "auto" as const,
+    paddingBottom: 0,
+  },
+  buttonsRowLandscape: {
+    width: "auto" as const,
+    borderTopWidth: 0,
+    paddingTop: 0,
   },
   section: {
     backgroundColor: colors.background,
@@ -132,6 +201,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   csvActionRow: {
     marginTop: 2,
     flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
     gap: 10,
     justifyContent: "flex-end" as const,
   },
@@ -172,7 +242,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   footer: {
     width: "100%",
-    paddingBottom: 24,
+    paddingBottom: SCREEN_ACTION_BOTTOM_PADDING,
     backgroundColor: colors.background,
     alignItems: "center" as const,
   },

@@ -152,6 +152,8 @@ export default function HomeScreen() {
   const renderTile = renderHomeTile(styles, {
     isTabletLayout,
     tileSize: gridMetrics?.tileSize ?? 0,
+    tileHeight: gridMetrics?.tileHeight,
+    isPhoneLandscape: !isTabletLayout && orientation === "landscape",
   });
 
   return (

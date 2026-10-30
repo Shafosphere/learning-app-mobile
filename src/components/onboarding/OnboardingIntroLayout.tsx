@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getIntroIllustrationWidth, getIntroSpacing } from "./introLayoutSizing";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
 const SCROLL_BOTTOM_PADDING = 12;
 
@@ -43,6 +44,8 @@ export function OnboardingIntroLayout({
   illustration,
 }: OnboardingIntroLayoutProps) {
   const styles = useStyles();
+  const { orientation, isTabletLayout } = useDeviceLayout();
+  const isTabletLandscape = isTabletLayout && orientation === "landscape";
   const insets = useSafeAreaInsets();
   const [contentHeight, setContentHeight] = useState(0);
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
@@ -51,9 +54,10 @@ export function OnboardingIntroLayout({
     logoWidth: number;
   } | null>(null);
   const spacing = getIntroSpacing(contentHeight);
+  const logoWidth = spacing.logoWidth;
   // A body measured with the initial compact spacing cannot size the final illustration.
   const isLayoutReady = contentHeight > 0 && viewport.height > 0 && viewport.width > 0
-    && measuredBody?.logoWidth === spacing.logoWidth;
+    && measuredBody?.logoWidth === logoWidth;
   const illustrationWidth = illustration && isLayoutReady
     ? getIntroIllustrationWidth({
         contentWidth: viewport.width,
@@ -61,6 +65,59 @@ export function OnboardingIntroLayout({
         aspectRatio: illustration.aspectRatio,
       })
     : undefined;
+
+  if (isTabletLandscape && illustration) {
+    return (
+      <View
+        testID="onboarding-intro-safe-area"
+        style={[
+          styles.container,
+          { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right },
+        ]}
+      >
+        <ScrollView
+          testID="onboarding-intro-scroll"
+          contentContainerStyle={styles.landscapeScrollContent}
+        >
+          <View style={styles.landscapePanel}>
+            <View style={styles.landscapeCopy} testID="onboarding-intro-body">
+              <Text style={styles.landscapeTitle} allowFontScaling accessibilityRole="header">
+                {title}
+              </Text>
+              <View style={styles.landscapeMessage} testID="onboarding-intro-message">
+                <Text testID={descriptionTestID} style={styles.landscapeDescription} allowFontScaling>
+                  {description}
+                </Text>
+                {descriptionEndNote ? (
+                  <Text style={styles.descriptionEndNote} allowFontScaling>{descriptionEndNote}</Text>
+                ) : null}
+              </View>
+              {children}
+              <View style={styles.landscapeAction} testID="onboarding-intro-footer">
+                <MyButton
+                  text={buttonText}
+                  onPress={onContinue}
+                  disabled={isSaving}
+                  color="my_green"
+                  width="100%"
+                  textStyle={styles.buttonText}
+                  style={styles.button}
+                />
+              </View>
+            </View>
+            <View style={[styles.landscapeDiagram, { aspectRatio: illustration.aspectRatio }]} testID={illustration.testID}>
+              <Image
+                source={illustration.source}
+                style={styles.landscapeImage}
+                resizeMode="contain"
+                accessible={false}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -97,13 +154,13 @@ export function OnboardingIntroLayout({
             testID="onboarding-intro-body"
             style={styles.body}
             onLayout={({ nativeEvent }) => {
-              setMeasuredBody({ height: nativeEvent.layout.height, logoWidth: spacing.logoWidth });
+              setMeasuredBody({ height: nativeEvent.layout.height, logoWidth });
             }}
           >
             <View style={[styles.header, { paddingBottom: spacing.headerGap }]}>
               {headerGraphic && (
                 <View style={{ marginBottom: spacing.logoGap }}>
-                  {headerGraphic(spacing.logoWidth)}
+                  {headerGraphic(logoWidth)}
                 </View>
               )}
               <Text style={styles.title} allowFontScaling accessibilityRole="header">
@@ -168,6 +225,58 @@ const useStyles = createThemeStylesHook((colors) => ({
     maxWidth: 460,
     alignSelf: "center",
     paddingHorizontal: 18,
+  },
+  landscapeScrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 32,
+    paddingVertical: 24,
+  },
+  landscapePanel: {
+    width: "100%",
+    maxWidth: 1000,
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 40,
+  },
+  landscapeCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: 20,
+  },
+  landscapeTitle: {
+    fontSize: 34,
+    lineHeight: 40,
+    fontWeight: "900",
+    color: colors.headline,
+    letterSpacing: -0.6,
+  },
+  landscapeMessage: {
+    gap: 12,
+  },
+  landscapeDescription: {
+    fontSize: 18,
+    lineHeight: 28,
+    fontWeight: "500",
+    color: colors.paragraph,
+  },
+  landscapeAction: {
+    width: "100%",
+    maxWidth: 240,
+    paddingTop: 8,
+  },
+  landscapeDiagram: {
+    flex: 1.15,
+    minWidth: 0,
+    maxWidth: 460,
+  },
+  landscapeImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
   },
   body: {
     flexShrink: 0,

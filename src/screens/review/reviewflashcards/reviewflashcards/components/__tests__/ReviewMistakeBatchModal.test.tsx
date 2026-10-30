@@ -202,4 +202,26 @@ describe("ReviewMistakeBatchModal", () => {
     fireEvent.press(screen.getByTestId("batch-confirm"));
     expect(onConfirm).toHaveBeenCalledWith([2]);
   });
+
+  it("preserves selection when rotating the tablet into the two-column layout", () => {
+    const onConfirm = jest.fn();
+    const props = {
+      cards: [makeCandidate(1), makeCandidate(2), makeCandidate(3)],
+      confirming: false,
+      error: false,
+      onConfirm,
+      onKeepReviewing: jest.fn(),
+      visible: true,
+    };
+    const screen = render(<ReviewMistakeBatchModal {...props} />);
+    fireEvent.press(screen.getAllByRole("checkbox")[1]);
+
+    mockWindowDimensions = { fontScale: 1, height: 768, scale: 1, width: 1024 };
+    screen.rerender(<ReviewMistakeBatchModal {...props} />);
+
+    expect(screen.getByTestId("review-mistake-batch-modal")).toHaveStyle({ maxWidth: 960 });
+    expect(screen.getAllByRole("checkbox")[1]).toHaveAccessibilityState({ checked: false });
+    fireEvent.press(screen.getByTestId("batch-confirm"));
+    expect(onConfirm).toHaveBeenCalledWith([1, 3]);
+  });
 });

@@ -68,7 +68,8 @@ export default function SettingsScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
   const { width, isTabletLayout, orientation } = useDeviceLayout();
-  const isLandscapeLayout = isTabletLayout && orientation === "landscape" && width >= 840;
+  const isPhoneLandscape = !isTabletLayout && orientation === "landscape" && width >= 600;
+  const isLandscapeLayout = isPhoneLandscape || (isTabletLayout && orientation === "landscape" && width >= 840);
   const useCenteredTabletLayout = isTabletLayout;
   const [activeTab, setActiveTab] = useState<TabKey>(TAB_CONFIG[0].key);
   const pagerRef = useRef<SettingsTabPagerHandle<TabKey>>(null);
@@ -83,6 +84,7 @@ export default function SettingsScreen() {
     <View style={[styles.container, isLandscapeLayout && styles.containerLandscape]}>
       <SettingsTabBar
         vertical={isLandscapeLayout}
+        compact={isPhoneLandscape}
         options={TAB_CONFIG.map((tab) => ({
           key: tab.key,
           label: t(tab.labelKey),

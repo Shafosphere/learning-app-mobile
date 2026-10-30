@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 import Animated from "react-native-reanimated";
 import { useTrophyEntrance } from "./useTrophyEntrance";
 
-export function TrophyEntrance({ ready }: { ready: boolean }) {
+export function TrophyEntrance({ ready, size = 160 }: { ready: boolean; size?: number }) {
   const [trophyLoaded, setTrophyLoaded] = useState(false);
   const [crackLoaded, setCrackLoaded] = useState(false);
   const { trophyAnimatedStyle, crackAnimatedStyle, impactAnimatedStyle } = useTrophyEntrance(
@@ -11,17 +11,17 @@ export function TrophyEntrance({ ready }: { ready: boolean }) {
   );
 
   return (
-    <Animated.View style={[styles.illustration, impactAnimatedStyle]} pointerEvents="none" accessible={false}>
+    <Animated.View style={[styles.illustration, { width: size * 1.5, height: size * (190 / 160) }, impactAnimatedStyle]} pointerEvents="none" accessible={false}>
       <Animated.Image
         source={require("@/assets/ui/achievements/wyrwa2.png")}
-        style={[styles.crack, crackAnimatedStyle]}
+        style={[styles.crack, { top: size * (15 / 160), width: size * 1.5, height: size * 1.5 }, crackAnimatedStyle]}
         accessible={false}
         onLoad={() => setCrackLoaded(true)}
         testID="completed-courses-crack"
       />
       <Animated.Image
         source={require("@/assets/ui/achievements/trophy.png")}
-        style={[styles.trophy, trophyAnimatedStyle]}
+        style={[styles.trophy, { width: size, height: size }, trophyAnimatedStyle]}
         accessible={false}
         onLoad={() => setTrophyLoaded(true)}
         testID="completed-courses-trophy"

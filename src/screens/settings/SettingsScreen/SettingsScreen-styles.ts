@@ -1,9 +1,11 @@
+import { useMemo } from "react";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { settingsWorkspaceStyles } from "@/src/components/settings/settingsWorkspaceStyles";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 const SETTINGS_TABLET_MAX_WIDTH = 500;
 
-export const useStyles = createThemeStylesHook((colors) => ({
+const useBaseStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     flexDirection: "column-reverse",
@@ -623,14 +625,22 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: "#00000055",
     justifyContent: "center",
     paddingHorizontal: 24,
+    paddingVertical: 24,
   },
   languageModalCard: {
+    width: "100%",
+    maxWidth: 480,
+    maxHeight: "100%",
+    alignSelf: "center",
+    flexGrow: 0,
     borderRadius: 14,
     backgroundColor: colors.secondBackground,
     borderWidth: 1,
     borderColor: colors.border,
-    paddingVertical: 8,
     overflow: "hidden",
+  },
+  languageModalContent: {
+    paddingVertical: 8,
   },
   languageMenuOption: {
     paddingHorizontal: 14,
@@ -737,3 +747,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     elevation: 8,
   },
 }));
+
+
+export function useStyles() {
+  const styles = useBaseStyles();
+  const { isTabletLayout, orientation } = useDeviceLayout();
+  const isPhoneLandscape = !isTabletLayout && orientation === "landscape";
+  return useMemo(() => isPhoneLandscape ? {
+    ...styles,
+    contentWrapperLandscape: { ...styles.contentWrapperLandscape, paddingHorizontal: 12 },
+    sectionCard: { ...styles.sectionCard, padding: 8, paddingTop: 8, marginBottom: 8 },
+    appearanceSectionHeader: { ...styles.appearanceSectionHeader, marginBottom: 12 },
+  } : styles, [styles, isPhoneLandscape]);
+}

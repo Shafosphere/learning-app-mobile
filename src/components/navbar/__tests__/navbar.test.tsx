@@ -1,9 +1,9 @@
 import React from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { act, fireEvent, render, within } from "@testing-library/react-native";
-import { Keyboard, Text, type KeyboardEvent } from "react-native";
+import { act, fireEvent, render, waitFor, within } from "@testing-library/react-native";
+import { Keyboard, StyleSheet, Text, type KeyboardEvent } from "react-native";
 import { usePathname } from "expo-router";
-import { useNavbarCompactLayoutSetter } from "@/src/contexts/NavbarLayoutContext";
+import { NavbarContentWidthContext, useNavbarCompactLayoutSetter } from "@/src/contexts/NavbarLayoutContext";
 
 import Navbar from "@/src/components/navbar/navbar";
 import { useSettings, useThemeSettings } from "@/src/contexts/SettingsContext";
@@ -13,6 +13,11 @@ import { getFlagSource } from "@/src/constants/languageFlags";
 import { Image } from "expo-image";
 import { ReduceMotion, withTiming } from "react-native-reanimated";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
+
+let mockDeviceLayout = { isTabletLayout: false, orientation: "portrait", width: 390 };
+jest.mock("@/src/hooks/useDeviceLayout", () => ({
+  useDeviceLayout: () => mockDeviceLayout,
+}));
 
 const mockDismissTo = jest.fn();
 const mockPush = jest.fn();
@@ -263,7 +268,11 @@ function setupNavbar(overrides: Partial<ReturnType<typeof useSettings>> = {}, in
   let theme = mockBaseSettings as ReturnType<typeof useThemeSettings>;
   let dueReviews = { dueReviewCount: 3, refreshDueReviewCount: mockRefreshDueReviews };
   let quote = { triggerQuote: mockTriggerQuote };
-  function ContentProbe() { mockContentRender(); return <Text>screen content</Text>; }
+  function ContentProbe() {
+    mockContentRender();
+    const width = React.useContext(NavbarContentWidthContext);
+    return <><Text>screen content</Text><Text testID="content-width">{width}</Text></>;
+  }
   const navbar = <Navbar><ContentProbe /></Navbar>;
   const tree = () => (
     <mockSettingsContext.Provider value={settings}>
@@ -317,11 +326,51 @@ function course(id: number, name: string, patch: Partial<CustomCourseRecord> = {
 describe("Navbar review routing", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDeviceLayout = { isTabletLayout: false, orientation: "portrait", width: 390 };
     (usePathname as jest.Mock).mockImplementation(() => React.useContext(mockPathContext));
     (useSettings as jest.Mock).mockImplementation(() => React.useContext(mockSettingsContext));
     (getCustomCourseById as jest.Mock).mockReset().mockResolvedValue(null);
     (resolveCourseIconProps as jest.Mock).mockReset().mockReturnValue({});
     (getFlagSource as jest.Mock).mockReset().mockReturnValue(undefined);
+  });
+
+  it("provides the measured content width after reserving navigation space", () => {
+    mockDeviceLayout = { isTabletLayout: false, orientation: "landscape", width: 740 };
+    const app = setupNavbar();
+    fireEvent(app.screen.getByTestId("navbar-content"), "layout", {
+      nativeEvent: { layout: { width: 584, height: 390, x: 88, y: 0 } },
+    });
+    expect(app.screen.getByTestId("content-width").props.children).toBe(584);
+    fireEvent(app.screen.getByTestId("navbar-content"), "layout", {
+      nativeEvent: { layout: { width: 390, height: 600, x: 0, y: 50 } },
+    });
+    expect(app.screen.getByTestId("content-width").props.children).toBe(390);
+  });
+
+  it("uses side rails on landscape phones and preserves the screen and course action on rotation", async () => {
+    mockDeviceLayout = { isTabletLayout: false, orientation: "landscape", width: 923 };
+    (getCustomCourseById as jest.Mock).mockResolvedValue(course(7, "A long custom course title"));
+    const app = setupNavbar({ activeCustomCourseId: 7 }, "/settings");
+    await waitFor(() => expect(app.screen.getByText("A long custom course title")).toBeTruthy());
+    expect(StyleSheet.flatten(app.screen.getByTestId("navbar-layout").props.style).flexDirection).toBe("row");
+    const courseButton = within(app.screen.getByTestId("coachmark-flashcards-course-button"));
+    expect(courseButton.getByText("A long custom course title").props.numberOfLines).toBe(2);
+    fireEvent.press(courseButton.getByRole("button"));
+    expect(mockOpenCoursePanel).toHaveBeenCalledTimes(1);
+    expect(app.screen.getByText("screen content")).toBeTruthy();
+    mockContentRender.mockClear();
+
+    mockDeviceLayout = { isTabletLayout: false, orientation: "portrait", width: 390 };
+    app.updateTheme({ theme: "dark" });
+    expect(StyleSheet.flatten(app.screen.getByTestId("navbar-layout").props.style).flexDirection).not.toBe("row");
+    expect(app.screen.getByText("screen content")).toBeTruthy();
+    expect(mockContentRender).not.toHaveBeenCalled();
+  });
+
+  it("preserves the existing bars on landscape tablets", () => {
+    mockDeviceLayout = { isTabletLayout: true, orientation: "landscape", width: 1200 };
+    const app = setupNavbar();
+    expect(StyleSheet.flatten(app.screen.getByTestId("navbar-layout").props.style).flexDirection).not.toBe("row");
   });
 
   it("uses the shared panel navigation from the course button and the empty gamepad", () => {

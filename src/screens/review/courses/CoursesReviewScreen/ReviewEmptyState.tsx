@@ -1,3 +1,4 @@
+import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import BoxSkin from "@/src/components/Box/Skin/BoxSkin";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
@@ -21,7 +22,10 @@ export function ReviewEmptyState({ width, height, message }: {
 }) {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { isSmallPhoneLayout, isCompactHeight, isTabletLayout } = useDeviceLayout();
+  const { isSmallPhoneLayout, isCompactHeight, isTabletLayout, orientation } = useDeviceLayout();
+  const isPhoneLandscape = useSideNavbarLayout();
+  const isLandscape = isPhoneLandscape || (isTabletLayout && orientation === "landscape" && width >= 600);
+  const isTabletLandscape = isTabletLayout && isLandscape;
   const [messageHeight, setMessageHeight] = useState(0);
   const [clockLoaded, setClockLoaded] = useState(false);
   const { boxAnimatedStyle, clockAnimatedStyle } = useReviewEmptyEntrance(
@@ -34,12 +38,13 @@ export function ReviewEmptyState({ width, height, message }: {
     isCompact,
     isTablet: isTabletLayout,
     messageHeight,
+    isLandscape,
   });
 
   return (
     <View
       testID="review-empty-state"
-      style={[styles.container, { minHeight: height, paddingTop: layout.paddingTop }]}
+      style={[styles.container, isLandscape && styles.containerLandscape, isTabletLandscape && styles.containerTabletLandscape, { minHeight: height, paddingTop: layout.paddingTop }]}
     >
       <View
         testID="review-empty-illustration"
@@ -47,7 +52,7 @@ export function ReviewEmptyState({ width, height, message }: {
         accessible={false}
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
-        style={{ width: layout.boxWidth, height: layout.boxHeight }}
+        style={{ width: layout.boxWidth, height: layout.boxHeight, marginTop: isLandscape ? -REVIEW_EMPTY_CLOCK_TOP * layout.scale : 0 }}
       >
         <View style={[
           styles.boxFrame,
@@ -84,12 +89,12 @@ export function ReviewEmptyState({ width, height, message }: {
       <View
         testID="review-empty-message"
         onLayout={(event) => setMessageHeight(event.nativeEvent.layout.height)}
-        style={styles.message}
+        style={[styles.message, isLandscape && styles.messageLandscape, isTabletLandscape && styles.messageTabletLandscape]}
       >
-        <Text testID="review-empty-title" style={styles.title}>
+        <Text testID="review-empty-title" style={[styles.title, isTabletLandscape && styles.titleTabletLandscape]}>
           {t(`screens.review.courses.coursesReview.coursesReview.emptyMessages.${message}.title`)}
         </Text>
-        <Text testID="review-empty-description" style={styles.description}>
+        <Text testID="review-empty-description" style={[styles.description, isTabletLandscape && styles.descriptionTabletLandscape]}>
           {t(`screens.review.courses.coursesReview.coursesReview.emptyMessages.${message}.description`)}
         </Text>
       </View>
@@ -102,6 +107,40 @@ const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     paddingHorizontal: 24,
     paddingBottom: 16,
+  },
+  containerLandscape: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 32,
+  },
+  containerTabletLandscape: {
+    width: "100%",
+    maxWidth: 960,
+    alignSelf: "center",
+    gap: 72,
+    paddingHorizontal: 40,
+  },
+  messageTabletLandscape: {
+    gap: 16,
+    maxWidth: 400,
+  },
+  titleTabletLandscape: {
+    fontSize: 32,
+    lineHeight: 40,
+    fontWeight: "900",
+    textAlign: "left",
+    color: colors.headline,
+  },
+  descriptionTabletLandscape: {
+    fontSize: 18,
+    lineHeight: 28,
+    textAlign: "left",
+  },
+  messageLandscape: {
+    flex: 1,
+    minWidth: 0,
+    maxWidth: 360,
+    marginTop: 0,
   },
   boxFrame: {
     position: "absolute",

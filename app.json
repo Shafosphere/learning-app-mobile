@@ -2,7 +2,7 @@
   "expo": {
     "name": "Memicard",
     "slug": "memicard",
-    "version": "1.0.27",
+    "version": "1.0.28",
     "orientation": "default",
     "icon": "./assets/app/icons/generated/ios/AppIcon~ios-marketing.png",
     "scheme": "memicard",
@@ -29,7 +29,7 @@
       ],
       "edgeToEdgeEnabled": true,
       "package": "com.memicard.app",
-      "versionCode": 28
+      "versionCode": 29
     },
     "splash": {
       "image": "./assets/app/splash/splash-icon-v2.png",

@@ -1,3 +1,5 @@
+import { StyleSheet } from "react-native";
+import { CourseCardGrid } from "@/src/components/course/CourseCardGrid";
 import type { ReactNode } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 
@@ -9,6 +11,11 @@ import {
   markAllOnboardingCoachmarksSeen,
   setOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
+
+let mockDeviceLayout = { isTabletLayout: false, orientation: "portrait", width: 390 };
+jest.mock("@/src/hooks/useDeviceLayout", () => ({
+  useDeviceLayout: () => mockDeviceLayout,
+}));
 
 const mockReplace = jest.fn();
 const mockPush = jest.fn();
@@ -188,6 +195,7 @@ function getLatestCoachmarkLayer() {
 describe("CoursePinScreen skip onboarding", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDeviceLayout = { isTabletLayout: false, orientation: "portrait", width: 390 };
     mockCoachmarkActive = true;
     mockPinnedOfficialCourseIds = [];
     mockNativeLanguage = "pl";
@@ -584,6 +592,33 @@ describe("CoursePinScreen skip onboarding", () => {
     expect(advanceByEvent).toHaveBeenCalledTimes(isActive ? 1 : 0);
     expect(mockReplace).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("fits the catalogue between phone side rails with equal actions and keeps pins while resizing", async () => {
+    mockDeviceLayout = { isTabletLayout: false, orientation: "landscape", width: 923 };
+    mockedGetOnboardingCheckpoint.mockResolvedValue("done");
+    mockedUseCoachmarkFlow.mockReturnValue({ ...mockedUseCoachmarkFlow(), isActive: false });
+    mockNativeLanguage = "en";
+    mockOfficialCourseRows = [{ id: 1, name: "Test course", iconId: "book", iconColor: "#000", slug: "french_b1", cardsCount: 50 }];
+    const app = render(<CoursePinScreen />);
+    fireEvent(screen.getByTestId("course-pin-viewport"), "layout", { nativeEvent: { layout: { width: 720, height: 333 } } });
+    await screen.findByText("Test course");
+    await screen.findByText("zrób własny");
+    expect(StyleSheet.flatten(screen.getByTestId("course-pin-content").props.style).width).toBe(688);
+    expect(screen.UNSAFE_getAllByType(CourseCardGrid)[0].props.columns).toBe(2);
+    const create = screen.getByRole("button", { name: "zrób własny" });
+    const activate = screen.getByRole("button", { name: "components.logoMessage.logoMessage.title.aktywujKurs" });
+    expect(StyleSheet.flatten(create.props.style).width).toBe(339);
+    expect(StyleSheet.flatten(activate.props.style).width).toBe(339);
+    fireEvent.press(screen.getByRole("button", { name: /Przypnij zestaw Test course/ }), { stopPropagation: jest.fn() });
+    expect(mockPinOfficialCourse).toHaveBeenCalledWith(1);
+    mockPinnedOfficialCourseIds = [1];
+    app.rerender(<CoursePinScreen />);
+    fireEvent(screen.getByTestId("course-pin-viewport"), "layout", { nativeEvent: { layout: { width: 480, height: 280 } } });
+    expect(screen.UNSAFE_getAllByType(CourseCardGrid)[0].props.columns).toBe(1);
+    expect(screen.getByRole("button", { name: /Odepnij zestaw Test course/ })).toBeTruthy();
+    fireEvent.press(activate);
+    expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel");
   });
 
   it("returns to activation outside onboarding and keeps custom creation as a push", async () => {

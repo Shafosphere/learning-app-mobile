@@ -1,3 +1,4 @@
+import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import { resolveCourseSettingsDefaults } from "@/src/contexts/settings/courseSettingsDefaults";
 import type { CourseSettingsSectionProps } from "@/src/components/courseEditor/SettingsCourse";
 import type { CourseSettingsTabKey } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
@@ -66,7 +67,8 @@ export default function CourseSettingsScreen() {
   const setPopup = usePopup();
   const params = useLocalSearchParams<LocalSearchParams>();
   const { width, isTabletLayout, orientation } = useDeviceLayout();
-  const isLandscapeLayout = isTabletLayout && orientation === "landscape" && width >= 840;
+  const isPhoneLandscape = useSideNavbarLayout();
+  const isLandscapeLayout = isPhoneLandscape || (isTabletLayout && orientation === "landscape" && width >= 840);
   const useCenteredTabletLayout = isTabletLayout;
   const {
     colors,
@@ -743,6 +745,7 @@ export default function CourseSettingsScreen() {
       </View>
       <SettingsTabBar
         vertical={isLandscapeLayout}
+        compact={isPhoneLandscape}
         options={categoryTabs.options}
         value={categoryTabs.activeTab}
         onChange={categoryTabs.onChange}

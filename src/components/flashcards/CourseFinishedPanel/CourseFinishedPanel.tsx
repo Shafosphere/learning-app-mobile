@@ -225,20 +225,22 @@ export function CourseFinishedPanel({
     Boolean(customCourseFlagSource);
   const useVerticalBadgeLayout =
     proportionalLayout.viewportWidth < 360 || fontScale > 1.2;
-  const needsScrollFallback = useVerticalBadgeLayout;
+  const isLandscapeLayout = proportionalLayout.viewportWidth >= 720
+    && proportionalLayout.viewportWidth > proportionalLayout.viewportHeight;
+  const needsScrollFallback = useVerticalBadgeLayout || isLandscapeLayout;
   const enteringFadeRise = (delay: number) => buildFadeRise(delay, reduceMotion);
   const enteringSoftFade = (delay: number) => buildSoftFade(delay, reduceMotion);
   const enteringBadge = (delay: number) => buildBadgeZoom(delay, reduceMotion);
   const enteringLogo = (delay: number) => buildLogoPop(delay, reduceMotion);
   const enteringCard = (delay: number) => buildCardPop(delay, reduceMotion);
-  const scale = proportionalLayout.visualScale;
-  const heightFor = proportionalLayout.heightFor;
-  const titleHeight = heightFor(LAYOUT_PERCENTAGES.title);
-  const courseHeight = heightFor(LAYOUT_PERCENTAGES.course);
-  const illustrationHeight = heightFor(LAYOUT_PERCENTAGES.illustration);
-  const statsHeadingHeight = heightFor(LAYOUT_PERCENTAGES.statsHeading);
-  const statsCardsHeight = heightFor(LAYOUT_PERCENTAGES.statsCards);
-  const actionHeight = Math.max(48, heightFor(LAYOUT_PERCENTAGES.action));
+  const scale = isLandscapeLayout ? 1 : proportionalLayout.visualScale;
+  const heightFor = isLandscapeLayout ? () => 12 : proportionalLayout.heightFor;
+  const titleHeight = isLandscapeLayout ? 70 : heightFor(LAYOUT_PERCENTAGES.title);
+  const courseHeight = isLandscapeLayout ? 48 : heightFor(LAYOUT_PERCENTAGES.course);
+  const illustrationHeight = isLandscapeLayout ? 230 : heightFor(LAYOUT_PERCENTAGES.illustration);
+  const statsHeadingHeight = isLandscapeLayout ? 28 : heightFor(LAYOUT_PERCENTAGES.statsHeading);
+  const statsCardsHeight = isLandscapeLayout ? 160 : heightFor(LAYOUT_PERCENTAGES.statsCards);
+  const actionHeight = isLandscapeLayout ? 56 : Math.max(48, heightFor(LAYOUT_PERCENTAGES.action));
   const scaled = (value: number) => value * scale;
   const scaledFont = (value: unknown, fallback: number) =>
     (typeof value === "number" ? value : fallback) * scale;
@@ -296,7 +298,7 @@ export function CourseFinishedPanel({
   return (
     <ScrollView
       style={styles.scroll}
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, isLandscapeLayout && styles.containerLandscape]}
       showsVerticalScrollIndicator={false}
       testID="course-finished-panel"
       onLayout={proportionalLayout.onLayout}
@@ -304,287 +306,293 @@ export function CourseFinishedPanel({
       <Confetti generateConfetti={showConfetti} />
       <View
         testID="course-finished-top-inset"
-        style={{ height: proportionalLayout.verticalInset }}
+        style={{ height: isLandscapeLayout ? 0 : proportionalLayout.verticalInset }}
       />
-      <View
-        testID="course-finished-title-region"
-        style={[styles.titleBlock, regionExtent(titleHeight)]}
-      >
-        <Animated.Text
-          testID="course-finished-heading"
-          style={[
-            styles.heading,
-            { fontSize: scaledFont(styles.heading.fontSize, 34) },
-          ]}
-          entering={enteringFadeRise(HEADING_DELAY)}
-          allowFontScaling
-          numberOfLines={2}
-          adjustsFontSizeToFit
-          minimumFontScale={0.76}
-          maxFontSizeMultiplier={1.25}
-        >
-          {t(
-            "components.flashcards.courseFinishedPanel.courseFinishedPanel.heading"
-          )}
-        </Animated.Text>
-        <Animated.Text
-          style={[
-            styles.subheading,
-            { fontSize: scaledFont(styles.subheading.fontSize, 16) },
-          ]}
-          entering={enteringSoftFade(SUBHEADING_DELAY)}
-          allowFontScaling
-          numberOfLines={2}
-          adjustsFontSizeToFit
-          minimumFontScale={0.85}
-          maxFontSizeMultiplier={1.2}
-        >
-          {t(
-            "components.flashcards.courseFinishedPanel.courseFinishedPanel.subheading"
-          )}
-        </Animated.Text>
-      </View>
-
-      <Animated.View
-        testID="course-finished-course-region"
-        style={[
-          styles.courseBadge,
-          {
-            ...regionExtent(courseHeight),
-            marginTop: heightFor(LAYOUT_PERCENTAGES.titleGap),
-            gap: scaled(12),
-          },
-          useVerticalBadgeLayout && styles.courseBadgeStacked,
-        ]}
-        entering={enteringBadge(BADGE_DELAY)}
-      >
-        {hasCustomCourseGraphic ? (
+      <View style={[styles.workspace, isLandscapeLayout && styles.workspaceLandscape]}>
+        <View style={[styles.hero, isLandscapeLayout && styles.heroLandscape]}>
           <View
-            style={[
-              styles.customCourseIconWrapper,
-              { width: courseGraphicSize, height: courseGraphicSize },
-            ]}
+            testID="course-finished-title-region"
+            style={[styles.titleBlock, regionExtent(titleHeight)]}
           >
-            {courseIconProps?.mainImageSource ? (
-              <Image
-                source={courseIconProps.mainImageSource}
+            <Animated.Text
+              testID="course-finished-heading"
+              style={[
+                styles.heading,
+                { fontSize: scaledFont(styles.heading.fontSize, 34) },
+              ]}
+              entering={enteringFadeRise(HEADING_DELAY)}
+              allowFontScaling
+              numberOfLines={2}
+              adjustsFontSizeToFit
+              minimumFontScale={0.76}
+              maxFontSizeMultiplier={1.25}
+            >
+              {t(
+                "components.flashcards.courseFinishedPanel.courseFinishedPanel.heading"
+              )}
+            </Animated.Text>
+            <Animated.Text
+              style={[
+                styles.subheading,
+                { fontSize: scaledFont(styles.subheading.fontSize, 16) },
+              ]}
+              entering={enteringSoftFade(SUBHEADING_DELAY)}
+              allowFontScaling
+              numberOfLines={2}
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}
+              maxFontSizeMultiplier={1.2}
+            >
+              {t(
+                "components.flashcards.courseFinishedPanel.courseFinishedPanel.subheading"
+              )}
+            </Animated.Text>
+          </View>
+
+          <Animated.View
+            testID="course-finished-course-region"
+            style={[
+              styles.courseBadge,
+              {
+                ...regionExtent(courseHeight),
+                marginTop: heightFor(LAYOUT_PERCENTAGES.titleGap),
+                gap: scaled(12),
+              },
+              useVerticalBadgeLayout && styles.courseBadgeStacked,
+            ]}
+            entering={enteringBadge(BADGE_DELAY)}
+          >
+            {hasCustomCourseGraphic ? (
+              <View
                 style={[
-                  styles.customCourseMainImage,
+                  styles.customCourseIconWrapper,
                   { width: courseGraphicSize, height: courseGraphicSize },
                 ]}
-                contentFit="contain"
-              />
-            ) : courseIconProps?.icon ? (
-              <courseIconProps.icon.Component
-                name={courseIconProps.icon.name as never}
-                size={courseGraphicSize * 0.8}
-                color={courseIconProps.icon.color}
-              />
-            ) : (
-              <Ionicons
-                name="person-circle-outline"
-                size={courseGraphicSize * 0.8}
-                color={styles.courseName.color}
-              />
-            )}
-            {customCourseFlagSource ? (
+              >
+                {courseIconProps?.mainImageSource ? (
+                  <Image
+                    source={courseIconProps.mainImageSource}
+                    style={[
+                      styles.customCourseMainImage,
+                      { width: courseGraphicSize, height: courseGraphicSize },
+                    ]}
+                    contentFit="contain"
+                  />
+                ) : courseIconProps?.icon ? (
+                  <courseIconProps.icon.Component
+                    name={courseIconProps.icon.name as never}
+                    size={courseGraphicSize * 0.8}
+                    color={courseIconProps.icon.color}
+                  />
+                ) : (
+                  <Ionicons
+                    name="person-circle-outline"
+                    size={courseGraphicSize * 0.8}
+                    color={styles.courseName.color}
+                  />
+                )}
+                {customCourseFlagSource ? (
+                  <Image
+                    source={customCourseFlagSource}
+                    style={[
+                      styles.customCourseFlag,
+                      {
+                        width: customFlagWidth,
+                        height: customFlagHeight,
+                        right: -scaled(5),
+                        borderRadius: scaled(4),
+                      },
+                    ]}
+                  />
+                ) : null}
+              </View>
+            ) : courseFlagSource ? (
               <Image
-                source={customCourseFlagSource}
+                source={courseFlagSource}
                 style={[
-                  styles.customCourseFlag,
+                  styles.courseFlag,
                   {
-                    width: customFlagWidth,
-                    height: customFlagHeight,
-                    right: -scaled(5),
-                    borderRadius: scaled(4),
+                    width: courseFlagWidth,
+                    height: courseFlagHeight,
+                    borderRadius: scaled(8),
                   },
                 ]}
+                contentFit="cover"
               />
             ) : null}
-          </View>
-        ) : courseFlagSource ? (
-          <Image
-            source={courseFlagSource}
+            <Text
+              style={[
+                styles.courseName,
+                { fontSize: scaledFont(styles.courseName.fontSize, 22) },
+              ]}
+              allowFontScaling
+              numberOfLines={useVerticalBadgeLayout ? 2 : 1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.72}
+              maxFontSizeMultiplier={1.2}
+            >
+              {courseName}
+            </Text>
+          </Animated.View>
+
+          <Animated.View
+            testID="course-finished-illustration-region"
             style={[
-              styles.courseFlag,
+              styles.logoWrap,
               {
-                width: courseFlagWidth,
-                height: courseFlagHeight,
-                borderRadius: scaled(8),
+                ...regionExtent(illustrationHeight),
+                marginTop: heightFor(LAYOUT_PERCENTAGES.courseGap),
               },
             ]}
-            contentFit="cover"
-          />
-        ) : null}
-        <Text
-          style={[
-            styles.courseName,
-            { fontSize: scaledFont(styles.courseName.fontSize, 22) },
-          ]}
-          allowFontScaling
-          numberOfLines={useVerticalBadgeLayout ? 2 : 1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.72}
-          maxFontSizeMultiplier={1.2}
-        >
-          {courseName}
-        </Text>
-      </Animated.View>
+            entering={enteringLogo(LOGO_DELAY)}
+          >
+            <View
+              style={[
+                styles.boxSkinWrap,
+                { transform: [{ scale: isLandscapeLayout ? 1.5 : scaled(1.72) }] },
+              ]}
+            >
+              <Image
+                source={BOX_SHADOW_SOURCE}
+                style={styles.boxShadow}
+                contentFit="contain"
+              />
+              <BoxSkin wordCount={0} face={boxFace} showHat />
+            </View>
+          </Animated.View>
 
-      <Animated.View
-        testID="course-finished-illustration-region"
-        style={[
-          styles.logoWrap,
-          {
-            ...regionExtent(illustrationHeight),
-            marginTop: heightFor(LAYOUT_PERCENTAGES.courseGap),
-          },
-        ]}
-        entering={enteringLogo(LOGO_DELAY)}
-      >
-        <View
-          style={[
-            styles.boxSkinWrap,
-            { transform: [{ scale: scaled(1.72) }] },
-          ]}
-        >
-          <Image
-            source={BOX_SHADOW_SOURCE}
-            style={styles.boxShadow}
-            contentFit="contain"
-          />
-          <BoxSkin wordCount={0} face={boxFace} showHat />
         </View>
-      </Animated.View>
+        <View style={[styles.results, isLandscapeLayout && styles.resultsLandscape]}>
+          <Animated.Text
+            testID="course-finished-stats-heading-region"
+            style={[
+              styles.statsHeading,
+              {
+                ...regionExtent(statsHeadingHeight),
+                marginTop: heightFor(LAYOUT_PERCENTAGES.illustrationGap),
+                fontSize: scaledFont(styles.statsHeading.fontSize, 18),
+              },
+            ]}
+            entering={enteringSoftFade(STATS_HEADING_DELAY)}
+            allowFontScaling
+            numberOfLines={2}
+            adjustsFontSizeToFit
+            minimumFontScale={0.85}
+            maxFontSizeMultiplier={1.2}
+          >
+            {t(
+              "components.flashcards.courseFinishedPanel.courseFinishedPanel.statsHeading"
+            )}
+          </Animated.Text>
 
-      <Animated.Text
-        testID="course-finished-stats-heading-region"
-        style={[
-          styles.statsHeading,
-          {
-            ...regionExtent(statsHeadingHeight),
-            marginTop: heightFor(LAYOUT_PERCENTAGES.illustrationGap),
-            fontSize: scaledFont(styles.statsHeading.fontSize, 18),
-          },
-        ]}
-        entering={enteringSoftFade(STATS_HEADING_DELAY)}
-        allowFontScaling
-        numberOfLines={2}
-        adjustsFontSizeToFit
-        minimumFontScale={0.85}
-        maxFontSizeMultiplier={1.2}
-      >
-        {t(
-          "components.flashcards.courseFinishedPanel.courseFinishedPanel.statsHeading"
-        )}
-      </Animated.Text>
-
-      <View
-        testID="course-finished-stats-region"
-        style={[
-          styles.statsRow,
-          {
-            ...regionExtent(statsCardsHeight),
-            marginTop: heightFor(LAYOUT_PERCENTAGES.statsHeadingGap),
-            gap: scaled(10),
-          },
-        ]}
-      >
-        <StatsCardAnimated
-          cardDelay={STATS_CARD_DELAYS[0]}
-          contentDelay={STATS_CONTENT_DELAYS[0]}
-          enteringCard={enteringCard}
-          enteringContent={enteringFadeRise}
-          icon={
-            <Octicons
-              name="check-circle-fill"
-              size={statsIconWrapSize * (30 / 42)}
-              color="#00caacff"
+          <View
+            testID="course-finished-stats-region"
+            style={[
+              styles.statsRow,
+              {
+                ...regionExtent(statsCardsHeight),
+                marginTop: heightFor(LAYOUT_PERCENTAGES.statsHeadingGap),
+                gap: scaled(10),
+              },
+            ]}
+          >
+            <StatsCardAnimated
+              cardDelay={STATS_CARD_DELAYS[0]}
+              contentDelay={STATS_CONTENT_DELAYS[0]}
+              enteringCard={enteringCard}
+              enteringContent={enteringFadeRise}
+              icon={
+                <Octicons
+                  name="check-circle-fill"
+                  size={statsIconWrapSize * (30 / 42)}
+                  color="#00caacff"
+                />
+              }
+              value={cardsCountLabel}
+              label={t(
+                "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.fiszek"
+              )}
+              styles={styles}
+              scale={scale}
+              iconWrapSize={statsIconWrapSize}
             />
-          }
-          value={cardsCountLabel}
-          label={t(
-            "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.fiszek"
-          )}
-          styles={styles}
-          scale={scale}
-          iconWrapSize={statsIconWrapSize}
-        />
 
-        <StatsCardAnimated
-          cardDelay={STATS_CARD_DELAYS[1]}
-          contentDelay={STATS_CONTENT_DELAYS[1]}
-          enteringCard={enteringCard}
-          enteringContent={enteringFadeRise}
-          icon={
-            <AntDesign
-              name="star"
-              size={statsIconWrapSize * (34 / 42)}
-              color="#fde24f"
+            <StatsCardAnimated
+              cardDelay={STATS_CARD_DELAYS[1]}
+              contentDelay={STATS_CONTENT_DELAYS[1]}
+              enteringCard={enteringCard}
+              enteringContent={enteringFadeRise}
+              icon={
+                <AntDesign
+                  name="star"
+                  size={statsIconWrapSize * (34 / 42)}
+                  color="#fde24f"
+                />
+              }
+              value={accuracyLabel}
+              label={t(
+                "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.skutecznosc"
+              )}
+              styles={styles}
+              scale={scale}
+              iconWrapSize={statsIconWrapSize}
             />
-          }
-          value={accuracyLabel}
-          label={t(
-            "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.skutecznosc"
-          )}
-          styles={styles}
-          scale={scale}
-          iconWrapSize={statsIconWrapSize}
-        />
 
-        <StatsCardAnimated
-          cardDelay={STATS_CARD_DELAYS[2]}
-          contentDelay={STATS_CONTENT_DELAYS[2]}
-          enteringCard={enteringCard}
-          enteringContent={enteringFadeRise}
-          icon={
-            <MaterialCommunityIcons
-              name="clock-time-eight"
-              size={statsIconWrapSize * (34 / 42)}
-              color="#00caacff"
+            <StatsCardAnimated
+              cardDelay={STATS_CARD_DELAYS[2]}
+              contentDelay={STATS_CONTENT_DELAYS[2]}
+              enteringCard={enteringCard}
+              enteringContent={enteringFadeRise}
+              icon={
+                <MaterialCommunityIcons
+                  name="clock-time-eight"
+                  size={statsIconWrapSize * (34 / 42)}
+                  color="#00caacff"
+                />
+              }
+              value={learningTimeLabel}
+              label={t(
+                "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.czasNauki"
+              )}
+              styles={styles}
+              scale={scale}
+              iconWrapSize={statsIconWrapSize}
             />
-          }
-          value={learningTimeLabel}
-          label={t(
-            "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.czasNauki"
-          )}
-          styles={styles}
-          scale={scale}
-          iconWrapSize={statsIconWrapSize}
-        />
+          </View>
+
+          <Animated.View
+            testID="course-finished-action-region"
+            style={[
+              styles.actions,
+              {
+                ...regionExtent(actionHeight),
+                marginTop: heightFor(LAYOUT_PERCENTAGES.statsCardsGap),
+              },
+            ]}
+            entering={enteringFadeRise(ACTIONS_DELAY)}
+          >
+            <MyButton
+              text={t(
+                "components.flashcards.courseFinishedPanel.courseFinishedPanel.text.wrocDoKursow"
+              )}
+              width="100%"
+              color="my_green"
+              onPress={onBackToCourses}
+              style={{
+                height: actionHeight,
+                minHeight: 48,
+                borderRadius: scaled(11),
+              }}
+              textStyle={{
+                fontSize: scaledFont(16, 16),
+              }}
+            />
+          </Animated.View>
+        </View>
       </View>
-
-      <Animated.View
-        testID="course-finished-action-region"
-        style={[
-          styles.actions,
-          {
-            ...regionExtent(actionHeight),
-            marginTop: heightFor(LAYOUT_PERCENTAGES.statsCardsGap),
-          },
-        ]}
-        entering={enteringFadeRise(ACTIONS_DELAY)}
-      >
-        <MyButton
-          text={t(
-            "components.flashcards.courseFinishedPanel.courseFinishedPanel.text.wrocDoKursow"
-          )}
-          width="100%"
-          color="my_green"
-          onPress={onBackToCourses}
-          style={{
-            height: actionHeight,
-            minHeight: 48,
-            borderRadius: scaled(11),
-          }}
-          textStyle={{
-            fontSize: scaledFont(16, 16),
-          }}
-        />
-      </Animated.View>
       <View
         testID="course-finished-bottom-inset"
-        style={{ height: proportionalLayout.verticalInset }}
+        style={{ height: isLandscapeLayout ? 0 : proportionalLayout.verticalInset }}
       />
     </ScrollView>
   );

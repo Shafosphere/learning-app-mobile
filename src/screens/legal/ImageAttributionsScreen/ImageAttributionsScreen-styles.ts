@@ -1,8 +1,9 @@
+import { SCREEN_ACTION_BOTTOM_PADDING } from "@/src/theme/layout";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 export const useStyles = createThemeStylesHook((colors) => ({
   container: { flex: 1, backgroundColor: colors.background },
-  scrollView: { width: "100%", alignSelf: "center" as const, flex: 1 },
+  scrollView: { width: "100%", maxWidth: 1000, alignSelf: "center" as const, flex: 1 },
   content: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 28, gap: 20 },
   pageHeader: { gap: 7 },
   title: { fontSize: 28, lineHeight: 34, fontWeight: "900", color: colors.headline },
@@ -32,6 +33,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   detailValue: { fontSize: 13, lineHeight: 19, color: colors.paragraph },
   emptyContent: { paddingTop: 24, gap: 8 },
   emptyTitle: { fontSize: 24, lineHeight: 30, fontWeight: "900", color: colors.headline },
-  footer: { width: "100%", paddingBottom: 24, backgroundColor: colors.background, alignItems: "center" },
-  footerRow: { width: "75%", borderTopWidth: 3, borderTopColor: colors.border, paddingTop: 15, flexDirection: "row", justifyContent: "flex-end" },
+  footer: { width: "100%", paddingBottom: SCREEN_ACTION_BOTTOM_PADDING, backgroundColor: colors.background, alignItems: "center" },
+  footerRow: { width: "75%", maxWidth: 968, borderTopWidth: 3, borderTopColor: colors.border, paddingTop: 15, flexDirection: "row", justifyContent: "flex-end" },
 }));

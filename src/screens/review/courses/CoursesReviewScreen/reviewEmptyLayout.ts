@@ -11,6 +11,7 @@ type ReviewEmptyLayoutOptions = {
   isCompact: boolean;
   isTablet: boolean;
   messageHeight: number;
+  isLandscape?: boolean;
 };
 
 export function getReviewEmptyLayout({
@@ -19,7 +20,17 @@ export function getReviewEmptyLayout({
   isCompact,
   isTablet,
   messageHeight,
+  isLandscape = false,
 }: ReviewEmptyLayoutOptions) {
+  if (isLandscape) {
+    const boxWidth = Math.max(0, Math.min(
+      isTablet ? 180 : 145,
+      (width - 72) * 0.35,
+      Math.max(0, height - 2 * EDGE_INSET) * BOX_WIDTH / (BOX_HEIGHT + CLOCK_OVERFLOW),
+    ));
+    const scale = boxWidth / BOX_WIDTH;
+    return { boxWidth, boxHeight: BOX_HEIGHT * scale, scale, paddingTop: EDGE_INSET };
+  }
   const targetWidth = (isTablet ? 260 : isCompact ? 170 : 200) * 0.85;
   const boxWidth = Math.max(0, Math.min(
     targetWidth,

@@ -1,3 +1,4 @@
+import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import { LANGUAGE_COURSE_GROUPS, type LanguageCourseGroupId } from "@/src/constants/languageCourseGroups";
 import MyButton from "@/src/components/button/button";
 import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
@@ -109,8 +110,11 @@ const KNOWLEDGE_ACCORDION_GROUPS: {
 export default function CoursePinScreen() {
   const styles = useStyles();
   const { width, isTabletLayout, orientation } = useDeviceLayout();
-  const isLandscapeGrid = isTabletLayout && orientation === "landscape" && width >= 840;
-  const contentWidth = Math.min(1100, Math.max(0, width - 96));
+  const isPhoneLandscape = useSideNavbarLayout();
+  const isLandscapeLayout = isPhoneLandscape || (isTabletLayout && orientation === "landscape" && width >= 840);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const contentWidth = Math.min(1100, Math.max(0, viewportWidth - (isPhoneLandscape ? 32 : 96)));
+  const isLandscapeGrid = isLandscapeLayout && contentWidth >= 600;
   const columns = isLandscapeGrid ? 2 : 1;
   const { t } = useTranslation();
   const router = useRouter();
@@ -617,7 +621,9 @@ export default function CoursePinScreen() {
   return (
     <View
       style={styles.container}
-      onLayout={() => {
+      testID="course-pin-viewport"
+      onLayout={(event) => {
+        setViewportWidth(event.nativeEvent.layout.width);
         if (!coachmarkTargetsReady) {
           setCoachmarkTargetsReady(true);
         }
@@ -632,50 +638,54 @@ export default function CoursePinScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.scrollArea}
-        contentContainerStyle={[styles.scrollContent, isLandscapeGrid && styles.scrollContentLandscape]}
+        testID="course-pin-scroll"
+        contentContainerStyle={[styles.scrollContent, isLandscapeLayout && styles.scrollContentLandscape]}
         keyboardShouldPersistTaps="handled"
         scrollEnabled={!coachmark.currentStep?.scrollLocked}
       >
-        <View style={[styles.minicontainer, isLandscapeGrid && { width: contentWidth }]}>
-          <Text style={[styles.title, isLandscapeGrid && styles.titleLandscape]}>
-            {t("screens.courses.pincourse.coursePin.coursePin.textChild.czegoSieUczymy")}
-          </Text>
-          <View style={styles.viewModeTabsSection}>
-            <CoachmarkAnchor
-              id="course-pin-tab-switcher"
-              shape="rect"
-              radius={18}
-              padding={2}
-              style={styles.viewModeTabsAnchor}
-            >
-              <View
-                ref={tabSwitcherRef}
+        <View testID="course-pin-content" style={[styles.minicontainer, isLandscapeLayout && { width: contentWidth }]}>
+          <View style={styles.header}>
+            <Text style={[styles.title, isLandscapeLayout && styles.titleLandscape, isPhoneLandscape && styles.titlePhoneLandscape]}>
+              {t("screens.courses.pincourse.coursePin.coursePin.textChild.czegoSieUczymy")}
+            </Text>
+            <View style={styles.viewModeTabsSection}>
+              <CoachmarkAnchor
+                id="course-pin-tab-switcher"
+                shape="rect"
+                radius={18}
+                padding={2}
                 style={styles.viewModeTabsAnchor}
               >
-                <SegmentedTabs
-                  options={[
-                    {
-                      key: "languages",
-                      label: t(
-                        "screens.courses.pincourse.coursePin.coursePin.textChild.jezyki"
-                      ),
-                    },
-                    {
-                      key: "general",
-                      label: t(
-                        "screens.courses.pincourse.coursePin.coursePin.textChild.wiedza"
-                      ),
-                    },
-                  ]}
-                  value={viewMode}
-                  onChange={setViewMode}
-                  accessibilityLabel={t(
-                    "screens.courses.pincourse.coursePin.coursePin.accessibilityLabel.filtrTypuKursow"
-                  )}
-                  containerStyle={styles.viewModeTabs}
-                />
-              </View>
-            </CoachmarkAnchor>
+                <View
+                  ref={tabSwitcherRef}
+                  style={styles.viewModeTabsAnchor}
+                >
+                  <SegmentedTabs
+                    options={[
+                      {
+                        key: "languages",
+                        label: t(
+                          "screens.courses.pincourse.coursePin.coursePin.textChild.jezyki"
+                        ),
+                      },
+                      {
+                        key: "general",
+                        label: t(
+                          "screens.courses.pincourse.coursePin.coursePin.textChild.wiedza"
+                        ),
+                      },
+                    ]}
+                    value={viewMode}
+                    onChange={setViewMode}
+                    accessibilityLabel={t(
+                      "screens.courses.pincourse.coursePin.coursePin.accessibilityLabel.filtrTypuKursow"
+                    )}
+                    containerStyle={styles.viewModeTabs}
+                  />
+                </View>
+              </CoachmarkAnchor>
+            </View>
+
           </View>
 
           {viewMode === "languages" ? (
@@ -699,7 +709,7 @@ export default function CoursePinScreen() {
 
                   return (
                     <View key={key} style={styles.groupSection}>
-                      <View style={styles.groupHeader}>
+                      <View style={[styles.groupHeader, isPhoneLandscape && styles.groupHeaderPhoneLandscape]}>
                         <View style={styles.groupHeaderLine} />
                         <View style={styles.groupHeaderBadge}>
                           <View style={styles.groupHeaderLanguage}>
@@ -787,7 +797,7 @@ export default function CoursePinScreen() {
                           <View key={`group-${group.key}`} style={styles.groupSection}>
                             {showRegular ? (
                               <>
-                                <Text style={styles.subTitle}>
+                                <Text style={[styles.subTitle, isPhoneLandscape && styles.subTitlePhoneLandscape]}>
                                   {t(
                                     "repeats.labels.courses"
                                   )}
@@ -801,7 +811,7 @@ export default function CoursePinScreen() {
                             {showMini ? (
                               <>
                                 {showRegular ? (
-                                  <Text style={styles.subTitle}>
+                                  <Text style={[styles.subTitle, isPhoneLandscape && styles.subTitlePhoneLandscape]}>
                                     {t(
                                       "screens.courses.pincourse.coursePin.coursePin.textChild.miniKursy"
                                     )}
@@ -853,8 +863,8 @@ export default function CoursePinScreen() {
       </ScrollView>
 
       {introActive ? (
-        <View style={styles.buttonscontainer}>
-          <View style={[styles.buttonsRow, isLandscapeGrid && { width: contentWidth }, isLandscapeGrid && styles.buttonsRowLandscape]}>
+        <View style={[styles.buttonscontainer, isPhoneLandscape && styles.buttonscontainerPhoneLandscape]}>
+          <View style={[styles.buttonsRow, isLandscapeLayout && { width: contentWidth }, isLandscapeLayout && styles.buttonsRowLandscape]}>
             <CoachmarkAnchor
               id="course-pin-next-button"
               shape="rect"
@@ -901,24 +911,24 @@ export default function CoursePinScreen() {
           />
         </View>
       ) : (
-        <View style={styles.buttonscontainer}>
-          <View style={[styles.buttonsRow, isLandscapeGrid && { width: contentWidth }, isLandscapeGrid && styles.buttonsRowLandscape]}>
+        <View style={[styles.buttonscontainer, isPhoneLandscape && styles.buttonscontainerPhoneLandscape]}>
+          <View style={[styles.buttonsRow, isLandscapeLayout && { width: contentWidth }, isLandscapeLayout && styles.buttonsRowLandscape]}>
             <MyButton
               text={t(
                 "screens.courses.pincourse.coursePin.coursePin.text.zrobWlasny"
-              ).replace(/\s+/, isLandscapeGrid ? " " : "\n")}
+              ).replace(/\s+/, isLandscapeLayout ? " " : "\n")}
               color="my_yellow"
               onPress={() => router.push("/custom_course")}
               disabled={false}
-              autoWidth={!isLandscapeGrid}
-              style={isLandscapeGrid ? styles.landscapeAction : undefined}
+              autoWidth={!isLandscapeLayout}
+              style={isLandscapeLayout ? [styles.landscapeAction, { width: (contentWidth - 10) / 2 }] : undefined}
             />
             <MyButton
               text={t("components.logoMessage.logoMessage.title.aktywujKurs")}
               color="my_green"
               onPress={() => router.dismissTo("/coursepanel")}
               disabled={false}
-              style={isLandscapeGrid ? styles.landscapeAction : { flex: 1 }}
+              style={isLandscapeLayout ? [styles.landscapeAction, { width: (contentWidth - 10) / 2 }] : { flex: 1 }}
             />
           </View>
         </View>

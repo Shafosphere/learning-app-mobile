@@ -12,12 +12,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   Image,
   Pressable,
+  ScrollView,
   Text,
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./LanguageIntroScreen-styles";
 import LeitnerIntroScreen from "./LeitnerIntroScreen";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
 type LanguageOption = {
   key: UiLanguage | NativeLanguage;
@@ -44,6 +46,8 @@ const languageOptions: LanguageOption[] = [
 
 export default function LanguageIntroScreen() {
   const styles = useStyles();
+  const { isTabletLayout, orientation } = useDeviceLayout();
+  const isTabletLandscape = isTabletLayout && orientation === "landscape";
   const { t } = useTranslation();
   const {
     uiLanguage,
@@ -147,14 +151,11 @@ export default function LanguageIntroScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.card}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, isTabletLandscape && styles.contentLandscape]}>
+        <View style={[styles.card, isTabletLandscape && styles.cardLandscape]}>
           <Text
             style={styles.title}
             allowFontScaling
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.72}
           >
             {tr(
               mode === "app"
@@ -219,7 +220,7 @@ export default function LanguageIntroScreen() {
             })}
           </View>
 
-          <View style={styles.confirmWrap}>
+          <View style={[styles.confirmWrap, isTabletLandscape && styles.confirmWrapLandscape]}>
             <MyButton
               text={tr("app.actions.next", {
                 defaultValue: fallback.confirm,
@@ -241,7 +242,7 @@ export default function LanguageIntroScreen() {
             </Text>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }

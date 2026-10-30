@@ -1,7 +1,7 @@
 import type { ThemeColorKey } from "@/src/theme/theme";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { ReactNode } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "./NudgeModal-styles";
@@ -34,11 +34,14 @@ export function NudgeModal({
   onClose,
   secondaryLabel,
   onSecondaryPress,
-  scrollableContent = false,
+  scrollableContent = true,
   closeLabel,
 }: NudgeModalProps) {
   const styles = useStyles();
   const { colors } = useSettings();
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const shouldScroll = scrollableContent || height < 480;
   const hasSecondaryAction = secondaryLabel != null && onSecondaryPress != null;
   const content = (
     <>
@@ -56,7 +59,7 @@ export function NudgeModal({
       onRequestClose={onClose}
     >
       <View style={styles.backdrop}>
-        <View style={[styles.card, scrollableContent && styles.scrollableCard]}>
+        <View style={[styles.card, isLandscape && styles.cardLandscape, styles.scrollableCard]}>
           <Pressable
             onPress={onClose}
             style={styles.closeButton}
@@ -67,7 +70,7 @@ export function NudgeModal({
             <Ionicons name="close" size={18} color={colors.lightbg} />
           </Pressable>
 
-          {scrollableContent ? (
+          {shouldScroll ? (
             <ScrollView style={styles.scrollableBody} keyboardShouldPersistTaps="handled">
               {content}
             </ScrollView>
@@ -77,7 +80,7 @@ export function NudgeModal({
             style={[
               styles.actions,
               hasSecondaryAction && styles.actionsWithSecondary,
-              scrollableContent && styles.scrollableActions,
+              shouldScroll && styles.scrollableActions,
             ]}
           >
             {hasSecondaryAction ? (
@@ -94,8 +97,8 @@ export function NudgeModal({
               color={confirmColor}
               onPress={onConfirm}
               disabled={confirmDisabled}
-              width={scrollableContent ? "100%" : 164}
-              textStyle={scrollableContent ? { color: colors.font } : undefined}
+              width={hasSecondaryAction ? 164 : "100%"}
+              textStyle={shouldScroll ? { color: colors.font } : undefined}
             />
           </View>
         </View>

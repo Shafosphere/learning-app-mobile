@@ -21,17 +21,14 @@ const EDIT_FLASHCARD_TABLET_MAX_WIDTH = 500;
 
 const useStyles = createThemeStylesHook((colors) => ({
   container: { flex: 1, backgroundColor: colors.background },
-  scrollView: { width: "100%", alignSelf: "center" as const },
+  scrollView: { flex: 1, width: "100%", alignSelf: "center" as const },
   scrollViewTablet: { maxWidth: EDIT_FLASHCARD_TABLET_MAX_WIDTH },
-  content: { padding: 16, paddingBottom: 110 },
+  scrollViewLandscape: { maxWidth: 1000 },
+  content: { padding: 16, paddingBottom: 24 },
   title: { color: colors.headline, fontSize: 24, fontWeight: "800", marginBottom: 12 },
   error: { color: colors.my_red, fontSize: 16, textAlign: "center" },
   loading: { flex: 1, alignItems: "center", justifyContent: "center" },
   actions: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
     padding: 14,
     backgroundColor: colors.background,
     borderTopWidth: 1,
@@ -56,7 +53,9 @@ export default function EditFlashcardScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const styles = useStyles();
-  const { isTabletLayout } = useDeviceLayout();
+  const { isTabletLayout, orientation } = useDeviceLayout({ sizeSource: "screen" });
+  const isTabletLandscape = isTabletLayout && orientation === "landscape";
+  const [editorWidth, setEditorWidth] = useState(0);
   const params = useLocalSearchParams<{ courseId?: string | string[]; flashcardId?: string | string[] }>();
   const courseId = toPositiveNumber(params.courseId);
   const flashcardId = toPositiveNumber(params.flashcardId);
@@ -136,7 +135,7 @@ export default function EditFlashcardScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
-        style={[styles.scrollView, isTabletLayout && styles.scrollViewTablet]}
+        style={[styles.scrollView, isTabletLayout && styles.scrollViewTablet, isTabletLandscape && styles.scrollViewLandscape]}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
@@ -144,24 +143,27 @@ export default function EditFlashcardScreen() {
         {loadError ? <Text style={styles.error}>{loadError}</Text> : (
           <>
             {error ? <Text style={styles.error}>{error}</Text> : null}
-          <ManualCardsEditor
-            manualCards={manualCards}
-            styles={{} as ManualCardsEditorStyles}
-            onCardFrontChange={handleManualCardFrontChange}
-            onCardAnswerChange={handleManualCardAnswerChange}
-            onAddAnswer={handleAddAnswer}
-            onRemoveAnswer={handleRemoveAnswer}
-            onToggleFlipped={handleToggleFlipped}
-            onCardImageChange={handleManualCardImageChange}
-            onCardExplanationChange={handleManualCardExplanationChange}
-            hideRemoveCardAction
-            showDefaultBottomAddButton={false}
-          />
+            <View onLayout={({ nativeEvent }) => setEditorWidth(nativeEvent.layout.width)}>
+              <ManualCardsEditor
+                twoColumn={isTabletLandscape && editorWidth >= 600}
+                manualCards={manualCards}
+                styles={{} as ManualCardsEditorStyles}
+                onCardFrontChange={handleManualCardFrontChange}
+                onCardAnswerChange={handleManualCardAnswerChange}
+                onAddAnswer={handleAddAnswer}
+                onRemoveAnswer={handleRemoveAnswer}
+                onToggleFlipped={handleToggleFlipped}
+                onCardImageChange={handleManualCardImageChange}
+                onCardExplanationChange={handleManualCardExplanationChange}
+                hideRemoveCardAction
+                showDefaultBottomAddButton={false}
+              />
+            </View>
           </>
         )}
       </ScrollView>
       <View style={styles.actions}>
-        <View style={[styles.actionsInner, isTabletLayout && styles.actionsInnerTablet]}>
+        <View style={[styles.actionsInner, isTabletLayout && styles.actionsInnerTablet, isTabletLandscape && styles.scrollViewLandscape]}>
           <MyButton text={t("app.actions.cancel")} color="my_yellow" onPress={() => router.back()} />
           <MyButton text={saving ? t("flashcards.cardEditor.saving") : t("flashcards.cardEditor.save")} disabled={Boolean(loadError) || saving} onPress={() => void save()} />
         </View>

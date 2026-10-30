@@ -1,3 +1,4 @@
+import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import type { CourseSettingsSectionProps } from "@/src/components/courseEditor/SettingsCourse";
 import type { CourseSettingsTabKey } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
 import { SettingsTabPager } from "@/src/components/settings/SettingsTabPager";
@@ -140,7 +141,8 @@ function BuiltinCourseEditor({
   const router = useRouter();
   const { t } = useTranslation();
   const { width, isTabletLayout, orientation } = useDeviceLayout();
-  const isLandscapeLayout = isTabletLayout && orientation === "landscape" && width >= 840;
+  const isPhoneLandscape = useSideNavbarLayout();
+  const isLandscapeLayout = isPhoneLandscape || (isTabletLayout && orientation === "landscape" && width >= 840);
   const useCenteredTabletLayout = isTabletLayout;
   const {
     colors,
@@ -624,6 +626,7 @@ function BuiltinCourseEditor({
       </View>
       <SettingsTabBar
         vertical={isLandscapeLayout}
+        compact={isPhoneLandscape}
         options={categoryTabs.options}
         value={categoryTabs.activeTab}
         onChange={categoryTabs.onChange}

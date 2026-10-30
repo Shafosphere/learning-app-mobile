@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react-native";
+import { fireEvent, render } from "@testing-library/react-native";
 import { View } from "react-native";
 
 import { ManualCardsEditor } from "../editFlashcards";
@@ -99,5 +99,29 @@ describe("ManualCardsEditor imported image previews", () => {
     expect(mockPromptImage).toHaveBeenCalledWith(
       expect.objectContaining({ uri: "file://images/ae.svg" })
     );
+  });
+
+  it("keeps front, answer and explanation editable in two columns", () => {
+    const onCardFrontChange = jest.fn();
+    const onCardAnswerChange = jest.fn();
+    const onCardExplanationChange = jest.fn();
+    const screen = render(
+      <ManualCardsEditor
+        manualCards={[svgCard]}
+        styles={{} as never}
+        twoColumn
+        onCardFrontChange={onCardFrontChange}
+        onCardAnswerChange={onCardAnswerChange}
+        onCardExplanationChange={onCardExplanationChange}
+      />
+    );
+
+    fireEvent.changeText(screen.getByPlaceholderText("courseCreator.manualEditor.frontPlaceholder"), "Flag");
+    fireEvent.changeText(screen.getByPlaceholderText("courseCreator.manualEditor.backPlaceholder"), "UAE");
+    fireEvent.changeText(screen.getByPlaceholderText("courseCreator.manualEditor.optional"), "Explanation");
+
+    expect(onCardFrontChange).toHaveBeenCalledWith(svgCard.id, "Flag");
+    expect(onCardAnswerChange).toHaveBeenCalledWith(svgCard.id, 0, "UAE");
+    expect(onCardExplanationChange).toHaveBeenCalledWith(svgCard.id, "Explanation");
   });
 });
