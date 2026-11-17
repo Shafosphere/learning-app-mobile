@@ -2,27 +2,28 @@ import { act, renderHook } from "@testing-library/react-native";
 import { Keyboard } from "react-native";
 import { FLASHCARDS_COACHMARK_STEPS, HINT_COACHMARK_STEPS, type CoachmarkFlowStep } from "@/src/constants/coachmarkFlows";
 import { useFlashcardsTutorials } from "../useFlashcardsTutorials";
+import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 
 let mockStep: CoachmarkFlowStep | null;
 const mockHintStep = HINT_COACHMARK_STEPS[0];
 jest.mock("@/src/hooks/useCoachmarkFlow", () => ({
-  useCoachmarkFlow: ({ flowKey }: { flowKey: string }) => ({
+  useCoachmarkFlow: jest.fn(({ flowKey }: { flowKey: string }) => ({
     currentStep: flowKey === "flashcards-guided" ? mockStep : mockHintStep,
     currentIndex: 0,
     isActive: flowKey === "flashcards-guided",
     isReady: true,
     hasSeen: false,
     isPendingStart: false,
-  }),
+  })),
 }));
 
-function setup(answer = "wrong") {
+function setup(answer = "wrong", boxZeroEnabled = false) {
   const params: Parameters<typeof useFlashcardsTutorials>[0] = {
     isFocused: true,
     isUiReady: true,
     shouldShowBoxes: true,
     shouldRenderLoadingOverlay: false,
-    boxZeroEnabled: false,
+    boxZeroEnabled,
     selectedItem: { id: 1, text: "cat", translations: ["kot"], type: "text" } as Parameters<typeof useFlashcardsTutorials>[0]["selectedItem"],
     selectedItemId: 1,
     answer,
@@ -46,6 +47,17 @@ beforeEach(() => {
   jest.spyOn(Keyboard, "dismiss").mockImplementation(() => {});
 });
 afterEach(() => jest.restoreAllMocks());
+
+it("starts the main tutorial with box zero enabled", () => {
+  setup("", true);
+  expect(useCoachmarkFlow).toHaveBeenCalledWith(expect.objectContaining({
+    flowKey: "flashcards-guided",
+    shouldStart: true,
+    steps: expect.arrayContaining([expect.objectContaining({
+      descriptionKey: "onboarding.flashcards.boxZero.firstBox",
+    })]),
+  }));
+});
 
 it.each([
   ["wrong", "assisted", "blink", "tilt"],

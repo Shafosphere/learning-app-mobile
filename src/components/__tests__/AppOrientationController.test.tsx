@@ -3,10 +3,11 @@ import React from "react";
 import { Platform } from "react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { AppOrientationController } from "../AppOrientationController";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
 let mockIsTablet = false;
 jest.mock("@/src/hooks/useDeviceLayout", () => ({
-  useDeviceLayout: () => ({ isTabletLayout: mockIsTablet }),
+  useDeviceLayout: jest.fn(() => ({ isTabletLayout: mockIsTablet })),
 }));
 jest.mock("expo-screen-orientation", () => ({
   OrientationLock: { DEFAULT: 0, PORTRAIT_UP: 3 },
@@ -39,6 +40,7 @@ describe("AppOrientationController", () => {
     mockIsTablet = true;
     const screen = render(<AppOrientationController />);
     await waitFor(() => expect(lockAsync).toHaveBeenLastCalledWith(DEFAULT));
+    expect(useDeviceLayout).toHaveBeenLastCalledWith({ sizeSource: "physicalScreen" });
     expect(lockAsync).not.toHaveBeenCalledWith(PORTRAIT_UP);
     screen.unmount();
     await act(async () => {});

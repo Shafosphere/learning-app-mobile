@@ -93,11 +93,35 @@ describe("keyboard-independent screen layout", () => {
     expect(result.current.isTabletLayout).toBe(true);
   });
 
+  it("uses the portrait activity inside a letterboxed landscape tablet, including keyboard entry", () => {
+    Dimensions.set({ window: size(691, 922), screen: size(1474, 922) });
+    const { result } = renderHook(() => useDeviceLayout({ sizeSource: "screen" }));
+    expect(result.current).toMatchObject({ width: 691, height: 922, orientation: "portrait", isTabletLayout: true });
+    act(() => Dimensions.set({ window: size(691, 430), screen: size(1474, 922) }));
+    expect(result.current).toMatchObject({ orientation: "portrait", isTabletLayout: true });
+    act(() => Dimensions.set({ window: size(1474, 922), screen: size(1474, 922) }));
+    expect(result.current.orientation).toBe("landscape");
+  });
+
   it("uses the browser viewport rather than the physical monitor on web", () => {
     const os = jest.replaceProperty(Platform, "OS", "web");
     Dimensions.set({ window: size(390, 800), screen: size(1920, 1080) });
     const { result } = renderHook(() => useDeviceLayout({ sizeSource: "screen" }));
     expect(result.current).toMatchObject({ isTabletLayout: false, orientation: "portrait" });
     os.restore();
+  });
+
+  it("keeps physical tablet classification when its portrait window is narrower than 600 dp", () => {
+    Dimensions.set({ window: size(480, 768), screen: size(1024, 768) });
+    const { result } = renderHook(() => ({
+      layout: useDeviceLayout({ sizeSource: "screen" }),
+      policy: useDeviceLayout({ sizeSource: "physicalScreen" }),
+    }));
+    expect(result.current.layout).toMatchObject({ width: 480, orientation: "portrait", isTabletLayout: false });
+    expect(result.current.policy).toMatchObject({ width: 1024, orientation: "landscape", isTabletLayout: true });
+    act(() => Dimensions.set({ window: size(480, 320), screen: size(1024, 768) }));
+    expect(result.current.policy.isTabletLayout).toBe(true);
+    act(() => Dimensions.set({ window: size(390, 800), screen: size(390, 844) }));
+    expect(result.current.policy.isTabletLayout).toBe(false);
   });
 });

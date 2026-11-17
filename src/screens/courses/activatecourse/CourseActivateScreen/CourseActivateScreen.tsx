@@ -558,7 +558,7 @@ export default function CourseActivateScreen() {
               shape="rect"
               radius={18}
               padding={2}
-              style={{ alignSelf: "flex-end" }}
+              style={isTabletLayout ? { flex: 1 } : { alignSelf: "flex-end" }}
             >
               <MyButton
                 text={t(
@@ -586,7 +586,7 @@ export default function CourseActivateScreen() {
                   })();
                 }}
                 color="my_green"
-                width={90}
+                width={isTabletLayout ? "100%" : 90}
               />
             </CoachmarkAnchor>
           </View>

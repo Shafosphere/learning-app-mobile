@@ -74,11 +74,11 @@ export function getDeviceLayout(width: number, height: number): DeviceLayout {
 }
 
 export function useDeviceLayout({ sizeSource = "window" }: {
-  sizeSource?: "window" | "screen";
+  sizeSource?: "window" | "screen" | "physicalScreen";
 } = {}): DeviceLayout {
   const window = useWindowDimensions();
   const [screen, setScreen] = useState(() => Dimensions.get("screen"));
-  const useScreen = sizeSource === "screen" && Platform.OS !== "web";
+  const useScreen = sizeSource !== "window" && Platform.OS !== "web";
 
   useEffect(() => {
     if (!useScreen) return;
@@ -89,9 +89,15 @@ export function useDeviceLayout({ sizeSource = "window" }: {
     return () => subscription.remove();
   }, [useScreen]);
 
-  // Study orientation must not change when Android resizes the window for
-  // the keyboard. Screen dimensions still update on rotation and folding.
-  const { width, height } = useScreen ? screen : window;
+  // Android may letterbox a portrait-locked activity on a landscape tablet.
+  // Its window is narrower than the physical display. Respect that width,
+  // while retaining screen height so keyboard resizing cannot rotate study UI.
+  // Screen dimensions still update on physical rotation and folding.
+  // Orientation policy uses physicalScreen so letterboxing cannot turn a tablet
+  // into a phone and keep its portrait lock after a tutorial ends.
+  const { width, height } = useScreen
+    ? { width: sizeSource === "physicalScreen" ? screen.width : Math.min(window.width, screen.width), height: screen.height }
+    : window;
 
   return getDeviceLayout(width, height);
 }

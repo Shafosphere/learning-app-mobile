@@ -547,6 +547,19 @@ describe("Card logic props", () => {
     expect((latestResolverProps?.cardMetrics as any)?.contentScale).toBeGreaterThan(1);
   });
 
+  it.each(["flashcards", "review"] as const)("keeps the empty hint entry available in spacious landscape for %s", (contentDebugSource) => {
+    mockWindowDimensions = { width: 1474, height: 520, scale: 1, fontScale: 1 };
+    mockScreenDimensions = { ...mockWindowDimensions, height: 922 };
+    const props = createProps({ contentDebugSource });
+    const screen = renderCard(props);
+    expect(latestCardHintProps).toMatchObject({ currentHint: null });
+    latestCardHintProps = null;
+    screen.rerender(<Card {...props} inlineAction={{ disabled: false, label: "Confirm", onCorrectionConfirm: jest.fn() }} />);
+    expect(latestCardHintProps).toBeNull();
+    screen.rerender(<Card {...props} />);
+    expect(latestCardHintProps).toMatchObject({ currentHint: null });
+  });
+
   it("keeps phone card metrics at base size", async () => {
     mockWindowDimensions = {
       width: 360,

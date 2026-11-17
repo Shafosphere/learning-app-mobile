@@ -30,6 +30,7 @@ it("keeps landscape boxes mounted through keyboard entry and dismissal", () => {
   const props = {
     layout: {
       isLandscapeStudy: true,
+      needsLandscapeKeyboardFocus: false,
       isTabletCenteredStudyLayout: true,
       boxesLayoutProps: {},
       studyLayout: { keyboardVisible: false },
@@ -44,7 +45,7 @@ it("keeps landscape boxes mounted through keyboard entry and dismissal", () => {
   expect(app.getByTestId("boxes").props.accessibilityElementsHidden).toBe(false);
   const withKeyboard = {
     ...props,
-    layout: { ...props.layout, studyLayout: { ...props.layout.studyLayout, keyboardVisible: true } },
+    layout: { ...props.layout, needsLandscapeKeyboardFocus: true, studyLayout: { ...props.layout.studyLayout, keyboardVisible: true } },
   };
   app.rerender(<FlashcardsStudyLayout {...withKeyboard} />);
   expect(app.getByTestId("boxes", { includeHiddenElements: true }).props.accessibilityElementsHidden).toBe(true);
@@ -52,4 +53,7 @@ it("keeps landscape boxes mounted through keyboard entry and dismissal", () => {
   expect(app.getByTestId("boxes").props.accessibilityElementsHidden).toBe(false);
   expect(mockMounts).toBe(1);
   expect(mockUnmounts).toBe(0);
+  app.rerender(<FlashcardsStudyLayout {...withKeyboard} layout={{ ...withKeyboard.layout, needsLandscapeKeyboardFocus: false }} />);
+  expect(app.getByTestId("boxes").props.accessibilityElementsHidden).toBe(false);
+  expect(mockMounts).toBe(1);
 });

@@ -1,5 +1,6 @@
 import {
   FLASHCARDS_COACHMARK_STEPS,
+  FLASHCARDS_BOX_ZERO_COACHMARK_STEPS,
   HINT_COACHMARK_STEPS,
   type CoachmarkAdvanceEvent,
   type CoachmarkFlowStep,
@@ -94,17 +95,15 @@ export function useFlashcardsTutorials({
     };
   }, [pendingHintTutorialCardIdRef, requestHintTutorialRef]);
 
-  const shouldRunFlashcardsCoachmark = !boxZeroEnabled;
   const coachmark = useCoachmarkFlow({
     flowKey: "flashcards-guided",
     storageKey: "@flashcards_intro_seen_v1",
     shouldStart:
-      shouldRunFlashcardsCoachmark &&
       isFocused &&
       isUiReady &&
       shouldShowBoxes &&
       !shouldRenderLoadingOverlay,
-    steps: FLASHCARDS_COACHMARK_STEPS,
+    steps: boxZeroEnabled ? FLASHCARDS_BOX_ZERO_COACHMARK_STEPS : FLASHCARDS_COACHMARK_STEPS,
     completionState: tutorialCompletionState,
   });
   const canRequestHintTutorial =
@@ -309,9 +308,12 @@ export function useFlashcardsTutorials({
 
   useEffect(() => {
     if (!coachmark.isActive) {
-      setTutorialCompletionState({});
+      // A blurred screen hides the tour, but its current step will resume on focus.
+      if (!coachmark.isPaused) {
+        setTutorialCompletionState({});
+        setTutorialSuccessVariant("normal");
+      }
       setTutorialBoxCountOverrides(null);
-      setTutorialSuccessVariant("normal");
       tutorialExpectedBoxRef.current = null;
       tutorialForceCorrectRef.current = false;
       tutorialDismissKeyboardRef.current = false;
@@ -319,7 +321,7 @@ export function useFlashcardsTutorials({
     }
 
     setTutorialBoxCountOverrides(currentFlashcardsStep?.showDemoBoxCounts ?? null);
-  }, [coachmark.isActive, currentFlashcardsStep]);
+  }, [coachmark.isActive, coachmark.isPaused, currentFlashcardsStep]);
 
   useEffect(() => {
     if (!coachmark.isActive || !currentFlashcardsStep?.triggerDemoConfetti) {

@@ -710,7 +710,6 @@ export default function Flashcards() {
     headlineColor: colors.headline,
   });
 
-  const shouldRunFlashcardsCoachmark = !boxZeroEnabled;
   const {
     coachmark,
     hintCoachmark,
@@ -749,7 +748,7 @@ export default function Flashcards() {
       boxZeroSettingsHydrated &&
       autoflowEnabled &&
       isFocused &&
-      (!shouldRunFlashcardsCoachmark || coachmark.hasSeen) &&
+      coachmark.hasSeen &&
       !coachmark.isActive &&
       !coachmark.isPendingStart &&
       !hintCoachmark.isActive &&

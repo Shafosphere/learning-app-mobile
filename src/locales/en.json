@@ -1,4 +1,10 @@
 {
+  "tutorialOrientation": {
+    "title": "Tutorial in portrait",
+    "description": "The tutorial uses portrait orientation to fit all the tips. If the screen has not rotated, turn your device upright. You can rotate the screen again after the tutorial.",
+    "preparing": "Preparing the tutorial…",
+    "continue": "Continue"
+  },
   "courseSettingsReset": {
     "ok": "OK",
     "close": "Close",
@@ -986,6 +992,12 @@
       }
     },
     "flashcards": {
+      "boxZero": {
+        "firstBox": "New flashcards start in the waiting room — box zero. Copy the answer to move them into the first study box.",
+        "copyTitle": "Meet your flashcard",
+        "copyDescription": "After the tutorial, copy the answer shown and confirm it. This introduces each new flashcard before you answer from memory.",
+        "wrongAnswer": "A wrong answer in the study boxes sends the flashcard back to the waiting room, where you copy the answer again."
+      },
       "completedCourses": {
         "title": "Completed courses",
         "description": "This button opens courses you have completed."

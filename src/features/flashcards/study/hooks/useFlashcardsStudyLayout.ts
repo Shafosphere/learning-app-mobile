@@ -10,7 +10,7 @@ import {
 } from "@/src/components/Box/List/BoxList.metrics";
 import { CARD_CONTENT_GAP, CARD_HINT_HEIGHT } from "@/src/components/card/cardLayout.constants";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { type LayoutChangeEvent } from "react-native";
+import { type LayoutChangeEvent, type View } from "react-native";
 import {
   BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET,
   BOTTOM_BUTTONS_MIN_HEIGHT,
@@ -52,6 +52,8 @@ export function useFlashcardsStudyLayout({
   const [cardMeasurement, setCardMeasurement] = useState({ height: 0, hintSpace: 0 });
   const [topButtonsHeight, setTopButtonsHeight] = useState(0);
   const [bottomButtonsHeight, setBottomButtonsHeight] = useState(0);
+  const studyViewportRef = useRef<View | null>(null);
+  const [studyTopInWindow, setStudyTopInWindow] = useState<number | null>(null);
   const { keyboardVisible, keyboardTopInWindow } = useKeyboardVisibility(isFocused);
   const [actionsHidden, setActionsHidden] = useState(false);
   const [visibleCardHeight, setVisibleCardHeight] = useState(0);
@@ -73,6 +75,11 @@ export function useFlashcardsStudyLayout({
 
   const onStudyLayout = useCallback((event: LayoutChangeEvent) => {
     const width = event.nativeEvent.layout.width;
+    // Keep the normal navbar origin while typing: collapsing it must not
+    // make the normal layout appear to fit and immediately restore the bar.
+    studyViewportRef.current?.measureInWindow((_x, y) => {
+      setStudyTopInWindow(previous => keyboardVisible && previous != null && width === availableStudyWidth ? previous : y);
+    });
     pendingStudyLayoutRef.current = { height: measuredHeight(event), width };
     logFlashcardsScrollDebug("study.layout.native", {
       layout: event.nativeEvent.layout,
@@ -229,6 +236,10 @@ export function useFlashcardsStudyLayout({
     isCompactStudyLayout: !isTabletLayout && isCompactStudyLayout,
     availableStudyHeight,
     visibleStudyHeight,
+    studyViewportRef,
+    studyTopInWindow,
+    topButtonsHeight,
+    bottomButtonsHeight,
     minimumFullStudyHeight,
     minimumFullBoxesHeight: boxesLayout === "classic" ? SINGLE_ROW_BOX_MIN_HEIGHT : minimumGridBoxesHeight,
     fullCardSectionHeight,

@@ -1,4 +1,5 @@
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
+import { useTutorialOrientationState } from "@/src/contexts/TutorialOrientationContext";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect } from "react";
 import { Platform } from "react-native";
@@ -13,8 +14,9 @@ function applyOrientation(lock: ScreenOrientation.OrientationLock) {
 }
 
 export function AppOrientationController() {
-  const { isTabletLayout } = useDeviceLayout({ sizeSource: "screen" });
-  const portraitOnly = !isTabletLayout;
+  const { isTabletLayout } = useDeviceLayout({ sizeSource: "physicalScreen" });
+  const tutorialOrientation = useTutorialOrientationState();
+  const portraitOnly = !isTabletLayout || tutorialOrientation?.portraitRequired === true;
 
   useEffect(() => {
     if (Platform.OS === "web") return;

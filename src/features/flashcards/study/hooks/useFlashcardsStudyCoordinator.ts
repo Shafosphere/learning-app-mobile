@@ -9,12 +9,16 @@ import type { LayoutChangeEvent } from "react-native";
 import {
   CAROUSEL_BOXES_MIN_SCALE,
   CLASSIC_PHONE_BOXES_MIN_SCALE,
+  BOTTOM_BUTTONS_MIN_HEIGHT,
+  TOP_BUTTONS_BOTTOM_GAP,
+  BOXES_BOTTOM_ACTIONS_TOP_GAP,
   SCREEN_LAYOUT_TRANSITION,
 } from "../study.constants";
 import { useFlashcardsBottomDockLayout } from "./useFlashcardsBottomDockLayout";
 import type { useFlashcardsStudyLayout } from "./useFlashcardsStudyLayout";
 
 type DockParams = Parameters<typeof useFlashcardsBottomDockLayout>[0];
+const LANDSCAPE_BOTTOM_DOCK_OFFSET = 24;
 type Params = Omit<DockParams, "hideActions" | "keepActionsAtBottom" | "isSmallPhoneLayout" | "bottomDockOffsetOverride"> & {
   // Geometry is measured before tutorial/action state is resolved. Reuse that
   // single instance so hint policy and presentation see the same measurements.
@@ -40,15 +44,28 @@ export function useFlashcardsStudyCoordinator({
   const horizontalRowHeight = isLandscapeStudy
     ? landscapeBoxRowHeight : studyLayout.horizontalRowHeight;
   const { areButtonsOnTop, shouldShowBoxes, isFocused } = dockParams;
+  const landscapeControlsHeight = areButtonsOnTop
+    ? studyLayout.topButtonsHeight + TOP_BUTTONS_BOTTOM_GAP
+    : Math.max(studyLayout.bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT)
+      + LANDSCAPE_BOTTOM_DOCK_OFFSET + BOXES_BOTTOM_ACTIONS_TOP_GAP;
+  const keyboardStudyHeight = studyLayout.keyboardTopInWindow != null && studyLayout.studyTopInWindow != null
+    ? Math.min(studyLayout.visibleStudyHeight,
+        studyLayout.keyboardTopInWindow - studyLayout.studyTopInWindow)
+    : studyLayout.visibleStudyHeight;
+  const needsLandscapeKeyboardFocus = isLandscapeStudy && studyLayout.keyboardVisible
+    && studyLayout.fullCardSectionHeight > 0 && studyLayout.visibleStudyHeight > 0
+    && studyLayout.fullCardSectionHeight + studyLayout.cardBottomGap
+      + landscapeBoxRowHeight + landscapeControlsHeight > keyboardStudyHeight;
   useQuoteSuppression(isFocused && (isCompactStudyLayout || isLandscapeStudy));
   const layoutTransition = useNavbarLayoutTransition();
   const setNavbarCompactLayout = useNavbarCompactLayoutSetter();
   useEffect(() => {
-    setNavbarCompactLayout(isFocused && (isCompactStudyLayout || isLandscapeStudy));
+    setNavbarCompactLayout(isFocused && (isCompactStudyLayout || needsLandscapeKeyboardFocus));
     return () => setNavbarCompactLayout(false);
-  }, [isFocused, isCompactStudyLayout, isLandscapeStudy, setNavbarCompactLayout]);
+  }, [isFocused, isCompactStudyLayout, needsLandscapeKeyboardFocus, setNavbarCompactLayout]);
 
-  const canUseInlineCardAction = (isLandscapeStudy || isCompactStudyLayout || horizontalRowHeight != null)
+  const canUseInlineCardAction = (isLandscapeStudy ? needsLandscapeKeyboardFocus
+    : isCompactStudyLayout || horizontalRowHeight != null)
     && inlineCardActionEligible;
   const useInlineCardAction = canUseInlineCardAction && studyLayout.keyboardVisible;
   useEffect(() => setActionsHidden(useInlineCardAction), [useInlineCardAction, setActionsHidden]);
@@ -58,7 +75,7 @@ export function useFlashcardsStudyCoordinator({
     hideActions: useInlineCardAction,
     keepActionsAtBottom: canUseInlineCardAction,
     isSmallPhoneLayout: isCompactStudyLayout,
-    bottomDockOffsetOverride: isLandscapeStudy ? 24 : studyLayout.bottomDockOffset,
+    bottomDockOffsetOverride: isLandscapeStudy ? LANDSCAPE_BOTTOM_DOCK_OFFSET : studyLayout.bottomDockOffset,
   });
   const isCarouselLayout = boxesLayout !== "classic";
   const carouselBottomClearance = isCarouselLayout && !isLandscapeStudy && !areButtonsOnTop && !useInlineCardAction
@@ -94,6 +111,7 @@ export function useFlashcardsStudyCoordinator({
     areButtonsOnTop,
     isTabletCenteredStudyLayout,
     isLandscapeStudy,
+    needsLandscapeKeyboardFocus,
     // Tablet rotation changes both the centered stack and box presentation.
     // Keep section positions native in both orientations so an interrupted
     // portrait transition cannot leave a stale offset on the landscape card.

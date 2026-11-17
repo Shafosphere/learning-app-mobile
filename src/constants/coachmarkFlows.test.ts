@@ -3,6 +3,7 @@ import {
   COURSE_ENTRY_SETTINGS_COACHMARK_STEPS,
   COURSE_PIN_COACHMARK_STEPS,
   FLASHCARDS_COACHMARK_STEPS,
+  FLASHCARDS_BOX_ZERO_COACHMARK_STEPS,
   HINT_COACHMARK_STEPS,
   REVIEW_COURSES_COACHMARK_STEPS,
   REVIEW_FLASHCARDS_COACHMARK_STEPS,
@@ -19,6 +20,14 @@ const ALL_FLOWS = [
 ];
 
 describe("coachmark flow definitions", () => {
+  it("walks through box zero without waiting for an answer from empty box one", () => {
+    expect(FLASHCARDS_BOX_ZERO_COACHMARK_STEPS.find((step) => step.id === "flashcards-step-8"))
+      .toMatchObject({ advanceOn: "manual", blockOutside: true, expectedBox: undefined });
+    expect(FLASHCARDS_BOX_ZERO_COACHMARK_STEPS.every((step) => step.advanceOn === "manual")).toBe(true);
+    expect(FLASHCARDS_BOX_ZERO_COACHMARK_STEPS.some((step) => step.id === "flashcards-step-25")).toBe(true);
+    expect(FLASHCARDS_BOX_ZERO_COACHMARK_STEPS.find((step) => step.id === "flashcards-step-6")?.descriptionKey)
+      .toBe("onboarding.flashcards.boxZero.firstBox");
+  });
   it("blocks outside clicks on every manual onboarding step", () => {
     const manualStepsWithoutBlockOutside = ALL_FLOWS.flatMap((flow) =>
       flow

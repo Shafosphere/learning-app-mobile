@@ -870,7 +870,7 @@ export default function CoursePinScreen() {
               shape="rect"
               radius={18}
               padding={2}
-              style={{ alignSelf: "flex-end" }}
+              style={isTabletLayout ? { flex: 1 } : { alignSelf: "flex-end" }}
             >
               <MyButton
                 text={t("app.actions.next")}
@@ -893,7 +893,7 @@ export default function CoursePinScreen() {
                   router.dismissTo("/coursepanel");
                 }}
                 color="my_green"
-                width={90}
+                width={isTabletLayout ? "100%" : 90}
               />
             </CoachmarkAnchor>
           </View>

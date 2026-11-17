@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { GuidedCoachmarkLayer, type GuidedCoachmarkLayerProps } from "./GuidedCoachmarkLayer";
+import { TutorialOrientationGate } from "./TutorialOrientationGate";
+import { useTutorialOrientationState } from "@/src/contexts/TutorialOrientationContext";
 
 type CoachmarkLayerRegistration = GuidedCoachmarkLayerProps & {
   ownerId: string;
@@ -19,6 +21,7 @@ export function CoachmarkLayerPortalProvider({
   children: React.ReactNode;
 }) {
   const [layer, setLayerState] = useState<CoachmarkLayerRegistration | null>(null);
+  const orientation = useTutorialOrientationState();
 
   const value = useMemo<CoachmarkLayerPortalContextValue>(
     () => ({
@@ -41,7 +44,8 @@ export function CoachmarkLayerPortalProvider({
   return (
     <CoachmarkLayerPortalContext.Provider value={value}>
       {children}
-      {layer ? <GuidedCoachmarkLayer {...layer} /> : null}
+      {layer && orientation?.ready !== false ? <GuidedCoachmarkLayer {...layer} /> : null}
+      <TutorialOrientationGate />
     </CoachmarkLayerPortalContext.Provider>
   );
 }

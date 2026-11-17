@@ -144,10 +144,10 @@ describe("shared study coordination", () => {
     expect(result.current.screenSectionLayout).toBeDefined();
   });
 
-  it("moves tablet confirmation into the card only in landscape and restores portrait", () => {
+  it("moves tablet confirmation into the card in cramped landscape and restores portrait", () => {
     jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
     const { result, rerender } = renderStudy(undefined, true);
-    measure(result, 800);
+    measure(result, 380);
     expect(result.current.useInlineCardAction).toBe(false);
     mockOrientation = "landscape";
     rerender({ eligible: true, focused: true });
@@ -159,6 +159,50 @@ describe("shared study coordination", () => {
     rerender({ eligible: true, focused: true });
     expect(result.current.useInlineCardAction).toBe(false);
     expect(result.current.boxesLayoutProps.horizontalRowHeight).toBeUndefined();
+  });
+
+  it.each(["classic", "carousel"])("keeps %s boxes and normal actions when landscape has room above the keyboard", (boxesLayout) => {
+    jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
+    mockOrientation = "landscape";
+    const { result } = renderStudy(undefined, true, boxesLayout);
+    measure(result, 800);
+    expect(result.current.needsLandscapeKeyboardFocus).toBe(false);
+    expect(result.current.useInlineCardAction).toBe(false);
+    expect(result.current.dock.shouldRenderBottomButtons).toBe(true);
+    act(() => result.current.studyLayout.onStudyLayout(layout(600)));
+    expect(result.current.needsLandscapeKeyboardFocus).toBe(false);
+    act(() => result.current.studyLayout.onStudyLayout(layout(350)));
+    expect(result.current.needsLandscapeKeyboardFocus).toBe(true);
+    expect(result.current.useInlineCardAction).toBe(true);
+  });
+
+  it("keeps focus mode stable when navbar collapse recovers space, then restores on keyboard hide", () => {
+    const listeners = new Map<string, ((event: KeyboardEvent) => void)[]>();
+    jest.spyOn(Keyboard, "isVisible").mockReturnValue(false);
+    const subscribe = Keyboard.addListener.bind(Keyboard);
+    jest.spyOn(Keyboard, "addListener").mockImplementation((name, listener) => {
+      listeners.set(name, [...(listeners.get(name) ?? []), listener]);
+      return subscribe(name, listener);
+    });
+    mockOrientation = "landscape";
+    const { result } = renderStudy(undefined, true);
+    let viewportTop = 100;
+    result.current.studyLayout.studyViewportRef.current = {
+      measureInWindow: (callback: (x: number, y: number, width: number, height: number) => void) => callback(0, viewportTop, 375, 800),
+    } as any;
+    measure(result, 800);
+    act(() => listeners.get("keyboardDidShow")?.forEach(listener => listener({
+      endCoordinates: { screenY: 500 },
+    } as KeyboardEvent)));
+    act(() => result.current.studyLayout.onStudyLayout(layout(400)));
+    expect(result.current.needsLandscapeKeyboardFocus).toBe(true);
+    viewportTop = 0;
+    act(() => result.current.studyLayout.onStudyLayout(layout(500)));
+    expect(result.current.studyLayout.studyTopInWindow).toBe(100);
+    expect(result.current.needsLandscapeKeyboardFocus).toBe(true);
+    act(() => listeners.get("keyboardDidHide")?.forEach(listener => listener({} as KeyboardEvent)));
+    expect(result.current.needsLandscapeKeyboardFocus).toBe(false);
+    expect(result.current.dock.shouldRenderBottomButtons).toBe(true);
   });
 
   it("suppresses reactions only for a focused compact screen and releases on recovery, blur and unmount", () => {

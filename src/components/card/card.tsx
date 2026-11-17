@@ -1476,7 +1476,7 @@ export default function Card({
           onBlur={() => logKeyboardDebug("card.keyboard_bridge.blur")}
         />
       ) : null}
-      {(hideHints || (isLandscapeStudy && (!currentHint || inlineAction))) && !isEditingHint ? (
+      {(hideHints || (isLandscapeStudy && inlineAction)) && !isEditingHint ? (
         reserveHintSpaceWhenHidden && !isLandscapeStudy ? (
           <View
             testID="card-hint-placeholder"

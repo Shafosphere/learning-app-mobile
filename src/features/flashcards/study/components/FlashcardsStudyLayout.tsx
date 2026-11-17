@@ -30,9 +30,9 @@ export function FlashcardsStudyLayout({
   isCourseFinishedVisible, interactionBlocked,
 }: Props) {
   const { studyLayout, dock, screenSectionLayout } = layout;
-  const isLandscapeTyping = layout.isLandscapeStudy && studyLayout.keyboardVisible;
   return (
     <View
+      ref={studyLayout.studyViewportRef}
       testID={`${testIDPrefix}-content`}
       onLayout={studyLayout.onStudyLayout}
       style={[
@@ -48,7 +48,12 @@ export function FlashcardsStudyLayout({
         keyboardTopInWindow={studyLayout.keyboardTopInWindow}
         cardHeight={studyLayout.visibleCardHeight}
         contentContainerStyle={layout.isTabletCenteredStudyLayout
-          ? [styles.studyStack, styles.tabletCenteredStudyStack] : undefined}
+          ? [styles.studyStack, styles.tabletCenteredStudyStack,
+              // A lifted dock covers the lower part of the centered stack.
+              // Keep the complete card, hint and boxes above it while typing.
+              layout.isLandscapeStudy && studyLayout.keyboardVisible && !layout.needsLandscapeKeyboardFocus
+                ? { justifyContent: "flex-start" } : null]
+          : undefined}
       >
         <FlashcardsStudyContent
           cardBottomGap={studyLayout.cardBottomGap}
@@ -60,7 +65,7 @@ export function FlashcardsStudyLayout({
             <FlashcardsBoxesSection
               {...boxes}
               {...layout.boxesLayoutProps}
-              hidden={isLandscapeTyping}
+              hidden={layout.needsLandscapeKeyboardFocus}
               styles={styles}
               screenSectionLayout={screenSectionLayout}
             />

@@ -1,6 +1,7 @@
 // _layout.tsx
 import i18n from "@/src/i18n";
 import { AppOrientationController } from "@/src/components/AppOrientationController";
+import { TutorialOrientationProvider } from "@/src/contexts/TutorialOrientationContext";
 import Navbar from "@/src/components/navbar/navbar";
 import { CoachmarkLayerPortalProvider } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { OnboardingGate } from "@/src/components/onboarding/OnboardingGate";
@@ -730,6 +731,7 @@ export default function RootLayout() {
   };
 
   return (
+    <TutorialOrientationProvider>
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <View
         style={[styles.root, { backgroundColor: startupUi.backgroundColor }]}
@@ -774,6 +776,7 @@ export default function RootLayout() {
         {shouldRenderApp ? renderPreviewOverlay() : null}
       </View>
     </SafeAreaProvider>
+    </TutorialOrientationProvider>
   );
 }
 

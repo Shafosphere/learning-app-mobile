@@ -755,6 +755,41 @@ export const FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] =
     avoidTargetIds: FLASHCARDS_ACTION_BUTTON_AVOID_TARGET_IDS,
   }));
 
+// Box zero starts with copying a new card, rather than answering from box one.
+// Keep its walkthrough informational: the box-one exercise has no cards yet.
+export const FLASHCARDS_BOX_ZERO_COACHMARK_STEPS: CoachmarkFlowStep[] =
+  FLASHCARDS_COACHMARK_STEPS
+    .filter((step) => !["flashcards-step-9", "flashcards-step-10", "flashcards-step-11"].includes(step.id))
+    .map((step): CoachmarkFlowStep => {
+      if (step.id === "flashcards-step-6" || step.id === "flashcards-step-7") {
+        return {
+          ...step,
+          targetId: "flashcards-boxes-section",
+          ...(step.id === "flashcards-step-6"
+            ? { descriptionKey: "onboarding.flashcards.boxZero.firstBox" }
+            : {}),
+        };
+      }
+      if (step.id === "flashcards-step-8") {
+        return {
+          ...step,
+          targetId: "flashcards-card-section",
+          titleKey: "onboarding.flashcards.boxZero.copyTitle",
+          descriptionKey: "onboarding.flashcards.boxZero.copyDescription",
+          kind: "info",
+          advanceOn: "manual",
+          expectedBox: undefined,
+          passThroughTargetId: undefined,
+          blockOutside: true,
+          blockSpotlight: true,
+          spotlight: true,
+        };
+      }
+      return step.id === "flashcards-step-15"
+        ? { ...step, descriptionKey: "onboarding.flashcards.boxZero.wrongAnswer" }
+        : step;
+    });
+
 export const HINT_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   {
     id: "flashcards-hint-step-1",

@@ -1,4 +1,10 @@
 {
+  "tutorialOrientation": {
+    "title": "Samouczek w pionie",
+    "description": "Samouczek wyświetlamy w pionie, żeby zmieścić wszystkie wskazówki. Jeśli ekran się nie obrócił, obróć urządzenie do pionu. Po zakończeniu znów możesz obracać ekran.",
+    "preparing": "Przygotowujemy samouczek…",
+    "continue": "Kontynuuj"
+  },
   "courseSettingsReset": {
     "ok": "OK",
     "close": "Zamknij",
@@ -990,6 +996,12 @@
       }
     },
     "flashcards": {
+      "boxZero": {
+        "firstBox": "Nowe fiszki trafiają najpierw do poczekalni — pudełka zero. Po przepisaniu odpowiedzi przechodzą do pierwszego pudełka nauki.",
+        "copyTitle": "Najpierw poznaj fiszkę",
+        "copyDescription": "Po samouczku przepisz widoczną odpowiedź i zatwierdź. Tak poznasz nową fiszkę, zanim zaczniesz odpowiadać z pamięci.",
+        "wrongAnswer": "Gdy odpowiesz źle w pudełkach nauki, fiszka wraca do poczekalni. Tam ponownie przepiszesz odpowiedź."
+      },
       "completedCourses": {
         "title": "Ukończone kursy",
         "description": "Ten przycisk otwiera ukończone przez Ciebie kursy."

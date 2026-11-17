@@ -3,7 +3,9 @@ import {
   useCoachmarkContext,
 } from "@edwardloopez/react-native-coachmark";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { NavigationContext } from "@react-navigation/native";
+import { useTutorialPortrait } from "@/src/contexts/TutorialOrientationContext";
 import type {
   CoachmarkAdvanceEvent,
   CoachmarkFlowStep,
@@ -29,33 +31,58 @@ export function useCoachmarkFlow({
   onComplete,
 }: UseCoachmarkFlowParams) {
   const { start, next, back, stop, state } = useCoachmarkContext();
+  const navigation = useContext(NavigationContext);
+  const subscribeToFocus = useCallback((notify: () => void) => {
+    if (!navigation) return () => {};
+    const offFocus = navigation.addListener("focus", notify);
+    const offBlur = navigation.addListener("blur", notify);
+    return () => { offFocus(); offBlur(); };
+  }, [navigation]);
+  const getFocus = useCallback(() => navigation?.isFocused() ?? true, [navigation]);
+  const isFocused = useSyncExternalStore(subscribeToFocus, getFocus, getFocus);
   const [isReady, setIsReady] = useState(false);
   const [hasSeen, setHasSeen] = useState(true);
   const startAttemptedRef = useRef(false);
   const autoAdvanceStepIdRef = useRef<string | null>(null);
   const autoAdvancedStepIdsRef = useRef<Set<string>>(new Set());
   const finishFlowInProgressRef = useRef(false);
+  const consumedRestartTokenRef = useRef<string | null>(null);
+  const replayInProgressRef = useRef(false);
+  const replayToken = restartToken == null || restartToken === ""
+    ? null
+    : JSON.stringify(restartToken);
 
   useEffect(() => {
-    if (restartToken == null || restartToken === "") return;
+    if (replayToken == null || replayToken === consumedRestartTokenRef.current) return;
+    consumedRestartTokenRef.current = replayToken;
+    replayInProgressRef.current = true;
     startAttemptedRef.current = false;
     autoAdvanceStepIdRef.current = null;
     autoAdvancedStepIdsRef.current.clear();
     finishFlowInProgressRef.current = false;
     setHasSeen(false);
     setIsReady(true);
-  }, [restartToken]);
+  }, [replayToken]);
 
   useEffect(() => {
+    if (!isFocused) return;
     let mounted = true;
+    setIsReady(false);
     AsyncStorage.getItem(storageKey)
       .then((value) => {
         if (!mounted) return;
-        if (restartToken != null && restartToken !== "") {
+        // A replay overrides old storage only until it is completed or skipped.
+        if (replayInProgressRef.current) {
           setHasSeen(false);
           return;
         }
-        setHasSeen(value === "1");
+        const seen = value === "1";
+        if (!seen) {
+          // Screens can stay mounted while Settings resets onboarding storage.
+          startAttemptedRef.current = false;
+          finishFlowInProgressRef.current = false;
+        }
+        setHasSeen(seen);
       })
       .catch((error) => {
         console.warn("[Coachmark] Failed to hydrate flow visibility", error);
@@ -68,15 +95,17 @@ export function useCoachmarkFlow({
     return () => {
       mounted = false;
     };
-  }, [restartToken, storageKey]);
+  }, [isFocused, replayToken, storageKey]);
 
-  const isActive = state.isActive && state.activeTour?.key === flowKey;
+  const isActive = isFocused && state.isActive && state.activeTour?.key === flowKey;
+  const isPaused = !isFocused && state.isActive && state.activeTour?.key === flowKey;
+  const portraitReady = useTutorialPortrait(isFocused && !hasSeen && (isActive || (isReady && shouldStart)));
   const currentStep = isActive ? steps[state.index] ?? null : null;
   const isPendingStart =
-    isReady && !hasSeen && shouldStart && !isActive && !startAttemptedRef.current;
+    isFocused && isReady && !hasSeen && shouldStart && !isActive && !startAttemptedRef.current;
 
   useEffect(() => {
-    if (!isReady || hasSeen || !shouldStart || isActive || startAttemptedRef.current) {
+    if (!isFocused || !portraitReady || !isReady || hasSeen || !shouldStart || isActive || startAttemptedRef.current) {
       return;
     }
 
@@ -105,10 +134,10 @@ export function useCoachmarkFlow({
         startAttemptedRef.current = false;
       }
     };
-  }, [flowKey, hasSeen, isActive, isReady, shouldStart, start, steps]);
+  }, [flowKey, hasSeen, isActive, isReady, isFocused, portraitReady, shouldStart, start, steps]);
 
   useEffect(() => {
-    if (!currentStep) {
+    if (!currentStep || !portraitReady) {
       autoAdvanceStepIdRef.current = null;
       return;
     }
@@ -129,17 +158,23 @@ export function useCoachmarkFlow({
     }
     autoAdvanceStepIdRef.current = currentStep.id;
 
+    let didAdvance = false;
     const timeout = setTimeout(() => {
+      didAdvance = true;
       autoAdvancedStepIdsRef.current.add(currentStep.id);
       next();
     }, currentStep.autoAdvanceDelayMs ?? 180);
-    return () => clearTimeout(timeout);
-  }, [completionState, currentStep, next]);
+    return () => {
+      clearTimeout(timeout);
+      if (!didAdvance) autoAdvanceStepIdRef.current = null;
+    };
+  }, [completionState, currentStep, next, portraitReady]);
 
   const finishFlow = useCallback(async () => {
     if (finishFlowInProgressRef.current) return;
     finishFlowInProgressRef.current = true;
     await AsyncStorage.setItem(storageKey, "1");
+    replayInProgressRef.current = false;
     autoAdvanceStepIdRef.current = null;
     autoAdvancedStepIdsRef.current.clear();
     setHasSeen(true);
@@ -160,6 +195,7 @@ export function useCoachmarkFlow({
     if (finishFlowInProgressRef.current) return;
     finishFlowInProgressRef.current = true;
     await AsyncStorage.setItem(storageKey, "1");
+    replayInProgressRef.current = false;
     autoAdvanceStepIdRef.current = null;
     autoAdvancedStepIdsRef.current.clear();
     setHasSeen(true);
@@ -167,7 +203,7 @@ export function useCoachmarkFlow({
   }, [storageKey, stop]);
 
   const canAdvanceCurrentStep = Boolean(
-    currentStep &&
+    portraitReady && currentStep &&
       (
         currentStep.advanceOn === "manual" ||
         (
@@ -188,7 +224,7 @@ export function useCoachmarkFlow({
   }, [canAdvanceCurrentStep, currentStep, finishFlow, next, state.index, steps.length]);
 
   const advanceByEvent = useCallback(async (event: CoachmarkAdvanceEvent) => {
-    if (!currentStep || currentStep.advanceOn !== event) return false;
+    if (!portraitReady || !currentStep || currentStep.advanceOn !== event) return false;
     const isLast = state.index >= steps.length - 1;
     if (isLast) {
       await finishFlow();
@@ -196,16 +232,17 @@ export function useCoachmarkFlow({
     }
     next();
     return true;
-  }, [currentStep, finishFlow, next, state.index, steps.length]);
+  }, [currentStep, finishFlow, next, portraitReady, state.index, steps.length]);
 
   const goBack = useCallback(() => {
-    if (!isActive || state.index <= 0) return;
+    if (!portraitReady || !isActive || state.index <= 0) return;
     back();
-  }, [back, isActive, state.index]);
+  }, [back, isActive, portraitReady, state.index]);
 
   return useMemo(
     () => ({
       isActive,
+      isPaused,
       isPendingStart,
       hasSeen,
       isReady,
@@ -227,6 +264,7 @@ export function useCoachmarkFlow({
       goNext,
       hasSeen,
       isActive,
+      isPaused,
       isPendingStart,
       isReady,
       skipFlow,
