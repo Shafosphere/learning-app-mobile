@@ -12,7 +12,7 @@ const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 // Increment this whenever the bundled database content changes.
-const PREBUILT_DATABASE_VERSION = 11;
+const PREBUILT_DATABASE_VERSION = 12;
 
 const OFFICIAL_PACKS = [
   {
@@ -261,7 +261,7 @@ const OFFICIAL_PACKS = [
   },
   {
     slug: "ptaki",
-    packVersion: 2,
+    packVersion: 3,
     name: "Ptaki Polski i Europy Środkowej",
     iconId: "bird",
     iconColor: "#16A34A",
@@ -644,6 +644,12 @@ function readCardsFromCsv(pack) {
   return parseCardsFromCsv(pack, rawCsv, pack.csvFile);
 }
 
+// One source of truth for image dependencies, shared with runtime and PAD generation.
+const contentImagePacks = require("../../Content/tools/catalog.cjs").buildImages(ROOT_DIR).packs;
+const contentCourses = require("../../Content/tools/officialCourses.cjs").officialCourses(ROOT_DIR);
+const { imageReference } = require("../../Content/tools/imageReferences.cjs");
+const contentImageReference = (slug, value) => imageReference(contentImagePacks, contentCourses, slug, value);
+
 function parseCardsFromCsv(pack, rawCsv, sourceName = pack.csvFile) {
   const normalizedCsv = rawCsv.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const parsed = Papa.parse(normalizedCsv, {
@@ -670,14 +676,17 @@ function parseCardsFromCsv(pack, rawCsv, sourceName = pack.csvFile) {
       tfAnswerRaw != null && String(tfAnswerRaw).trim().length > 0;
     const resetProgressRaw = row.reset_progress_on_update;
 
-    const imageFront =
+    const imageFrontRaw =
       row.front_image != null && String(row.front_image).trim().length > 0
         ? String(row.front_image).trim()
         : null;
-    const imageBack =
+    const imageBackRaw =
       row.back_image != null && String(row.back_image).trim().length > 0
         ? String(row.back_image).trim()
         : null;
+
+    const imageFront = contentImageReference(pack.slug, imageFrontRaw);
+    const imageBack = contentImageReference(pack.slug, imageBackRaw);
 
     const explanationRaw = row.explanation;
     const explanation =

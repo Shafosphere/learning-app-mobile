@@ -11,7 +11,7 @@
     "web": "expo start --web",
     "autoflow-sim": "vite --config tools/autoflow-sim/vite.config.ts",
     "autoflow-sim:build": "vite build --config tools/autoflow-sim/vite.config.ts",
-    "lint": "expo lint src app Audio/runtime",
+    "lint": "expo lint src app Audio/runtime Content/runtime",
     "test": "jest",
     "test:mass-correction": "jest src/hooks/__tests__/useFlashcardsInteraction.mass.test.ts --runInBand",
     "db:prebuild": "node --experimental-strip-types ./tools/scripts/build-prebuilt-db.ts",
@@ -28,7 +28,10 @@
     "audio:prepare": "node Audio/tools/prepare.cjs",
     "audio:check": "node Audio/tools/prepare.cjs --check",
     "audio:link": "node Audio/tools/link-courses.cjs",
-    "audio:verify:aab": "node Audio/tools/verify-aab.cjs"
+    "audio:verify:aab": "node Audio/tools/verify-aab.cjs",
+    "content:check": "node Content/tools/prepare.cjs --check",
+    "content:prepare": "node Content/tools/prepare.cjs",
+    "content:verify:aab": "node Content/tools/verify-aab.cjs"
   },
   "dependencies": {
     "@edwardloopez/react-native-coachmark": "^0.5.2",
@@ -113,7 +116,9 @@
     "autolinking": {
       "nativeModulesDir": "./Audio/modules",
       "android": {
-        "buildFromSource": ["expo-speech"]
+        "buildFromSource": [
+          "expo-speech"
+        ]
       }
     }
   }

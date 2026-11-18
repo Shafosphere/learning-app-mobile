@@ -43,6 +43,7 @@ type OfficialPackDef = {
   targetLang?: string;
   smallFlag?: string;
   imageMap?: Record<string, any>;
+  requiredImagePacks?: string[];
   // Marks whether the pack should be displayed as a mini course in UI groupings
   isMini?: boolean;
   categoryId?: string;
@@ -517,7 +518,8 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "ptaki",
-    packVersion: 2,
+    packVersion: 3,
+    requiredImagePacks: ["images_birds"],
     name: "Ptaki Polski i Europy Środkowej",
     iconId: "bird",
     iconColor: "#16A34A",

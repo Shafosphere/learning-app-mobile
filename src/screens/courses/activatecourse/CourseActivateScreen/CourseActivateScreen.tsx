@@ -1,7 +1,7 @@
+import { CourseImageDownloadRow } from "@/Content/runtime/CourseImageDownloadRow";
+import { CourseImageRevealProvider } from "@/Content/runtime/CourseImageRevealCoordinator";
 import { useSideNavbarLayout } from "@/src/components/navbar/useSideNavbarLayout";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
-import { CourseAudioDownloadRow } from "@/Audio/runtime/CourseAudioDownloadRow";
-import { CourseAudioRevealProvider } from "@/Audio/runtime/CourseAudioRevealCoordinator";
 import type { LanguageCourseGroupId } from "@/src/constants/languageCourseGroups";
 import MyButton from "@/src/components/button/button";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
@@ -98,17 +98,15 @@ const CustomCourseRow = memo(function CustomCourseRow({
   );
 });
 
-function renderCourseAudioFooter(course: OfficialCourseListItem, isHighlighted: boolean) {
-  return (
-    <CourseAudioDownloadRow
-      slug={course.slug}
-      courseName={course.name}
-      expanded={isHighlighted}
-    />
-  );
+function renderCourseImageFooter(course: OfficialCourseListItem, isHighlighted: boolean) {
+  return <CourseImageDownloadRow slug={course.slug} courseName={course.name} expanded={isHighlighted} />;
 }
 
 export default function CourseActivateScreen() {
+  return <CourseImageRevealProvider><CourseActivateContent /></CourseImageRevealProvider>;
+}
+
+function CourseActivateContent() {
   const { t } = useTranslation();
   const { width, isTabletLayout, orientation } = useDeviceLayout();
   const isPhoneLandscape = useSideNavbarLayout();
@@ -475,7 +473,7 @@ export default function CourseActivateScreen() {
   );
 
   return profileCourseActivation("course-activation", (
-    <CourseAudioRevealProvider>
+    <>
     <View style={styles.container} onLayout={onViewportLayout} testID="course-activate-viewport">
       <CoachmarkAnchor
         id="course-activate-bubble-anchor"
@@ -509,6 +507,7 @@ export default function CourseActivateScreen() {
                     )}
                   </Text>
                       <CourseGroupList
+                        renderCourseFooter={renderCourseImageFooter}
                         groups={courseGroups}
                         cardWidth={cardWidth}
                         activeCourseId={activeCustomCourseId}
@@ -517,7 +516,6 @@ export default function CourseActivateScreen() {
                         onEdit={handleEditCustomCourse}
                         firstCoachmarkCourseId={firstPinnedOfficialCourseId}
                         scrollRef={scrollRef}
-                        renderCourseFooter={renderCourseAudioFooter}
                       />
                 </>
               ) : null}
@@ -646,6 +644,6 @@ export default function CourseActivateScreen() {
         </View>
       ) : null}
     </View>
-    </CourseAudioRevealProvider>
+    </>
   ));
 }

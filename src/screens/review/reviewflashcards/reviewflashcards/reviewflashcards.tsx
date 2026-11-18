@@ -1,3 +1,4 @@
+import { CourseMaterialsGate } from "@/Content/runtime/CourseMaterialsGate";
 import { FlashcardsStudyLayout } from "@/src/features/flashcards/study/components/FlashcardsStudyLayout";
 import { useFlashcardsStudyLayout } from "@/src/features/flashcards/study/hooks/useFlashcardsStudyLayout";
 import { useFlashcardsStudyCoordinator } from "@/src/features/flashcards/study/hooks/useFlashcardsStudyCoordinator";
@@ -46,6 +47,13 @@ import { useStyles } from "@/src/features/flashcards/study/study.styles";
 
 // Review session loads due cards and persists answers through review-specific hooks.
 export default function ReviewFlashcardsScreen() {
+  const params = useLocalSearchParams<{ courseId?: string }>();
+  const value = Array.isArray(params.courseId) ? params.courseId[0] : params.courseId;
+  const id = value ? Number(value) : NaN;
+  return <CourseMaterialsGate courseId={Number.isFinite(id) ? id : null}><ReviewFlashcardsContent /></CourseMaterialsGate>;
+}
+
+function ReviewFlashcardsContent() {
   const params = useLocalSearchParams<{
     courseId?: string;
     onboarding?: string;

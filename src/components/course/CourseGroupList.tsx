@@ -1,3 +1,5 @@
+import { LanguageAudioDownloadPanel } from "@/Audio/runtime/LanguageAudioDownloadPanel";
+import { getCourseAudioPacks } from "@/Audio/runtime/catalog";
 import { LANGUAGE_COURSE_GROUPS } from "@/src/constants/languageCourseGroups";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import React, { memo, useMemo } from "react";
@@ -28,6 +30,7 @@ type PreparedGroup = {
     regularIds: Set<number>;
     miniIds: Set<number>;
     continuesLanguageSeries: boolean;
+    audioPacks: string[];
 };
 
 type GroupProps = Omit<CourseGroupListProps, "groups" | "colors"> & {
@@ -114,6 +117,8 @@ const CourseGroupView = memo(function CourseGroupView({
                 </View>
             </View> : null}
 
+            {prepared.audioPacks.map(packName => <LanguageAudioDownloadPanel key={packName} packName={packName} />)}
+
             <OfficialCourseSection
                 title={t("repeats.labels.courses")}
                 list={regular}
@@ -151,6 +156,7 @@ export const CourseGroupList = ({ groups, activeCourseId, colors, firstCoachmark
     const preparedGroups = useMemo(() => {
         const seriesPairs = new Set(groups.filter((group) => group.languageGroupId)
             .map((group) => JSON.stringify([group.sourceLang, group.targetLang])));
+        const seenPacks = new Set<string>();
         const prepared = groups.filter((group) => group.official.length > 0).map((group): PreparedGroup => {
             const regular: OfficialCourseListItem[] = [];
             const mini: OfficialCourseListItem[] = [];
@@ -165,7 +171,10 @@ export const CourseGroupList = ({ groups, activeCourseId, colors, firstCoachmark
                     miniIds.add(course.id);
                 }
             }
+            const audioPacks = [...new Set(group.official.flatMap(course => getCourseAudioPacks(course.slug)))].filter(name => !seenPacks.has(name));
+            audioPacks.forEach(name => seenPacks.add(name));
             return {
+                audioPacks,
                 group, regular, mini, regularIds, miniIds,
                 continuesLanguageSeries: !group.languageGroupId && !group.category &&
                     seriesPairs.has(JSON.stringify([group.sourceLang, group.targetLang])),

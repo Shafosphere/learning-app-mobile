@@ -386,7 +386,7 @@ export const ManualCardsEditor = ({
                         ]}
                       >
                         {imageUri ? (
-                          isSvgImageUri(imageUri) ? (
+                          (isSvgImageUri(imageUri) || imageUri.startsWith("asset://")) ? (
                             <PromptImage
                               uri={imageUri}
                               imageStyle={styles.imageThumb}

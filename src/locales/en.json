@@ -2444,5 +2444,16 @@
       "title": "Progress",
       "description": "Clear boxes, delete reviews and restart the course."
     }
+  },
+  "contentDownload": {
+    "title": "Images",
+    "birds": "Bird images",
+    "required": "Download the images to start studying.",
+    "unavailable": "Materials unavailable",
+    "start": "Start",
+    "lookupError": "Could not check the course materials.",
+    "failed": "Could not download images.",
+    "noSpace": "Not enough storage for images. Free up space and try again.",
+    "preview": "Download preview · images included in the app"
   }
 }

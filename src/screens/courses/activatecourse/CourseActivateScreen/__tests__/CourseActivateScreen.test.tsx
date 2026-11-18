@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import React from "react";
 import { act, fireEvent, render, waitFor, within } from "@testing-library/react-native";
 
-import { downloadCourse, refreshCourse } from "@/Audio/runtime/courseDownloads";
+import { downloadPack, refreshPack } from "@/Audio/runtime/packDownloads";
 import CourseActivateScreen from "@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActivateScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
@@ -40,11 +40,8 @@ jest.mock("@react-navigation/native", () => ({
 const mockAudioSnapshot = { name: "es_to_pl_first_50", phase: "missing", totalBytes: 223392, downloadedBytes: 0,
     errorCode: 0, nativeStatus: 8, confirmationReason: null, confirmationPending: false };
 jest.mock("@/Audio/runtime/packDownloads", () => ({
-  subscribePackDownloads: () => () => {},
-}));
-jest.mock("@/Audio/runtime/courseDownloads", () => ({
-  getCourseDownload: () => mockAudioSnapshot, refreshCourse: jest.fn(async () => {}),
-  downloadCourse: jest.fn(), cancelCourse: jest.fn(), confirmCourseDownload: jest.fn(),
+  subscribePackDownloads: () => () => {}, getPackDownload: () => mockAudioSnapshot,
+  refreshPack: jest.fn(async () => {}), downloadPack: jest.fn(), cancelPack: jest.fn(), confirmPackDownload: jest.fn(),
 }));
 
 jest.mock("@/src/contexts/PopupContext", () => ({
@@ -55,7 +52,10 @@ jest.mock("@/src/contexts/SettingsContext", () => {
   const useSettings = jest.fn();
   return {
     useSettings,
-    useThemeSettings: () => ({ ...useSettings(), fontScaleMultiplier: 1 }),
+    useThemeSettings: () => {
+      const settings = useSettings();
+      return { ...settings, colors: { ...jest.requireActual("@/src/theme/theme").resolveThemeColors("light"), ...settings.colors }, fontScaleMultiplier: 1, accessibilityPreferences: {} };
+    },
   };
 });
 
@@ -81,7 +81,7 @@ jest.mock("react-i18next", () => {
       };
       return translations[key] ?? key;
   };
-  return { useTranslation: () => ({ t }) };
+  return { useTranslation: () => ({ t, i18n: { language: "pl" } }) };
 });
 
 jest.mock("@/src/db/sqlite/db", () => ({
@@ -257,7 +257,7 @@ describe("CourseActivateScreen loading state", () => {
     expect(screen.queryByRole("button", { name: "Graj w aktywny kurs" })).toBeNull();
   });
 
-  it("reveals audio controls only for the active course without activating on download", async () => {
+  it("shows a single language panel outside course rows and downloads without activation", async () => {
     const courses = [
       { id: 21, name: "Spanish PL", slug: "es_to_pl_first_50", iconId: "flag:es", iconColor: "#000", cardsCount: 50, isOfficial: true },
       { id: 22, name: "Spanish EN", slug: "es_to_en_first_50", iconId: "flag:es", iconColor: "#000", cardsCount: 50, isOfficial: true },
@@ -267,27 +267,14 @@ describe("CourseActivateScreen loading state", () => {
     mockedGetOfficialCustomCoursesWithCardCounts.mockResolvedValue(courses);
     const screen = render(<CourseActivateScreen />);
     await waitFor(() => expect(screen.getByText("Spanish PL")).toBeTruthy());
-    const plRow = within(screen.getByTestId("official-course-row-21"));
-    const enRow = within(screen.getByTestId("official-course-row-22"));
-    const englishRow = within(screen.getByTestId("official-course-row-31"));
-    expect(plRow.queryByTestId("course-audio-row-es_to_pl_first_50")).toBeNull();
-    expect(enRow.queryByTestId("course-audio-row-es_to_en_first_50")).toBeNull();
-    expect(englishRow.getByText("Pobierz")).toBeTruthy();
-    expect(screen.queryByTestId("course-audio-panel")).toBeNull();
-    fireEvent.press(screen.getByText("Spanish PL"));
-    expect(mockedUseSettings().setActiveCustomCourseId).toHaveBeenCalledWith(21);
-    mockedUseSettings().setActiveCustomCourseId.mockClear();
-    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), activeCustomCourseId: 21 });
-    screen.rerender(<CourseActivateScreen />);
-    fireEvent.press(within(screen.getByTestId("official-course-row-21")).getByText("Pobierz"));
-    expect(downloadCourse).toHaveBeenCalledWith("es_to_pl_first_50");
+    expect(screen.getAllByTestId("language-audio-panel-audio_es")).toHaveLength(1);
+    expect(screen.getAllByTestId("language-audio-panel-audio_en")).toHaveLength(1);
+    expect(within(screen.getByTestId("official-course-row-21")).queryByText("Pobierz")).toBeNull();
+    expect(downloadPack).not.toHaveBeenCalled();
+    fireEvent.press(within(screen.getByTestId("language-audio-panel-audio_es")).getByText("Pobierz"));
+    expect(downloadPack).toHaveBeenCalledWith("audio_es");
     expect(mockedUseSettings().setActiveCustomCourseId).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
-    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), activeCustomCourseId: 22 });
-    screen.rerender(<CourseActivateScreen />);
-    expect(within(screen.getByTestId("official-course-row-21")).queryByTestId("course-audio-row-es_to_pl_first_50")).toBeNull();
-    expect(within(screen.getByTestId("official-course-row-22")).getByTestId("course-audio-row-es_to_en_first_50")).toBeTruthy();
-    expect(within(screen.getByTestId("official-course-row-31")).queryByText("Pobierz")).toBeNull();
   });
 
   it("shows loading instead of empty state while course data is pending", () => {
@@ -344,7 +331,7 @@ describe("CourseActivateScreen loading state", () => {
     } finally {
       clock.mockRestore();
     }
-    expect(refreshCourse).toHaveBeenCalledTimes(3);
+    expect(refreshPack).toHaveBeenCalledTimes(2);
     expect(mockPush).not.toHaveBeenCalled();
   });
 

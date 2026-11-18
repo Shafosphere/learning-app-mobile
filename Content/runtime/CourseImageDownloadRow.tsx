@@ -8,16 +8,17 @@ import { useTranslation } from "react-i18next";
 import { useThemeSettings } from "@/src/contexts/SettingsContext";
 import { profileCourseActivation } from "@/src/components/course/CourseActivationProfiler";
 import { recordCourseActivationEvent } from "@/src/services/courseActivationDiagnostics";
-import { getAudioCourse } from "./catalog";
+import { getCourseImagePacks, getImagePack } from "./catalog";
+import { usesImagePAD } from "./images";
 import { subscribePackDownloads } from "./packDownloads";
 import { cancelCourse, confirmCourseDownload, downloadCourse, getCourseDownload, refreshCourse } from "./courseDownloads";
-import { useCourseAudioRevealTarget } from "./CourseAudioRevealCoordinator";
+import { useCourseImageRevealTarget } from "./CourseImageRevealCoordinator";
 
 // Ignore intrinsic measurement jitter within half a React Native layout unit.
 const CONTENT_HEIGHT_TOLERANCE = 0.5;
 
-export const CourseAudioDownloadRow = memo(function CourseAudioDownloadRow({ slug, courseName, expanded = true }: { slug: string | null | undefined; courseName: string; expanded?: boolean }) {
-  const supported = Boolean(getAudioCourse(slug)?.requiredPacks.length);
+export const CourseImageDownloadRow = memo(function CourseImageDownloadRow({ slug, courseName, expanded = true }: { slug: string | null | undefined; courseName: string; expanded?: boolean }) {
+  const supported = (usesImagePAD || __DEV__) && Boolean(getCourseImagePacks(slug).length);
   return supported ? <CourseRow key={slug} slug={slug!} courseName={courseName} expanded={expanded} /> : null;
 });
 
@@ -36,7 +37,7 @@ function CourseRow({ slug, courseName, expanded }: { slug: string; courseName: s
   }, [slug]);
   const revealedHeight = useSharedValue(0);
   const targetHeight = expanded ? contentHeight : 0;
-  useCourseAudioRevealTarget(revealedHeight, targetHeight, slug);
+  useCourseImageRevealTarget(revealedHeight, targetHeight, slug);
   const revealStyle = useAnimatedStyle(() => ({
     height: revealedHeight.value,
     marginTop: -Math.min(15, revealedHeight.value),
@@ -75,15 +76,15 @@ function CourseRow({ slug, courseName, expanded }: { slug: string; courseName: s
     >
     <View
       style={styles.row}
-      testID={`course-audio-row-${slug}`}
+      testID={`course-image-row-${slug}`}
       onLayout={handleLayout}
     >
       <View style={styles.details}>
         <View style={styles.icon} accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <FontAwesome6 name="headphones" size={18} color={colors.headline} />
+          <FontAwesome6 name="image" size={18} color={colors.headline} />
         </View>
         <Text style={[styles.title, { color: colors.headline }]}>
-          {t("audioDownload.title")}{size ? ` · ${size}` : ""}
+          {t(getCourseImagePacks(slug).length === 1 ? getImagePack(getCourseImagePacks(slug)[0])?.titleKey ?? "contentDownload.title" : "contentDownload.title")}{size ? ` · ${size}` : ""}
         </Text>
       </View>
       {ready ? <View style={[styles.ready, { backgroundColor: colors.my_green }]}>
@@ -110,8 +111,9 @@ function CourseRow({ slug, courseName, expanded }: { slug: string; courseName: s
           {t(`audioDownload.${button}`)}
         </Text>
       </Pressable> : null}
+      {__DEV__ && !usesImagePAD ? <Text style={[styles.status, { color: colors.paragraph }]}>{t("contentDownload.preview")}</Text> : null}
       {showStatus ? <Text accessibilityLiveRegion="polite" style={[styles.status, { color: colors.paragraph }]}>
-        {t(`audioDownload.${status}`, { percent })}
+        {t(`${status === "failed" || status === "noSpace" ? "contentDownload" : "audioDownload"}.${status}`, { percent })}
       </Text> : null}
       {busy ? <View style={[styles.progressTrack, { backgroundColor: colors.secondBackground }]} accessible={false}>
         <View style={[styles.progressFill, { width: `${percent}%`, backgroundColor: colors.my_green }]} />

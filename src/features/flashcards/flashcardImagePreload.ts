@@ -113,7 +113,10 @@ const preloadOne = (uri: string): Promise<void> => {
   const running = inFlight.get(uri);
   if (running) return running;
 
-  const task = loadImage(uri)
+  const resolvedUri = uri.startsWith("asset://")
+    ? import("@/Content/runtime/images").then(({ resolveImageUri }) => resolveImageUri(uri))
+    : Promise.resolve(uri);
+  const task = resolvedUri.then(resolved => resolved ? loadImage(resolved) : null)
     .then((entry) => {
       if (entry) cacheEntry(entry);
     })

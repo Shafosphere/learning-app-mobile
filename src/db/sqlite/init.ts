@@ -154,6 +154,7 @@ const isUnresolvedBundledImageRef = (value: string | null): value is string => {
   if (!value) return false;
   const normalized = value.trim().toLowerCase();
   if (!normalized) return false;
+  if (normalized.startsWith("asset://")) return false;
   if (normalized.startsWith("file://")) return false;
   if (normalized.startsWith("content://")) return false;
   if (normalized.startsWith("http://")) return false;

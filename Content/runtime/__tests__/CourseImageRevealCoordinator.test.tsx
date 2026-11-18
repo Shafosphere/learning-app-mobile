@@ -2,7 +2,7 @@ import React from "react";
 import { act, render } from "@testing-library/react-native";
 import * as Reanimated from "react-native-reanimated";
 import type { SharedValue } from "react-native-reanimated";
-import { CourseAudioRevealProvider, useCourseAudioRevealTarget } from "../CourseAudioRevealCoordinator";
+import { CourseImageRevealProvider, useCourseImageRevealTarget } from "../CourseImageRevealCoordinator";
 
 const mockFocusCallbacks = new Set<() => void>();
 jest.mock("@react-navigation/native", () => ({
@@ -22,7 +22,7 @@ jest.mock("react-native-reanimated", () => {
 });
 
 function Panel({ height, target }: { height: SharedValue<number>; target: number }) {
-  useCourseAudioRevealTarget(height, target, "test-course");
+  useCourseImageRevealTarget(height, target, "test-course");
   return null;
 }
 
@@ -44,11 +44,11 @@ describe("coordinated reveal scheduling", () => {
   function setup() {
     const heights = [height(100), height(0), height(0)];
     const tree = (active: number, sizes = [100, 140, 180], removed = -1) => (
-      <CourseAudioRevealProvider>
+      <CourseImageRevealProvider>
         {heights.map((value, index) => index === removed ? null : (
           <Panel key={index} height={value} target={index === active ? sizes[index] : 0} />
         ))}
-      </CourseAudioRevealProvider>
+      </CourseImageRevealProvider>
     );
     const screen = render(tree(0));
     flush();

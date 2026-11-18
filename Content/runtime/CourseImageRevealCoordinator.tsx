@@ -58,7 +58,7 @@ function createRevealQueue() {
 const RevealQueueContext = createContext<ReturnType<typeof createRevealQueue> | null>(null);
 
 /** One stable queue per activation screen; no selection/settings subscription. */
-export function CourseAudioRevealProvider({ children }: { children: ReactNode }) {
+export function CourseImageRevealProvider({ children }: { children: ReactNode }) {
   const [queue] = useState(createRevealQueue);
   useFocusEffect(useCallback(() => {
     recordCourseActivationEvent("panel.restore");
@@ -67,7 +67,7 @@ export function CourseAudioRevealProvider({ children }: { children: ReactNode })
   return <RevealQueueContext.Provider value={queue}>{children}</RevealQueueContext.Provider>;
 }
 
-export function useCourseAudioRevealTarget(height: SharedValue<number>, targetHeight: number, slug: string) {
+export function useCourseImageRevealTarget(height: SharedValue<number>, targetHeight: number, slug: string) {
   const queue = useContext(RevealQueueContext);
   useLayoutEffect(() => {
     recordCourseActivationEvent("panel.target", { slug, targetHeight });

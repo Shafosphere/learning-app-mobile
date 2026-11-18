@@ -13,7 +13,7 @@ jest.mock("@/Audio/modules/play-asset-delivery", () => ({ playAssetDelivery: {
   getPackStates: jest.fn(), fetch: jest.fn(), cancel: jest.fn(), showConfirmationDialog: jest.fn(),
 } }));
 const native = jest.mocked(playAssetDelivery!);
-const name = "audio_es_50";
+const name = "audio_es";
 const state = (status: number): NativePackState => ({ name, status, errorCode: 0, totalBytes: 223392,
   downloadedBytes: status === 4 ? 223392 : 0, transferProgress: 0 });
 const flush = async () => { for (let i = 0; i < 24; i++) await Promise.resolve(); };
@@ -45,6 +45,7 @@ it("subscribers can leave without cancelling downloads; completion verifies file
 it("supports cancellation, retry and required Google Play confirmation", async () => {
   await cancelPack(name); expect(getPackDownload(name).phase).toBe("cancelled");
   await downloadPack(name); expect(getPackDownload(name).phase).toBe("pending");
+  await cancelPack(name);
   native.fetch.mockResolvedValueOnce([state(7)]);
   await downloadPack(name); expect(getPackDownload(name).phase).toBe("confirmation");
   native.getPackStates.mockResolvedValue([state(7)]);
@@ -53,6 +54,7 @@ it("supports cancellation, retry and required Google Play confirmation", async (
   expect(getPackDownload(name).phase).toBe("pending");
 });
 it("retains native network/storage error codes", async () => {
+  await cancelPack(name);
   native.fetch.mockRejectedValueOnce({ code: "PAD_-10" });
   await downloadPack(name); expect(getPackDownload(name)).toMatchObject({ phase: "failed", errorCode: -10 });
   native.fetch.mockRejectedValueOnce({ code: "PAD_-6" });
@@ -99,11 +101,11 @@ it("merges simultaneous refreshes of the same pack into one native query", async
 
 it("checks a large pack through one native call with its expected manifest hash", async () => {
   native.checkPackReady.mockResolvedValue(true);
-  await refreshPack("audio_fr_b2");
+  await refreshPack("audio_fr");
   expect(native.checkPackReady).toHaveBeenCalledTimes(1);
-  expect(native.checkPackReady).toHaveBeenCalledWith("audio_fr_b2", expect.stringMatching(/^[a-f0-9]{64}$/));
+  expect(native.checkPackReady).toHaveBeenCalledWith("audio_fr", expect.stringMatching(/^[a-f0-9]{64}$/));
   expect(native.resolveAssetUri).not.toHaveBeenCalled();
-  expect(getPackDownload("audio_fr_b2").phase).toBe("ready");
+  expect(getPackDownload("audio_fr").phase).toBe("ready");
 });
 
 it("discards an in-flight readiness result on resume and performs a fresh check", async () => {
@@ -207,4 +209,12 @@ it("preserves snapshot identity and skips notifications for repeated native stat
   } finally {
     unsubscribe();
   }
+});
+
+it("ignores repeated download taps and obsolete pack events", async () => {
+  await cancelPack(name);
+  await Promise.all([downloadPack(name), downloadPack(name)]);
+  expect(native.fetch).toHaveBeenCalledTimes(1);
+  mockPackListener({ ...state(4), name: "audio_es_50" }); await flush();
+  expect(getPackDownload(name).phase).toBe("pending");
 });

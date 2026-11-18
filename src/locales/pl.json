@@ -2448,5 +2448,16 @@
       "title": "Postęp",
       "description": "Czyszczenie pudełek, usuwanie powtórek i restart kursu."
     }
+  },
+  "contentDownload": {
+    "title": "Zdjęcia",
+    "birds": "Zdjęcia ptaków",
+    "required": "Pobierz zdjęcia, aby rozpocząć naukę.",
+    "unavailable": "Materiały niedostępne",
+    "start": "Rozpocznij",
+    "lookupError": "Nie udało się sprawdzić materiałów kursu.",
+    "failed": "Nie udało się pobrać zdjęć.",
+    "noSpace": "Brak miejsca na zdjęcia. Zwolnij miejsce i spróbuj ponownie.",
+    "preview": "Podgląd pobierania · zdjęcia dostępne w aplikacji"
   }
 }

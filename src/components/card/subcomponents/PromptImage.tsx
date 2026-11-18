@@ -1,3 +1,5 @@
+import { useContentImage } from "@/Content/runtime/useContentImage";
+import { MissingImage } from "@/Content/runtime/MissingImage";
 import { Image } from "expo-image";
 import * as FileSystem from "expo-file-system/legacy";
 import { useEffect, useMemo, useState } from "react";
@@ -301,7 +303,7 @@ const prepareSvg = (
   };
 };
 
-export function PromptImage({
+function ResolvedPromptImage({
   uri,
   imageStyle,
   initialSlotWidth,
@@ -647,6 +649,26 @@ export function PromptImage({
           />
         )}
       </View>
+    </View>
+  );
+}
+
+export function PromptImage(props: PromptImageProps) {
+  const { uri, loading } = useContentImage(props.uri);
+  if (uri) return <ResolvedPromptImage key={uri} {...props} uri={uri} />;
+
+  const flat = StyleSheet.flatten(props.imageStyle) || {};
+  return (
+    <View
+      style={[
+        { width: props.initialSlotWidth, height: resolveTargetHeight(flat) },
+        props.imageStyle,
+        props.maxHeight == null ? null : { maxHeight: props.maxHeight },
+        { alignItems: "center", justifyContent: "center" },
+      ]}
+      onLayout={({ nativeEvent }) => props.onHeightChange?.(nativeEvent.layout.height)}
+    >
+      <MissingImage reference={props.uri} loading={loading} />
     </View>
   );
 }

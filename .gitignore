@@ -99,3 +99,7 @@ profiling-data.03-10-2026.19-39-11.json
 /Audio/modules/**/android/.gradle/
 /Audio/modules/**/android/.cxx/
 profiling-data.15-10-2026.10-06-54.json
+
+# Source definitions for downloadable image packs
+!/Content/packs/images/
+!/Content/packs/images/*.json

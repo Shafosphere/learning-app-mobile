@@ -15,7 +15,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { Image } from "expo-image";
+import { ContentImage as Image } from "@/Content/runtime/ContentImage";
 import { useTranslation } from "react-i18next";
 
 type FlashcardsPeekOverlayProps = {

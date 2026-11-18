@@ -45,17 +45,23 @@ class PlayAssetDeliveryModule : Module() {
       val root = manager.getPackLocation(name)?.assetsPath()?.let { File(it).canonicalFile }
       if (root == null) false else {
         try {
-          val manifestFile = File(root, "audio-manifests/$name.json").canonicalFile
+          val contentManifest = File(root, "content-manifests/$name.json")
+          val manifestFile = (if (contentManifest.isFile) contentManifest else File(root, "audio-manifests/$name.json")).canonicalFile
           if (!manifestFile.path.startsWith(root.path + File.separator) || !manifestFile.isFile) false
           else {
             val bytes = manifestFile.readBytes()
             if (!PackFileVerifier.matchesHash(bytes, expectedManifestHash)) false
             else {
               val manifest = JSONObject(bytes.toString(Charsets.UTF_8))
-              if (manifest.getInt("schemaVersion") != 2 || manifest.getString("packName") != name) false
+              if (manifest.getInt("schemaVersion") !in listOf(2, 3) || manifest.getString("packName") != name) false
               else {
                 val files = manifest.getJSONArray("files")
-                PackFileVerifier.filesReady(root, (0 until files.length()).map { index ->
+                if (manifest.getInt("schemaVersion") == 3) {
+                  PackFileVerifier.contentFilesReady(root, (0 until files.length()).map { index ->
+                    val file = files.getJSONObject(index)
+                    PackFileVerifier.ContentAsset(file.getString("relativePath"), file.getLong("bytes"))
+                  })
+                } else PackFileVerifier.filesReady(root, (0 until files.length()).map { index ->
                   val file = files.getJSONObject(index)
                   PackFileVerifier.Asset(file.getString("audioId"), file.getLong("bytes"))
                 })

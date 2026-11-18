@@ -41,4 +41,27 @@ class PackFileVerifierTest {
       assertFalse(PackFileVerifier.filesReady(root, listOf(PackFileVerifier.Asset(id, 3))))
     } finally { root.deleteRecursively(); outside.delete() }
   }
+  @Test fun contentImagesRequireSafeUniquePathsAndMatchingSizes() {
+    val root = Files.createTempDirectory("pad-images").toFile()
+    val outside = Files.createTempFile("pad-outside", ".webp").toFile()
+    try {
+      val image = File(root, "birds/stork.webp")
+      image.parentFile!!.mkdirs()
+      val assets = listOf(PackFileVerifier.ContentAsset("birds/stork.webp", 3))
+      assertFalse(PackFileVerifier.contentFilesReady(root, assets))
+      image.writeBytes(byteArrayOf(1, 2, 3))
+      assertTrue(PackFileVerifier.contentFilesReady(root, assets))
+      assertFalse(PackFileVerifier.contentFilesReady(root, assets + assets))
+      assertFalse(PackFileVerifier.contentFilesReady(root, emptyList()))
+      image.writeBytes(byteArrayOf(1))
+      assertFalse(PackFileVerifier.contentFilesReady(root, assets))
+      for (unsafe in listOf("../outside.webp", "/outside.webp", "birds/../stork.webp", "birds\\stork.webp")) {
+        assertFalse(PackFileVerifier.contentFilesReady(root, listOf(PackFileVerifier.ContentAsset(unsafe, 3))))
+      }
+      outside.writeBytes(byteArrayOf(1, 2, 3))
+      Files.createSymbolicLink(File(root, "link.webp").toPath(), outside.toPath())
+      assertFalse(PackFileVerifier.contentFilesReady(root, listOf(PackFileVerifier.ContentAsset("link.webp", 3))))
+    } finally { root.deleteRecursively(); outside.delete() }
+  }
+
 }

@@ -1,3 +1,4 @@
+import { CourseMaterialsGate } from "@/Content/runtime/CourseMaterialsGate";
 import { useFlashcardsScrollDiagnostics } from "./hooks/useFlashcardsScrollDiagnostics";
 import { useFlashcardsLayoutDiagnostics } from "./hooks/useFlashcardsLayoutDiagnostics";
 import { useFlashcardsCompletionCelebration } from "./hooks/useFlashcardsCompletionCelebration";
@@ -69,6 +70,11 @@ import {
 } from "react-native";
 
 export default function Flashcards() {
+  const { activeCustomCourseId } = useSettings();
+  return <CourseMaterialsGate courseId={activeCustomCourseId}><FlashcardsContent /></CourseMaterialsGate>;
+}
+
+function FlashcardsContent() {
   const router = useRouter();
   const isFocused = useIsFocused();
   const params = useLocalSearchParams<{ hintTutorialRestartToken?: string }>();

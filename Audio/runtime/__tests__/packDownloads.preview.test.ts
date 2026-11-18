@@ -14,7 +14,7 @@ function load(development: boolean) {
   });
   return store;
 }
-const name = "audio_es_50";
+const name = "audio_es";
 beforeEach(() => { mockNative = null; jest.useFakeTimers(); jest.spyOn(console, "info").mockImplementation(() => {}); });
 afterEach(() => {
   jest.clearAllTimers(); jest.useRealTimers(); jest.restoreAllMocks();

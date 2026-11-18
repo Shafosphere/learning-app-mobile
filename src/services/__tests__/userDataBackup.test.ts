@@ -1,7 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from "expo-file-system/legacy";
+import JSZip from "jszip";
 
 import {
   buildUserDataExport,
+  createBackupZip,
   hasUserDataExportImages,
   restoreUserData,
   type UserDataExport,
@@ -15,6 +18,11 @@ import {
   initializeStreakProtectionFromHistory,
   type StreakProtectionState,
 } from "@/src/services/streakProtection";
+
+jest.mock("expo-file-system/legacy", () => ({
+  ...jest.requireActual("expo-file-system/legacy"),
+  documentDirectory: "file:///documents/",
+}));
 
 jest.mock("@/src/db/sqlite/db", () => ({
   getDB: jest.fn(),
@@ -324,6 +332,42 @@ describe("userDataBackup", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it("preserves content image references in backups without passing them to the filesystem", async () => {
+    mockedGetDb.mockResolvedValue(createMockDb() as never);
+    mockedGetCustomCourses.mockResolvedValue([]);
+    const payload = await buildUserDataExport();
+    const imageFront = "asset://images_birds/stork.webp";
+    const imageBack = "asset://images_birds/crow.webp";
+    payload.officialCourseState.courses = [{
+      slug: "birds",
+      reviews: [],
+      learningEvents: [],
+      hints: [],
+      editedFlashcards: [{
+        externalId: "stork", position: 0,
+        frontText: "Edited bird", backText: "Stork", answers: ["Stork"],
+        imageFront, imageBack, explanation: null, flipped: false,
+      }],
+    }];
+    const getInfo = jest.spyOn(FileSystem, "getInfoAsync").mockImplementation(async (uri) => {
+      if (uri.startsWith("asset://")) throw new Error("Unsupported asset scheme");
+      return { exists: false, uri, isDirectory: false };
+    });
+    const readImage = jest.spyOn(FileSystem, "readAsStringAsync");
+    const writeArchive = jest.spyOn(FileSystem, "writeAsStringAsync").mockResolvedValue();
+
+    const result = await createBackupZip(payload);
+
+    expect(getInfo).toHaveBeenCalledTimes(1);
+    expect(getInfo).toHaveBeenCalledWith(result.fileUri);
+    expect(readImage).not.toHaveBeenCalled();
+    const zip = await JSZip.loadAsync(writeArchive.mock.calls[0][1], { base64: true });
+    const archived = JSON.parse(await zip.file("data.json")!.async("string"));
+    expect(archived.officialCourseState.courses[0].editedFlashcards[0]).toMatchObject({
+      frontText: "Edited bird", imageFront, imageBack,
+    });
   });
 
   it("exports image roles and restores explicit standard using new ids and official slugs", async () => {

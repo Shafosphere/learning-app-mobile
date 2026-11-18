@@ -1,5 +1,5 @@
 const { withDangerousMod, withSettingsGradle, withAppBuildGradle } = require('expo/config-plugins');
-const { buildCatalog, writeOutputs, preparePacks, gradleBlocks, withBlock } = require('../tools/catalog.cjs');
+const { buildCatalog, writeOutputs, preparePacks, gradleBlocks, withBlock } = require('../../Content/tools/catalog.cjs');
 
 module.exports = function withPlayAssetDelivery(config) {
   let catalog;

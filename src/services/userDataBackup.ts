@@ -1092,6 +1092,9 @@ async function addImageToArchive(
 ): Promise<string | null> {
   if (!uri) return null;
 
+  // Content pack references are resolved by the app, not the filesystem.
+  if (uri.startsWith("asset://")) return uri;
+
   if (cache.has(uri)) {
     return cache.get(uri) ?? null;
   }

@@ -130,3 +130,12 @@ describe("bundled image hydration", () => {
     });
   });
 });
+
+it('does not hydrate stable PAD references into permanent file paths', async () => {
+  const db = {
+    getAllAsync: jest.fn().mockResolvedValue([{ id: 1, imageFront: 'asset://images_birds/stork.webp', imageBack: null }]),
+    runAsync: jest.fn(), execAsync: jest.fn(),
+  };
+  await hydrateBundledImagePaths(db as any);
+  expect(db.runAsync).not.toHaveBeenCalled();
+});

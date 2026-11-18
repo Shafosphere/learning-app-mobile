@@ -1,3 +1,6 @@
+import { getCourseImagePacks } from "@/Content/runtime/catalog";
+import { usesImagePAD } from "@/Content/runtime/images";
+import { CourseImageDownloadRow } from "@/Content/runtime/CourseImageDownloadRow";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import type { CourseSettingsSectionProps } from "./types";
@@ -74,6 +77,7 @@ const buildImageSizeLabels = (
 
 type Props = Pick<
   CourseSettingsSectionProps,
+  | "audioCourseSlug"
   | "styles"
   | "cardSize"
   | "onSelectCardSize"
@@ -91,6 +95,7 @@ type Props = Pick<
 >;
 
 export function CourseAppearanceSettings({
+  audioCourseSlug,
   styles,
   cardSize,
   onSelectCardSize,
@@ -118,6 +123,7 @@ export function CourseAppearanceSettings({
   }));
   return (
     <View testID="course-appearance-settings">
+      {(usesImagePAD || __DEV__) && getCourseImagePacks(audioCourseSlug).length > 0 ? <View style={{ marginBottom: 16 }}><CourseImageDownloadRow slug={audioCourseSlug} courseName={t("contentDownload.title")} /></View> : null}
       <SizeSettingsChoiceBlock
         kind="flashcard"
         title={t("components.courseEditor.settingsCourse.title.rozmiarFiszki")}

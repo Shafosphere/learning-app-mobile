@@ -1,10 +1,19 @@
 import React from "react";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { PromptImage } from "@/src/components/card/subcomponents/PromptImage";
 import * as FileSystem from "expo-file-system/legacy";
 import { getPreloadedImage } from "@/src/features/flashcards/flashcardImagePreload";
+import { useContentImage } from "@/Content/runtime/useContentImage";
+
+jest.mock("@/Content/runtime/useContentImage", () => ({
+  useContentImage: jest.fn((uri: string) => ({ uri, loading: false })),
+}));
+
+jest.mock("@/Content/runtime/MissingImage", () => ({
+  MissingImage: () => null,
+}));
 
 jest.mock("expo-image", () => ({
   Image: () => null,
@@ -39,6 +48,7 @@ jest.mock("react-native-svg", () => ({
 
 const mockedFileSystem = FileSystem as jest.Mocked<typeof FileSystem>;
 const mockedGetPreloadedImage = getPreloadedImage as jest.Mock;
+const mockedUseContentImage = jest.mocked(useContentImage);
 
 const findFrameOpacity = (screen: ReturnType<typeof render>) =>
   screen.UNSAFE_getAllByType(View).find((node) => {
@@ -57,6 +67,41 @@ describe("PromptImage SVG rendering", () => {
     jest.clearAllMocks();
     mockedFileSystem.getInfoAsync.mockResolvedValue({ exists: true } as any);
     mockedGetPreloadedImage.mockReturnValue(null);
+    mockedUseContentImage.mockImplementation((uri) => ({ uri, loading: false }));
+  });
+
+  it.each([true, false])("preserves the image slot while URI is unavailable (loading=%s)", (loading) => {
+    mockedUseContentImage.mockReturnValue({ uri: null, loading });
+    const onHeightChange = jest.fn();
+    const props = {
+      uri: "asset://images_birds/stork.webp",
+      imageStyle: [{ width: "90%" as const, height: 140 }, { marginTop: 8 }],
+      initialSlotWidth: 260,
+      maxHeight: 140,
+      onHeightChange,
+    };
+    const screen = render(<PromptImage {...props} />);
+    const slot = screen.UNSAFE_getAllByType(View)[0];
+    expect(StyleSheet.flatten(slot.props.style)).toMatchObject({
+      width: "90%", height: 140, maxHeight: 140, marginTop: 8,
+    });
+    fireEvent(slot, "layout", { nativeEvent: { layout: { width: 260, height: 140 } } });
+    expect(onHeightChange).toHaveBeenCalledWith(140);
+
+    mockedUseContentImage.mockReturnValue({ uri: "file://images/stork.webp", loading: false });
+    mockedGetPreloadedImage.mockReturnValue({ kind: "bitmap", ratio: 1, uri: "file://images/stork.webp" });
+    screen.rerender(<PromptImage {...props} />);
+    expect(StyleSheet.flatten(screen.UNSAFE_getAllByType(View)[0].props.style)).toMatchObject({
+      width: "90%", height: 140, marginTop: 8,
+    });
+  });
+
+  it("uses initial width and default height while resolving an image without explicit dimensions", () => {
+    mockedUseContentImage.mockReturnValue({ uri: null, loading: true });
+    const screen = render(<PromptImage uri="asset://images_birds/stork.webp" imageStyle={{}} initialSlotWidth={260} maxHeight={40} />);
+    expect(StyleSheet.flatten(screen.UNSAFE_getAllByType(View)[0].props.style)).toMatchObject({
+      width: 260, height: 64, maxHeight: 40,
+    });
   });
 
   it("renders a preloaded bitmap visibly on its first mount", () => {

@@ -68,3 +68,29 @@ it.each(["eng_to_pl_a1", "french_a1"])("updates %s by stable IDs without clearin
   expect(local.execAsync).toHaveBeenLastCalledWith("COMMIT;");
   expect(bundled.closeAsync).toHaveBeenCalled();
 });
+
+it('migrates bird images by external_id without resetting progress or replacing user images', async () => {
+  mockSyncSlug = 'ptaki';
+  const reference = 'asset://images_birds/stork.webp';
+  const existing = { ...card(42, 'bird-1', 'stork'), imageFront: 'file:///images/old-copy.webp', resetProgressOnUpdate: 1 };
+  const edited = { ...card(43, 'bird-2', 'crow'), imageFront: 'file:///images/user-photo.webp', isUserEdited: 1 };
+  const local = {
+    getFirstAsync: jest.fn().mockResolvedValue({ flashcardsCount: 2 }),
+    getAllAsync: jest.fn().mockResolvedValue([existing, edited]),
+    execAsync: jest.fn().mockResolvedValue(undefined),
+    runAsync: jest.fn().mockResolvedValue({ lastInsertRowId: 0 }),
+  };
+  const bundled = {
+    getFirstAsync: jest.fn().mockResolvedValue({ id: 5, packVersion: 3, flashcardsCount: 2 }),
+    getAllAsync: jest.fn().mockResolvedValue([{ ...existing, imageFront: reference }, { ...edited, imageFront: 'asset://images_birds/crow.webp', isUserEdited: 0 }]),
+    closeAsync: jest.fn().mockResolvedValue(undefined),
+  };
+  (SQLite.openDatabaseAsync as jest.Mock).mockResolvedValue(bundled);
+  (ensureOfficialCourse as jest.Mock).mockResolvedValue({ id: 7, packVersion: 2 });
+  await seedOfficialPacksWithDb(local as any, { reportStartupProgress: false });
+  const updates = local.runAsync.mock.calls.filter(([sql]) => sql.includes('UPDATE custom_flashcards'));
+  expect(updates).toHaveLength(1);
+  expect(updates[0]).toContain(reference);
+  expect(updates[0].at(-1)).toBe(42);
+  expect(local.runAsync.mock.calls.some(([sql]) => sql.includes('DELETE FROM custom_reviews'))).toBe(false);
+});

@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "packs": {
+    "images_birds": {
+      "kind": "images",
+      "titleKey": "contentDownload.birds",
+      "sourceBytes": 1686680,
+      "manifestHash": "e9127bb0431ab3cec6c91790821dc9f1296bd15b09c6d8731e88d3ad00056571",
+      "files": {
+        "01_White_Stork_Wei_storch_Ciconia_ciconia.webp": {
+          "relativePath": "01_White_Stork_Wei_storch_Ciconia_ciconia.webp",
+          "source": "assets/learning/flashcards/birds/01_White_Stork_Wei_storch_Ciconia_ciconia.webp",
+          "bytes": 48234,
+          "fileSha256": "29039459abeab6043a0d1e69a822a477710e3eacc737abbbde5d51c884f4f0ca"
+        },
+        "02_Ciconia_nigra_qtl1.webp": {
+          "relativePath": "02_Ciconia_nigra_qtl1.webp",
+          "source": "assets/learning/flashcards/birds/02_Ciconia_nigra_qtl1.webp",
+          "bytes": 39300,
+          "fileSha256": "e0705cf11ed887b40ae4b5c54adc315c124470af9bae6f7f4f6d6535c3cda812"
+        },
+        "03_CygnusOlorNaturalHabitatMorning.webp": {
+          "relativePath": "03_CygnusOlorNaturalHabitatMorning.webp",
+          "source": "assets/learning/flashcards/birds/03_CygnusOlorNaturalHabitatMorning.webp",
+          "bytes": 75694,
+          "fileSha256": "7346ea63d8c4055e5327f55cbfc1c8f74d8020cf4de538ecc88f8acfddac129e"
+        },
+        "04_Cygnus_cygnus_070416_IOL.webp": {
+          "relativePath": "04_Cygnus_cygnus_070416_IOL.webp",
+          "source": "assets/learning/flashcards/birds/04_Cygnus_cygnus_070416_IOL.webp",
+          "bytes": 16948,
+          "fileSha256": "ccab0025728ada6090419a9ed136f04a31bb6fd350ce5eec5e7cec004eeb065b"
+        },
+        "05_Greylag_Geese_Anser_anser_in_flight_Cley_Norfolk_1700.webp": {
+          "relativePath": "05_Greylag_Geese_Anser_anser_in_flight_Cley_Norfolk_1700.webp",
+          "source": "assets/learning/flashcards/birds/05_Greylag_Geese_Anser_anser_in_flight_Cley_Norfolk_1700.webp",
+          "bytes": 10504,
+          "fileSha256": "4ac63dd4d7af088d9d28846ddc7a08f2ad01d58ded50acfbb3538be597090bc6"
+        },
+        "06_Female_Mallard_Duck_Rest_3.webp": {
+          "relativePath": "06_Female_Mallard_Duck_Rest_3.webp",
+          "source": "assets/learning/flashcards/birds/06_Female_Mallard_Duck_Rest_3.webp",
+          "bytes": 28620,
+          "fileSha256": "a33c131516023eef5e18dc4bbf3d5622c8959885892086a5e778cab9fff4368f"
+        },
+        "07_2015_Cyraneczka_zwyczajna_samiec.webp": {
+          "relativePath": "07_2015_Cyraneczka_zwyczajna_samiec.webp",
+          "source": "assets/learning/flashcards/birds/07_2015_Cyraneczka_zwyczajna_samiec.webp",
+          "bytes": 55618,
+          "fileSha256": "dd92fe9f97623e9d7d7ba14aa783b12829d7ad572ff8239daa4152ce897fa992"
+        },
+        "08_Ardea_cinerea_Luc_Viatour.webp": {
+          "relativePath": "08_Ardea_cinerea_Luc_Viatour.webp",
+          "source": "assets/learning/flashcards/birds/08_Ardea_cinerea_Luc_Viatour.webp",
+          "bytes": 8108,
+          "fileSha256": "cd74214c4c9a41febd571555c80c09277b607053fea6d73f7f1c062acad00b16"
+        },
+        "09_Ardea_alba4.webp": {
+          "relativePath": "09_Ardea_alba4.webp",
+          "source": "assets/learning/flashcards/birds/09_Ardea_alba4.webp",
+          "bytes": 37858,
+          "fileSha256": "bffe8ba92d53ea2cfc5e102ed658a78db917c3ddb157f587d266a54de5551240"
+        },
+        "10_Sookurg_-_Grus_grus.webp": {
+          "relativePath": "10_Sookurg_-_Grus_grus.webp",
+          "source": "assets/learning/flashcards/birds/10_Sookurg_-_Grus_grus.webp",
+          "bytes": 40668,
+          "fileSha256": "4da5d9ae2047e2422b4e991d74256877f371e48ada067ef3d375400643301b39"
+        },
+        "11_Eurasian_Coot.webp": {
+          "relativePath": "11_Eurasian_Coot.webp",
+          "source": "assets/learning/flashcards/birds/11_Eurasian_Coot.webp",
+          "bytes": 47602,
+          "fileSha256": "4e5c1ef1f09d3cc81285e0c36676ffc436233bca3a36a8aa7d38874bea87a580"
+        },
+        "12_Podiceps_cristatus_juv.webp": {
+          "relativePath": "12_Podiceps_cristatus_juv.webp",
+          "source": "assets/learning/flashcards/birds/12_Podiceps_cristatus_juv.webp",
+          "bytes": 17758,
+          "fileSha256": "13b85836c11a207cd08d025352b53dd6fa163c9e4b978cb92f36886dd55ff928"
+        },
+        "13_Phalacrocorax_carbo_Vic.webp": {
+          "relativePath": "13_Phalacrocorax_carbo_Vic.webp",
+          "source": "assets/learning/flashcards/birds/13_Phalacrocorax_carbo_Vic.webp",
+          "bytes": 23022,
+          "fileSha256": "69489d245cc1fff0c7ea762708d08947b51265f284c96713b5e4c6d38e99c42e"
+        },
+        "14_Alcedo_atthis_eating_a_tadpole.webp": {
+          "relativePath": "14_Alcedo_atthis_eating_a_tadpole.webp",
+          "source": "assets/learning/flashcards/birds/14_Alcedo_atthis_eating_a_tadpole.webp",
+          "bytes": 30614,
+          "fileSha256": "9080cea36e32f29841408e8b76cddd14583d7ed9749d12cdba08e0f5a95dc040"
+        },
+        "15_Smrdokavra1.webp": {
+          "relativePath": "15_Smrdokavra1.webp",
+          "source": "assets/learning/flashcards/birds/15_Smrdokavra1.webp",
+          "bytes": 35856,
+          "fileSha256": "fbf771feaa71c98556a78cca1d9402344c2adc49369d4694e0c4b0a7885d171f"
+        },
+        "16_Dendrocopos_major_41554885581_cropped.webp": {
+          "relativePath": "16_Dendrocopos_major_41554885581_cropped.webp",
+          "source": "assets/learning/flashcards/birds/16_Dendrocopos_major_41554885581_cropped.webp",
+          "bytes": 71030,
+          "fileSha256": "32cdf9cafe7ffee99f82714930936a131147d166882f4c210c4972a188d3da1f"
+        },
+        "17_European_green_woodpecker_21737.webp": {
+          "relativePath": "17_European_green_woodpecker_21737.webp",
+          "source": "assets/learning/flashcards/birds/17_European_green_woodpecker_21737.webp",
+          "bytes": 77758,
+          "fileSha256": "6a7a5b5e214839ebc8857cb1b3490a7dbc22d1dfd175d08be8c076af60b8c043"
+        },
+        "18_Skylark_2_Lake_District_England_-_June_2009.webp": {
+          "relativePath": "18_Skylark_2_Lake_District_England_-_June_2009.webp",
+          "source": "assets/learning/flashcards/birds/18_Skylark_2_Lake_District_England_-_June_2009.webp",
+          "bytes": 61854,
+          "fileSha256": "f44b214e8ba2a0b043903ddaec57b0de2e97dc47f07607275673e2b221bddf7c"
+        },
+        "19_Landsvale.webp": {
+          "relativePath": "19_Landsvale.webp",
+          "source": "assets/learning/flashcards/birds/19_Landsvale.webp",
+          "bytes": 19354,
+          "fileSha256": "96a4c3aa09a299158403fb50a5ceb77463bff6dfd4df347dc5d7dea076bcf19d"
+        },
+        "20_Beynac_Mauersegler_1_Apus_apus.webp": {
+          "relativePath": "20_Beynac_Mauersegler_1_Apus_apus.webp",
+          "source": "assets/learning/flashcards/birds/20_Beynac_Mauersegler_1_Apus_apus.webp",
+          "bytes": 50160,
+          "fileSha256": "97e94ac42c39962c746ff0af8ab06c1deea29f54a52128eea272deb41c70de95"
+        },
+        "21_Garrulus_glandarius_1_Luc_Viatour.webp": {
+          "relativePath": "21_Garrulus_glandarius_1_Luc_Viatour.webp",
+          "source": "assets/learning/flashcards/birds/21_Garrulus_glandarius_1_Luc_Viatour.webp",
+          "bytes": 21156,
+          "fileSha256": "3da0caa66c55daaacc32af250727f6e52bd34533bbba4dff709d7c12e44378bc"
+        },
+        "22_Pica_pica_-_02.webp": {
+          "relativePath": "22_Pica_pica_-_02.webp",
+          "source": "assets/learning/flashcards/birds/22_Pica_pica_-_02.webp",
+          "bytes": 21442,
+          "fileSha256": "53a14953e50db0ced2a19afd6f8b06ae8a6e72b2760af77eec72318615755f9b"
+        },
+        "23_Coloeus_monedula_Antwerpen.webp": {
+          "relativePath": "23_Coloeus_monedula_Antwerpen.webp",
+          "source": "assets/learning/flashcards/birds/23_Coloeus_monedula_Antwerpen.webp",
+          "bytes": 17156,
+          "fileSha256": "a6a6ca2b2f2be2f14bddcd827ea50aad2be232acada7b6dcfd35e4811c275679"
+        },
+        "24_20140831-Nebelkra_he_by_sebaso.webp": {
+          "relativePath": "24_20140831-Nebelkra_he_by_sebaso.webp",
+          "source": "assets/learning/flashcards/birds/24_20140831-Nebelkra_he_by_sebaso.webp",
+          "bytes": 19806,
+          "fileSha256": "bfca869a44ef5eb610901ae5c687fd04ab047c678d329a7703dd186cca6a2c95"
+        },
+        "25_Corvus_corax_Common_Raven_Yosemite_NP_CA_US_-_Diliff.webp": {
+          "relativePath": "25_Corvus_corax_Common_Raven_Yosemite_NP_CA_US_-_Diliff.webp",
+          "source": "assets/learning/flashcards/birds/25_Corvus_corax_Common_Raven_Yosemite_NP_CA_US_-_Diliff.webp",
+          "bytes": 41952,
+          "fileSha256": "9d62e3fade5710865e4e9f6f3692781c1f97a8385b3c32a8f075fd5410b09027"
+        },
+        "26_Great_Tit_Parus_major_1.webp": {
+          "relativePath": "26_Great_Tit_Parus_major_1.webp",
+          "source": "assets/learning/flashcards/birds/26_Great_Tit_Parus_major_1.webp",
+          "bytes": 35128,
+          "fileSha256": "00ccc97fa17283efad580e4e37be6d76ea01c3e6f7b11a1598d689146cdec349"
+        },
+        "27_Parus_caeruleus_feeding.webp": {
+          "relativePath": "27_Parus_caeruleus_feeding.webp",
+          "source": "assets/learning/flashcards/birds/27_Parus_caeruleus_feeding.webp",
+          "bytes": 54080,
+          "fileSha256": "f3fad7b1f1e5f041400321ba0876039d355ec17d5640019f1102351325b5af93"
+        },
+        "28_Lophophanes_cristatus_Luc_Viatour_2.webp": {
+          "relativePath": "28_Lophophanes_cristatus_Luc_Viatour_2.webp",
+          "source": "assets/learning/flashcards/birds/28_Lophophanes_cristatus_Luc_Viatour_2.webp",
+          "bytes": 25718,
+          "fileSha256": "abbd9e602614135cda7c24e9ccacca99b74afa1c4df03a11a9a4deee5c74eb5f"
+        },
+        "29_Parus_palustris02.webp": {
+          "relativePath": "29_Parus_palustris02.webp",
+          "source": "assets/learning/flashcards/birds/29_Parus_palustris02.webp",
+          "bytes": 28850,
+          "fileSha256": "f81436b63de9580f8a0ed6facc3c91696161106e88890e1bd184ac38315a4e34"
+        },
+        "30_Aegithalos_caudatus_front-on_2.webp": {
+          "relativePath": "30_Aegithalos_caudatus_front-on_2.webp",
+          "source": "assets/learning/flashcards/birds/30_Aegithalos_caudatus_front-on_2.webp",
+          "bytes": 32278,
+          "fileSha256": "f0e56ff782875426aa253f5120ab07738744143efa37e36703b57e5de0a02171"
+        },
+        "31_Sitta_europaea_wildlife_3.webp": {
+          "relativePath": "31_Sitta_europaea_wildlife_3.webp",
+          "source": "assets/learning/flashcards/birds/31_Sitta_europaea_wildlife_3.webp",
+          "bytes": 13078,
+          "fileSha256": "b081178fd1a017a35905c18c7b6dade5e39f1285f0766eae6e4aad1da108cdac"
+        },
+        "32_Short-toed_Treecreeper_Certhia_brachydactyla_cropped_version.webp": {
+          "relativePath": "32_Short-toed_Treecreeper_Certhia_brachydactyla_cropped_version.webp",
+          "source": "assets/learning/flashcards/birds/32_Short-toed_Treecreeper_Certhia_brachydactyla_cropped_version.webp",
+          "bytes": 46868,
+          "fileSha256": "04376cb4c39fbed215160a926a6a2df7f9f09047a3f12894d96363244f5596cf"
+        },
+        "33_Eurasian_wren.webp": {
+          "relativePath": "33_Eurasian_wren.webp",
+          "source": "assets/learning/flashcards/birds/33_Eurasian_wren.webp",
+          "bytes": 24628,
+          "fileSha256": "c2662d975beb6ce55135c4c59eded51dc986f2307a1d2aff0613783519f93135"
+        },
+        "34_Blackbird_female.webp": {
+          "relativePath": "34_Blackbird_female.webp",
+          "source": "assets/learning/flashcards/birds/34_Blackbird_female.webp",
+          "bytes": 29112,
+          "fileSha256": "cf6b894a611f6fb220fe3f2bcffb6c71f67f107592504c62453e955f2ed61737"
+        },
+        "35_Song_Thrush_Turdus_philomelos.webp": {
+          "relativePath": "35_Song_Thrush_Turdus_philomelos.webp",
+          "source": "assets/learning/flashcards/birds/35_Song_Thrush_Turdus_philomelos.webp",
+          "bytes": 22262,
+          "fileSha256": "4a6ce13950a75b976529c0fef6d17c3ed276c7843335c9efe96f23d72b4360f5"
+        },
+        "36_Erithacus_rubecula_-Netherlands-8.webp": {
+          "relativePath": "36_Erithacus_rubecula_-Netherlands-8.webp",
+          "source": "assets/learning/flashcards/birds/36_Erithacus_rubecula_-Netherlands-8.webp",
+          "bytes": 28890,
+          "fileSha256": "0d13fe65e44a32856bbdbcdd9eb37051c36fcdffed6f72e4382f351aeaa8314e"
+        },
+        "37_Phoenicurus_phoenicurus_female.webp": {
+          "relativePath": "37_Phoenicurus_phoenicurus_female.webp",
+          "source": "assets/learning/flashcards/birds/37_Phoenicurus_phoenicurus_female.webp",
+          "bytes": 10708,
+          "fileSha256": "ba8be22583bf4ed5f58e6bd0c246466cb2db88ae9da99c8133c74097cbad6bf5"
+        },
+        "38_Trauerschna_pper_Weibchen_Ficedula_hypoleuca_Schlehdorf_Kochelsee-001.webp": {
+          "relativePath": "38_Trauerschna_pper_Weibchen_Ficedula_hypoleuca_Schlehdorf_Kochelsee-001.webp",
+          "source": "assets/learning/flashcards/birds/38_Trauerschna_pper_Weibchen_Ficedula_hypoleuca_Schlehdorf_Kochelsee-001.webp",
+          "bytes": 34054,
+          "fileSha256": "6701a82b476807fba6ce07ce71066ef2619a39c73e14c5335da718c0ac452ea8"
+        },
+        "39_Motacilla_alba_-_White_wagtail_in_Tuzla_03.webp": {
+          "relativePath": "39_Motacilla_alba_-_White_wagtail_in_Tuzla_03.webp",
+          "source": "assets/learning/flashcards/birds/39_Motacilla_alba_-_White_wagtail_in_Tuzla_03.webp",
+          "bytes": 54214,
+          "fileSha256": "ef480e87455c3c6b49afd3092646cbeb4cf770f57040080861177c3038fab54a"
+        },
+        "40_FringillaCoelebsFemale.webp": {
+          "relativePath": "40_FringillaCoelebsFemale.webp",
+          "source": "assets/learning/flashcards/birds/40_FringillaCoelebsFemale.webp",
+          "bytes": 18920,
+          "fileSha256": "ac0383c0381c3642730582f4c657ade9a29a973f4ce7f53bfa7efd5803a0e27a"
+        },
+        "41_Carduelis_carduelis_2012.webp": {
+          "relativePath": "41_Carduelis_carduelis_2012.webp",
+          "source": "assets/learning/flashcards/birds/41_Carduelis_carduelis_2012.webp",
+          "bytes": 41282,
+          "fileSha256": "65fd86cc8f18a86103530a94f3abcddb396e54569b10d7bbec49e3d5731d92d3"
+        },
+        "42_CarduelisChlorisBerry.webp": {
+          "relativePath": "42_CarduelisChlorisBerry.webp",
+          "source": "assets/learning/flashcards/birds/42_CarduelisChlorisBerry.webp",
+          "bytes": 23922,
+          "fileSha256": "9c14033339c311fb256413ff59915b9c9b5d2fdd76c364db76de476b9422580f"
+        },
+        "43_A_male_bullfinch_8420316038.webp": {
+          "relativePath": "43_A_male_bullfinch_8420316038.webp",
+          "source": "assets/learning/flashcards/birds/43_A_male_bullfinch_8420316038.webp",
+          "bytes": 38894,
+          "fileSha256": "e208a1db917a752d2d92987e3a562046333dbc921bbdbf51868678da627ef406"
+        },
+        "44_Passer_domesticus_04.webp": {
+          "relativePath": "44_Passer_domesticus_04.webp",
+          "source": "assets/learning/flashcards/birds/44_Passer_domesticus_04.webp",
+          "bytes": 62818,
+          "fileSha256": "5b64a8922a68df3c81f7cbeb1dec662eeb89924390d8da236e8f487a32703c51"
+        },
+        "45_Tree_Sparrow_August_2007_Osaka_Japan.webp": {
+          "relativePath": "45_Tree_Sparrow_August_2007_Osaka_Japan.webp",
+          "source": "assets/learning/flashcards/birds/45_Tree_Sparrow_August_2007_Osaka_Japan.webp",
+          "bytes": 19254,
+          "fileSha256": "9925ee3ca79bf673104a8a6bd5250f897b94b751d41ff655e6d589bcb10b34a7"
+        },
+        "46_Common_Cuckoo_14679874253.webp": {
+          "relativePath": "46_Common_Cuckoo_14679874253.webp",
+          "source": "assets/learning/flashcards/birds/46_Common_Cuckoo_14679874253.webp",
+          "bytes": 9606,
+          "fileSha256": "0a2373cbe248a0627f3a0cdfb5e784b6822d217a4d67630b87708959c4cf0171"
+        },
+        "47_Buizerd_-_common_buzzard_-_Buteo_buteo.webp": {
+          "relativePath": "47_Buizerd_-_common_buzzard_-_Buteo_buteo.webp",
+          "source": "assets/learning/flashcards/birds/47_Buizerd_-_common_buzzard_-_Buteo_buteo.webp",
+          "bytes": 19908,
+          "fileSha256": "db513a0fc008355e887702096f4f31376b0951be0d47dd5954cdc89f235374f2"
+        },
+        "48_Northern_Goshawk_ad_M2.webp": {
+          "relativePath": "48_Northern_Goshawk_ad_M2.webp",
+          "source": "assets/learning/flashcards/birds/48_Northern_Goshawk_ad_M2.webp",
+          "bytes": 41426,
+          "fileSha256": "1b61d23c35299f03aaaddbce05ac11caf77c59ce83c40e0688a1dd617d6a9d6a"
+        },
+        "49_Accipiter_nisus.webp": {
+          "relativePath": "49_Accipiter_nisus.webp",
+          "source": "assets/learning/flashcards/birds/49_Accipiter_nisus.webp",
+          "bytes": 38556,
+          "fileSha256": "461b3246e59d65bdf82a0c7b01faf4204e70b3a5f37d49d8a9a22acc86535472"
+        },
+        "50_Common_kestrel_falco_tinnunculus.webp": {
+          "relativePath": "50_Common_kestrel_falco_tinnunculus.webp",
+          "source": "assets/learning/flashcards/birds/50_Common_kestrel_falco_tinnunculus.webp",
+          "bytes": 14154,
+          "fileSha256": "df4d033e0838ecbab3d058ce131d0c083328971c545e02a8038f7c5b91f5a0e3"
+        }
+      }
+    }
+  }
+}

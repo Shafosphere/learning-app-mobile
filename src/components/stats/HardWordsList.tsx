@@ -4,7 +4,7 @@ import StatsProgressRow from "./StatsProgressRow";
 import MyButton from "@/src/components/button/button";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { Image } from "expo-image";
+import { ContentImage as Image } from "@/Content/runtime/ContentImage";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
