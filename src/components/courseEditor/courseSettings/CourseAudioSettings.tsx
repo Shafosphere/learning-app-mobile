@@ -1,3 +1,4 @@
+import { CourseAudioDownloadPanels } from "@/Audio/runtime/LanguageAudioDownloadPanel";
 import { Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import type { CourseSettingsSectionProps } from "./types";
@@ -15,6 +16,7 @@ import { AudioAutoplaySettingsSection } from "../AudioAutoplaySettingsSection";
 
 type Props = Pick<
   CourseSettingsSectionProps,
+  | "audioCourseSlug"
   | "styles"
   | "audioSettings"
   | "onChangeAudioSettings"
@@ -23,6 +25,7 @@ type Props = Pick<
 >;
 
 export function CourseAudioSettings({
+  audioCourseSlug,
   styles,
   audioSettings,
   onChangeAudioSettings,
@@ -35,6 +38,7 @@ export function CourseAudioSettings({
   if (!audioSettings || !onChangeAudioSettings) return null;
   return (
     <View testID="course-audio-settings">
+      <CourseAudioDownloadPanels slug={audioCourseSlug} />
       <View style={sharedStyles.settingsGroupCard}>
         <SettingsToggleRow
           styles={sharedStyles}

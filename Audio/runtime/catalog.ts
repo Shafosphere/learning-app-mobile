@@ -1,3 +1,4 @@
+import { audioLanguageKey } from "../language";
 import data from "./generated/catalog.json";
 
 export type AudioSide = "front" | "back";
@@ -8,9 +9,10 @@ export type AudioCourse = {
   requiredPacks: string[];
 };
 type CatalogCourse = AudioCourse & { cards: Record<string, Partial<Record<AudioSide, number | number[]>>> };
-export type AudioPack = { deliveryMode: string; sourceBytes: number; recordingCount: number; manifestHash: string };
+export type AudioPack = { language: string; deliveryMode: string; sourceBytes: number; recordingCount: number; manifestHash: string };
 type AudioCatalog = {
   schemaVersion: number;
+  languages: Record<string, string>;
   recordings: { audioId: string; text: string; language: string; packName: string }[];
   packs: Record<string, AudioPack>;
   courses: Record<string, CatalogCourse>;
@@ -33,4 +35,9 @@ export function resolveRecording(slug: string | null, externalId: string | null 
   const recording: Recording | null = entry ? { text: entry.text, language: entry.language,
     packName: entry.packName, relativePath: `${entry.audioId}.mp3` } : null;
   return { language, recording };
+}
+
+export const getAudioLanguagePack = (locale: string): string | undefined => catalog.languages[audioLanguageKey(locale)];
+export function getCourseAudioPacks(slug: string | null | undefined): string[] {
+  return getAudioCourse(slug)?.requiredPacks ?? [];
 }

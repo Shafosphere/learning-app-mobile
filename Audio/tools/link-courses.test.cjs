@@ -16,7 +16,7 @@ test('matches complete text across course IDs and physical sides; missing forms 
     assert.equal(catalog.courses.spanish_pl.cards['0002'].front, createAudioId({ ...recipe, text: 'hola, buenos días' }));
     assert.equal(catalog.courses.spanish_pl.cards['0003'], undefined);
     assert.equal(summary.find((item) => item.slug === 'spanish_pl').missing, 1);
-    assert.equal(catalog.packs.audio_es_small.audioIds.length, 2);
+    assert.equal(catalog.packs.audio_es.audioIds.length, 2);
     assert.ok(!existsSync(join(audioRoot, 'recordings.json')));
     assert.ok(existsSync(join(audioRoot, 'reports/spanish_pl.csv')));
     assert.ok(existsSync(join(root, 'docs/audio/content/reports/README.md')));
@@ -51,12 +51,12 @@ test('partial variants share recordings, preserve commas and omit unavailable fo
     assert.equal(buildCatalog(root).courses.spanish_pl.cards['0001'], undefined);
   });
 });
-test('a course can require multiple packs and every recording has one owner', () => {
+test('courses share one language pack and every recording has one owner', () => {
   fixture(({ root, audioRoot }) => {
     writeFileSync(join(root, 'pl.csv'), 'external_id,front_text,back_text\n0001,agua,woda\n');
     writeFileSync(join(root, 'back.csv'), 'external_id,front_text,back_text\n0001,woda,agua\n0002,phrase,"hola, buenos días"\n');
     const { catalog } = linkCourses(root);
-    assert.deepEqual(catalog.courses.spanish_back.requiredPacks, ['audio_es_large', 'audio_es_small']);
+    assert.deepEqual(catalog.courses.spanish_back.requiredPacks, ['audio_es']);
     assert.equal(Object.keys(catalog.recordings).length, 2);
     assert.equal(existsSync(join(audioRoot, 'reports/spanish_back.csv')), true);
   });

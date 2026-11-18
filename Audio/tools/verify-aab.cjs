@@ -10,6 +10,10 @@ async function verify() {
   const source = readRecordings(resolve(root, 'Audio/content'));
   const aab = resolve(process.argv[2] || 'android/app/build/outputs/bundle/release/app-release.aab');
   const zip = await JSZip.loadAsync(readFileSync(aab));
+  const bundledAudioPacks = [...new Set(Object.keys(zip.files).map(path => path.split('/')[0]).filter(name => name.startsWith('audio_')))];
+  if (bundledAudioPacks.some(name => !catalog.packs[name]) || bundledAudioPacks.length !== Object.keys(catalog.packs).length) {
+    throw new Error(`Unexpected AAB audio packs: ${bundledAudioPacks.join(', ')}`);
+  }
   const expectedPaths = new Set();
   const audioChecksums = new Set();
   for (const [name, pack] of Object.entries(catalog.packs)) {

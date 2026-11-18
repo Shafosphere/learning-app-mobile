@@ -13,7 +13,7 @@ jest.mock("expo-file-system/legacy", () => ({
   cacheDirectory: "file:///cache/", documentDirectory: "file:///documents/", EncodingType: { UTF8: "utf8" },
   writeAsStringAsync: jest.fn(async () => {}),
 }));
-const name = "audio_es_50";
+const name = "audio_es";
 const native = jest.mocked(playAssetDelivery!);
 beforeEach(async () => {
   await flushDebugEvents();

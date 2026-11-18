@@ -17,14 +17,18 @@ test('v1 migration preserves every recording and all 16 course mappings', () => 
   const originalRecordings = Object.fromEntries(Object.entries(readRecordings(join(project, 'Audio/content'))).filter(([, record]) => record.language !== 'en-US'));
   assert.equal(sha256(JSON.stringify(canonical(originalRecordings))), '00decafe586e5e5c6d4e38bb11c4e8a6f135251205cd86e5308746f832f4c3b6');
   assert.equal(Object.values(catalog.recordings).filter((record) => record.language !== 'en-US').length, 10436);
-  assert.equal(Object.keys(catalog.packs).filter((name) => !name.startsWith('audio_en_')).length, 11);
+  assert.equal(Object.keys(catalog.packs).filter((name) => name !== 'audio_en').length, 2);
   const members = Object.values(catalog.packs).flatMap((pack) => pack.audioIds);
   assert.equal(new Set(members).size, members.length);
 });
 test('course dependencies cover every recording with the planned source sizes', () => {
-  const bytes = (slug) => catalog.courses[slug].requiredPacks.reduce((sum, name) => sum + catalog.packs[name].sourceBytes, 0);
-  for (const [slug, size] of [['fr_to_pl_first_50', 519264], ['fr_to_pl_first_150', 977952], ['fr_to_pl_first_332', 1564704],
-    ['french_a1', 5224320], ['french_a2', 7518720], ['french_b1', 15429120], ['french_b2', 20710944], ['es_to_pl_first_50', 223392]]) assert.equal(bytes(slug), size);
+  assert.deepEqual(Object.keys(catalog.packs), ['audio_en', 'audio_es', 'audio_fr']);
+  assert.deepEqual(catalog.languages, { en: 'audio_en', es: 'audio_es', fr: 'audio_fr' });
+  for (const [name, bytes] of Object.entries({ audio_en: 27467040, audio_es: 1515744, audio_fr: 47519712 })) assert.equal(catalog.packs[name].sourceBytes, bytes);
+  for (const [slug, course] of Object.entries(catalog.courses)) {
+    const expected = slug.startsWith('eng_') ? 'audio_en' : slug.startsWith('es_') ? 'audio_es' : 'audio_fr';
+    assert.deepEqual(course.requiredPacks, [expected]);
+  }
   for (const language of ['es', 'fr']) for (const count of language === 'es' ? [50, 150, 327] : [50, 150, 332]) {
     assert.deepEqual(catalog.courses[`${language}_to_pl_first_${count}`].cards, catalog.courses[`${language}_to_en_first_${count}`].cards);
   }
@@ -74,14 +78,10 @@ test('identity includes voice/configuration and preserves NFC', () => {
   assert.notEqual(createAudioId(recipe), createAudioId({ ...recipe, audioConfig: { speakingRate: 0.8 } }));
   assert.equal(createAudioId({ ...recipe, text: ' azúcar ' }), createAudioId({ ...recipe, text: 'azu\u0301car' }));
 });
-test('corrupt recordings and duplicate pack policies fail validation', () => {
+test('corrupt recordings fail validation', () => {
   fixture(({ root, audioRoot, recordings }) => {
     writeFileSync(join(audioRoot, Object.values(recordings)[0].file), 'invalid');
     assert.throws(() => buildCatalog(root), /Invalid audio file/);
-  });
-  fixture(({ root, audioRoot }) => {
-    writeFileSync(join(audioRoot, 'packs.json'), JSON.stringify({ schemaVersion: 2, families: { es: { groups: ['es_small', 'es_small'] } } }));
-    assert.throws(() => buildCatalog(root), /duplicate pack group/);
   });
 });
 test('check rejects mutating options before executing them', () => {
@@ -96,7 +96,7 @@ test('Gradle registration preserves signing and is idempotent', () => {
   const once = withBlock(original, block);
   assert.equal(withBlock(once, block), once);
   assert.ok(once.startsWith(original));
-  assert.equal((once.match(/audio_es_50/g) || []).length, 1);
+  assert.equal((once.match(/audio_es/g) || []).length, 1);
 });
 test('staged packs namespace manifests so bundletool cannot collide asset paths', () => {
   fixture(({ root }) => {
@@ -108,7 +108,7 @@ test('staged packs namespace manifests so bundletool cannot collide asset paths'
     for (const [name, pack] of Object.entries(generated.packs)) {
       assert.equal(readFileSync(join(android, name, 'src/main/assets/audio-manifests', `${name}.json`), 'utf8'), pack.manifest);
     }
-    assert.equal(Object.keys(generated.packs).length, 2);
+    assert.equal(Object.keys(generated.packs).length, 1);
     // The second preparation owns these directories and is safe to repeat.
     preparePacks(root, android, generated);
   });

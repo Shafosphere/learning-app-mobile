@@ -5,7 +5,7 @@ import type { CustomFlashcardRecord } from "@/src/db/sqlite/repositories/flashca
 it("shares Spanish recordings across translations while keeping physical-side languages", () => {
   const pl = resolveRecording("es_to_pl_first_50", "0001", "front", "agua")!;
   expect(pl).toEqual(resolveRecording("es_to_en_first_50", "0001", "front", "agua"));
-  expect(pl.recording).toMatchObject({ packName: "audio_es_50", language: "es-ES" });
+  expect(pl.recording).toMatchObject({ packName: "audio_es", language: "es-ES" });
   expect(pl.recording?.relativePath).toMatch(/^[a-f0-9]{64}\.mp3$/);
   expect(resolveRecording("es_to_pl_first_50", "0001", "back", "woda")).toEqual({ language: "pl-PL", recording: null });
   expect(resolveRecording("es_to_en_first_50", "0001", "back", "water")).toEqual({ language: "en-US", recording: null });
@@ -15,15 +15,15 @@ it("rejects obsolete text, absent identity and courses without audio", () => {
   expect(resolveRecording("es_to_pl_first_50", null, "front", "agua")?.recording).toBeNull();
   expect(resolveRecording("unknown", "0001", "front", "eau")).toBeNull();
   expect(getAudioCourse("unknown")).toBeUndefined();
-  expect(getAudioPack("audio_es_50")?.recordingCount).toBe(50);
+  expect(getAudioPack("audio_es")?.recordingCount).toBe(327);
 });
-it.each(["pl", "en"])("resolves shared Spanish MP3 and incremental packs with %s translations", (target) => {
+it.each(["pl", "en"])("resolves shared Spanish MP3 and language pack with %s translations", (target) => {
   const first = resolveRecording(`es_to_${target}_first_50`, "0001", "front", "agua");
   for (const count of [150, 327]) {
     expect(resolveRecording(`es_to_${target}_first_${count}`, "0001", "front", "agua")).toEqual(first);
-    expect(resolveRecording(`es_to_${target}_first_${count}`, "0107", "front", "ser")?.recording?.packName).toBe("audio_es_150");
+    expect(resolveRecording(`es_to_${target}_first_${count}`, "0107", "front", "ser")?.recording?.packName).toBe("audio_es");
   }
-  expect(resolveRecording(`es_to_${target}_first_327`, "0051", "front", "hola")?.recording?.packName).toBe("audio_es_327");
+  expect(resolveRecording(`es_to_${target}_first_327`, "0051", "front", "hola")?.recording?.packName).toBe("audio_es");
   expect(resolveRecording(`es_to_${target}_first_327`, "0328", "front", "no me gusta")?.recording?.text).toBe("no me gusta");
 });
 it("preserves externalId through study and review mapping", () => {
@@ -49,12 +49,12 @@ it.each([
   ["french_b1", "2003", ["construit", "construite", "construits"]],
   ["french_b2", "5004", ["crie", "crié"]],
 ] as const)("resolves real generated forms in %s", (slug, externalId, forms) => {
-  expect(getAudioCourse(slug)?.requiredPacks.length).toBe(2);
+  expect(getAudioCourse(slug)?.requiredPacks.length).toBe(1);
   for (const text of forms) expect(resolveRecording(slug, externalId, "front", text)?.recording).toMatchObject({ text, language: "fr-FR" });
   expect(resolveRecording(slug, externalId, "front", "edited")?.recording).toBeNull();
 });
 it("resolves recording index zero rather than treating it as missing", () => {
-  expect(resolveRecording("french_b2", "7991", "front", "tactique")?.recording).toMatchObject({ text: "tactique", packName: "audio_fr_b2" });
+  expect(resolveRecording("french_b2", "7991", "front", "tactique")?.recording).toMatchObject({ text: "tactique", packName: "audio_fr" });
 });
 it("shares English audio across A1 and the smaller courses and keeps Polish on device speech", () => {
   const water = resolveRecording("eng_to_pl_a1", "0092", "front", "water");

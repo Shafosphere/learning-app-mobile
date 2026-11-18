@@ -12,9 +12,8 @@ function migrate(root) {
   const recordings = legacy.recordings, recipes = {}, courses = {};
   for (const record of Object.values(recordings)) recipes[recipeKey(record)] = recipeOf(record);
   for (const [slug, { cards, ...course }] of Object.entries(definitions.courses)) {
-    const family = slug.startsWith('es_') ? 'es' : 'fr';
-    const group = slug.startsWith('french_') ? `fr_${slug.slice(7)}` : `${family}_${slug.split('_').at(-1)}`;
-    courses[slug] = { ...course, packGroup: group };
+    const { packGroup, ...sourceCourse } = course;
+    courses[slug] = sourceCourse;
     for (const side of ['front', 'back']) {
       const ids = Object.values(cards).flatMap((sides) => sides[side] ? [sides[side]].flat() : []);
       if (!ids.length) continue;
@@ -24,19 +23,14 @@ function migrate(root) {
     }
   }
   const newCourses = { schemaVersion: 2, courses };
-  const packs = { schemaVersion: 2, families: {
-    es: { groups: ['es_50', 'es_150', 'es_327'] },
-    fr: { groups: ['fr_50', 'fr_150', 'fr_332', 'fr_a1', 'fr_a2', 'fr_b1', 'fr_b2'], sharedGroups: ['fr_a1', 'fr_a2', 'fr_b1', 'fr_b2'] },
-  } };
   // Validate identities, every MP3 checksum and every regenerated mapping before changing sources.
-  const catalog = buildCatalog(root, { recordings, recipes, courses: newCourses, packs });
+  const catalog = buildCatalog(root, { recordings, recipes, courses: newCourses });
   for (const [slug, course] of Object.entries(definitions.courses)) assert.deepEqual(catalog.courses[slug].cards, course.cards, `Changed mapping: ${slug}`);
   assert.deepEqual(Object.keys(catalog.recordings).sort(), Object.keys(recordings).sort(), 'Migration must preserve all recordings');
   saveRecordingLibrary(directory, recordings);
   const reloaded = readRecordings(directory);
   for (const [id, record] of Object.entries(recordings)) assert.deepEqual(reloaded[id], { ...recipeOf(record), text: record.text, bytes: record.bytes, fileSha256: record.fileSha256, file: record.file });
   saveJson(join(directory, 'courses.json'), newCourses);
-  saveJson(join(directory, 'packs.json'), packs);
   writeOutputs(root, catalog);
   unlinkSync(join(directory, 'recordings.json'));
   console.log(`Migration verified: ${Object.keys(recordings).length} unchanged recordings, ${Object.keys(courses).length} unchanged course mappings, ${Object.keys(catalog.packs).length} packs.`);

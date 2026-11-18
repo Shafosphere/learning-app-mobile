@@ -2361,6 +2361,10 @@
     }
   },
   "audioDownload": {
+    "languageTitle": "Audio · {{language}}",
+    "allCourses": "Recordings for all courses",
+    "optional": "Optional · learn without downloading",
+    "languageAction": "{{action}} — {{language}} recordings",
     "title": "Audio",
     "downloaded": "Downloaded",
     "checking": "Checking…",

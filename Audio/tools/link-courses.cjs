@@ -2,7 +2,7 @@ const { resolve } = require('node:path');
 const { parseArgs } = require('node:util');
 const { buildCatalog, writeOutputs } = require('./catalog.cjs');
 
-// Recipes and pack groups live in source configuration. Regenerate every course
+// Recipes live in source configuration. Regenerate every course
 // so new recordings cannot leave another course's catalog stale.
 function linkCourses(projectRoot, { check = false } = {}) {
   const catalog = buildCatalog(projectRoot);

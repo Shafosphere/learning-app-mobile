@@ -45,7 +45,7 @@ it("uses the current course and physical side for study/box0/review read request
   await waitFor(() => expect(screen.result.current.available).toBe(true));
   act(() => screen.result.current.read("front", "agua"));
   expect(flashcardAudioPlayer.play).toHaveBeenLastCalledWith(expect.objectContaining({ language: "es-ES",
-    recording: expect.objectContaining({ packName: "audio_es_50" }), text: "agua" }));
+    recording: expect.objectContaining({ packName: "audio_es" }), text: "agua" }));
   act(() => screen.result.current.read("back", "woda"));
   expect(flashcardAudioPlayer.play).toHaveBeenLastCalledWith(expect.objectContaining({ language: "pl-PL", recording: null }));
   act(() => screen.result.current.read("front", "changed"));

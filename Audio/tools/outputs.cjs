@@ -4,10 +4,10 @@ const { saveText, sorted } = require('./io.cjs');
 
 function runtimeCatalog(catalog) {
   const entries = Object.entries(catalog.recordings), indexes = new Map(entries.map(([id], index) => [id, index]));
-  return { schemaVersion: 2,
+  return { schemaVersion: 2, languages: catalog.languages,
     recordings: entries.map(([audioId, { text, language, packName }]) => ({ audioId, text, language, packName })),
     packs: Object.fromEntries(Object.entries(catalog.packs).map(([name, pack]) => [name,
-      { deliveryMode: pack.deliveryMode, sourceBytes: pack.sourceBytes, recordingCount: pack.audioIds.length, manifestHash: pack.manifestHash }])),
+      { language: pack.language, deliveryMode: pack.deliveryMode, sourceBytes: pack.sourceBytes, recordingCount: pack.audioIds.length, manifestHash: pack.manifestHash }])),
     courses: Object.fromEntries(Object.entries(catalog.courses).map(([slug, course]) => [slug, { ...course,
       cards: Object.fromEntries(Object.entries(course.cards).map(([id, sides]) => [id,
         Object.fromEntries(Object.entries(sides).map(([side, ids]) => [side, Array.isArray(ids) ? ids.map((id) => indexes.get(id)) : indexes.get(ids)]))])) }])) };

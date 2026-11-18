@@ -243,6 +243,7 @@ export default function CustomCourseEditor({
   const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [existingCourses, setExistingCourses] = useState<CourseNameCandidate[]>([]);
+  const [audioCourseSlug, setAudioCourseSlug] = useState<string | null>(null);
   const [isOfficialCourse, setIsOfficialCourse] = useState(lockAppearance);
   const customBoxesStorageKey = useMemo(
     () =>
@@ -343,6 +344,7 @@ export default function CustomCourseEditor({
   const hydrateFromDb = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
+    setAudioCourseSlug(null);
     try {
       const [courseRow, nameRows, flashcardRows] = await Promise.all([
         getCustomCourseById(courseId),
@@ -367,6 +369,7 @@ export default function CustomCourseEditor({
         reviewsEnabled: courseRow.reviewsEnabled,
       });
       setIsOfficialCourse(courseRow.isOfficial === true);
+      setAudioCourseSlug(courseRow.isOfficial ? courseRow.slug ?? null : null);
 
       const incomingCards = flashcardRows.map((card, index) => {
         const answersSource =
@@ -735,6 +738,7 @@ export default function CustomCourseEditor({
       trackTrue: colors.my_green,
     },
     colors,
+    audioCourseSlug,
     audioSettings: getCustomCourseAudioSettings(courseId),
     audioSettingsDisabled: !courseAudioSettingsHydrated,
     showAudioLanguages: !isOfficialCourse,
@@ -779,6 +783,7 @@ export default function CustomCourseEditor({
     imageFrameEnabled: courseImageFrameEnabled,
     onToggleImageFrame: handleCourseImageFrameToggle,
   }), [
+    audioCourseSlug,
     colors,
     courseAudioSettingsHydrated,
     courseAutoflowEnabled,

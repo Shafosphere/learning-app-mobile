@@ -14,6 +14,7 @@ type SwitchColors = {
   trackTrue: string;
 };
 export type CourseSettingsSectionProps = {
+  audioCourseSlug?: string | null;
   frontImageRole?: CourseFrontImageRole;
   onChangeFrontImageRole?: (role: CourseFrontImageRole) => void;
   frontImageRoleDisabled?: boolean;

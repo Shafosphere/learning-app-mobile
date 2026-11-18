@@ -5,15 +5,14 @@ const { audioTexts, createAudioId } = require('./identity.cjs');
 
 function mapCourses(projectRoot, definitions, recipes, recordings) {
   if (definitions.schemaVersion !== 2 || !definitions.courses) throw new Error('Unsupported audio course version');
-  const courses = {}, summary = [], groupIds = {};
+  const courses = {}, summary = [], usedAudioIds = new Set();
   for (const [slug, course] of Object.entries(sorted(definitions.courses))) {
-    if (!/^[a-z0-9_]+$/.test(slug) || !/^[a-z][a-z0-9_]*$/.test(course.packGroup)) throw new Error(`Invalid course: ${slug}`);
+    if (!/^[a-z0-9_]+$/.test(slug)) throw new Error(`Invalid course: ${slug}`);
     if (course.cards) throw new Error(`Generated cards must not be stored in source course: ${slug}`);
     const parsed = Papa.parse(readFileSync(inside(projectRoot, course.csv), 'utf8'), { header: true, skipEmptyLines: 'greedy' });
     if (parsed.errors.length || !['external_id', 'front_text', 'back_text'].every((key) => parsed.meta.fields?.includes(key))) throw new Error(`Invalid course CSV: ${slug}`);
     const cards = {}, rows = [], externalIds = new Set();
     let matched = 0, missing = 0;
-    const used = groupIds[course.packGroup] ??= new Set();
     for (const row of parsed.data) {
       const id = row.external_id;
       if (!id || externalIds.has(id)) throw new Error(`Duplicate/missing externalId: ${slug}`);
@@ -29,7 +28,7 @@ function mapCourses(projectRoot, definitions, recipes, recordings) {
         const ids = [];
         for (const text of texts) {
           const audioId = createAudioId({ ...recipe, text });
-          if (recordings[audioId]) { ids.push(audioId); used.add(audioId); matched++; } else missing++;
+          if (recordings[audioId]) { ids.push(audioId); usedAudioIds.add(audioId); matched++; } else missing++;
           rows.push({ externalId: id, side, text, audioId: recordings[audioId] ? audioId : '', pack: '' });
         }
         if (ids.length) sides[side] = ids.length === 1 ? ids[0] : ids;
@@ -39,6 +38,6 @@ function mapCourses(projectRoot, definitions, recipes, recordings) {
     courses[slug] = { frontLanguage: course.frontLanguage, backLanguage: course.backLanguage, requiredPacks: [], cards };
     summary.push({ slug, totalCards: parsed.data.length, matched, missing, rows });
   }
-  return { courses, summary, groupIds };
+  return { courses, summary, usedAudioIds };
 }
 module.exports = { mapCourses };

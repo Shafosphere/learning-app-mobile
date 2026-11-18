@@ -2365,6 +2365,10 @@
     }
   },
   "audioDownload": {
+    "languageTitle": "Audio · {{language}}",
+    "allCourses": "Nagrania do wszystkich kursów",
+    "optional": "Opcjonalnie · ucz się bez pobierania",
+    "languageAction": "{{action}} — nagrania: {{language}}",
     "title": "Audio",
     "downloaded": "Pobrano",
     "checking": "Sprawdzanie…",

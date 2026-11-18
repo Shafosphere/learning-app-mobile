@@ -13,7 +13,7 @@ function buildCatalog(projectRoot, documents = {}) {
   const recipes = documents.recipes ?? sources.readRecipes(root);
   sources.validateRecordings(root, source);
   const mapped = mapCourses(projectRoot, documents.courses ?? readJson(join(root, 'courses.json')), recipes, source);
-  const packed = packRecordings(documents.packs ?? readJson(join(root, 'packs.json')), mapped.groupIds, source);
+  const packed = packRecordings(mapped.usedAudioIds, source);
   for (const course of Object.values(mapped.courses)) {
     const used = Object.values(course.cards).flatMap((sides) => Object.values(sides).flat());
     course.requiredPacks = [...new Set(used.map((id) => packed.recordings[id].packName))].sort();

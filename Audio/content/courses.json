@@ -5,42 +5,36 @@
       "csv": "tools/prebuild-data/pl/jezyki/hiszpanski/fiszki_50.csv",
       "frontLanguage": "es-ES",
       "backLanguage": "pl-PL",
-      "packGroup": "es_50",
       "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
     },
     "es_to_en_first_50": {
       "csv": "tools/prebuild-data/en/jezyki/hiszpanski/fiszki_50.csv",
       "frontLanguage": "es-ES",
       "backLanguage": "en-US",
-      "packGroup": "es_50",
       "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
     },
     "es_to_pl_first_150": {
       "csv": "tools/prebuild-data/pl/jezyki/hiszpanski/fiszki_150.csv",
       "frontLanguage": "es-ES",
       "backLanguage": "pl-PL",
-      "packGroup": "es_150",
       "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
     },
     "es_to_pl_first_327": {
       "csv": "tools/prebuild-data/pl/jezyki/hiszpanski/fiszki_327.csv",
       "frontLanguage": "es-ES",
       "backLanguage": "pl-PL",
-      "packGroup": "es_327",
       "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
     },
     "es_to_en_first_150": {
       "csv": "tools/prebuild-data/en/jezyki/hiszpanski/fiszki_150.csv",
       "frontLanguage": "es-ES",
       "backLanguage": "en-US",
-      "packGroup": "es_150",
       "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
     },
     "es_to_en_first_327": {
       "csv": "tools/prebuild-data/en/jezyki/hiszpanski/fiszki_327.csv",
       "frontLanguage": "es-ES",
       "backLanguage": "en-US",
-      "packGroup": "es_327",
       "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
     },
     "fr_to_pl_first_50": {
@@ -48,7 +42,6 @@
       "frontLanguage": "fr-FR",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "fr_50",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
     },
     "fr_to_pl_first_150": {
@@ -56,7 +49,6 @@
       "frontLanguage": "fr-FR",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "fr_150",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
     },
     "fr_to_pl_first_332": {
@@ -64,7 +56,6 @@
       "frontLanguage": "fr-FR",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "fr_332",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
     },
     "fr_to_en_first_50": {
@@ -72,7 +63,6 @@
       "frontLanguage": "fr-FR",
       "backLanguage": "en-US",
       "frontAudioMode": "variants",
-      "packGroup": "fr_50",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
     },
     "fr_to_en_first_150": {
@@ -80,7 +70,6 @@
       "frontLanguage": "fr-FR",
       "backLanguage": "en-US",
       "frontAudioMode": "variants",
-      "packGroup": "fr_150",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
     },
     "fr_to_en_first_332": {
@@ -88,7 +77,6 @@
       "frontLanguage": "fr-FR",
       "backLanguage": "en-US",
       "frontAudioMode": "variants",
-      "packGroup": "fr_332",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
     },
     "french_a1": {
@@ -96,7 +84,6 @@
       "frontLanguage": "fr-FR",
       "backLanguage": "en-US",
       "frontAudioMode": "variants",
-      "packGroup": "fr_a1",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
     },
     "french_a2": {
@@ -104,7 +91,6 @@
       "frontLanguage": "fr-FR",
       "backLanguage": "en-US",
       "frontAudioMode": "variants",
-      "packGroup": "fr_a2",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
     },
     "french_b1": {
@@ -112,7 +98,6 @@
       "frontLanguage": "fr-FR",
       "backLanguage": "en-US",
       "frontAudioMode": "variants",
-      "packGroup": "fr_b1",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
     },
     "french_b2": {
@@ -120,7 +105,6 @@
       "frontLanguage": "fr-FR",
       "backLanguage": "en-US",
       "frontAudioMode": "variants",
-      "packGroup": "fr_b2",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
     },
     "eng_to_pl_first_50": {
@@ -128,7 +112,6 @@
       "frontLanguage": "en-US",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "en_50",
       "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
     },
     "eng_to_pl_first_100": {
@@ -136,7 +119,6 @@
       "frontLanguage": "en-US",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "en_100",
       "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
     },
     "eng_to_pl_first_250": {
@@ -144,7 +126,6 @@
       "frontLanguage": "en-US",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "en_250",
       "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
     },
     "eng_to_pl_first_500": {
@@ -152,7 +133,6 @@
       "frontLanguage": "en-US",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "en_500",
       "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
     },
     "eng_to_pl_a1": {
@@ -160,7 +140,6 @@
       "frontLanguage": "en-US",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "en_a1",
       "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
     },
     "eng_to_pl_a2": {
@@ -168,7 +147,6 @@
       "frontLanguage": "en-US",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "en_a2",
       "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
     },
     "eng_to_pl_b1": {
@@ -176,7 +154,6 @@
       "frontLanguage": "en-US",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "en_b1",
       "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
     },
     "eng_to_pl_b2": {
@@ -184,7 +161,6 @@
       "frontLanguage": "en-US",
       "backLanguage": "pl-PL",
       "frontAudioMode": "variants",
-      "packGroup": "en_b2",
       "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
     }
   }
