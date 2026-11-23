@@ -507,6 +507,7 @@ function CourseActivateContent() {
                     )}
                   </Text>
                       <CourseGroupList
+                        showAudioDownloads
                         renderCourseFooter={renderCourseImageFooter}
                         groups={courseGroups}
                         cardWidth={cardWidth}

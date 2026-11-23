@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 
 interface CourseGroupListProps {
     groups: CourseGroup[];
+    showAudioDownloads?: boolean;
     cardWidth?: number;
     activeCourseId: number | null;
     colors: { headline: string };
@@ -48,6 +49,7 @@ const CourseGroupView = memo(function CourseGroupView({
     scrollRef,
     renderCourseFooter,
     cardWidth,
+    showAudioDownloads = false,
 }: GroupProps) {
     const { t } = useTranslation();
     const styles = useStyles();
@@ -117,7 +119,7 @@ const CourseGroupView = memo(function CourseGroupView({
                 </View>
             </View> : null}
 
-            {prepared.audioPacks.map(packName => <LanguageAudioDownloadPanel key={packName} packName={packName} />)}
+            {showAudioDownloads && prepared.audioPacks.map(packName => <LanguageAudioDownloadPanel key={packName} packName={packName} />)}
 
             <OfficialCourseSection
                 title={t("repeats.labels.courses")}

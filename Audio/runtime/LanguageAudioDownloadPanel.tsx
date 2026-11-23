@@ -73,8 +73,8 @@ function DownloadPanel({ packName, language }: { packName: string; language: str
         <Text style={styles.size}>{t("audioDownload.size", { value: (state.totalBytes / 1_000_000).toFixed(2) })}</Text>
       </View> : null}
       {ready ? <View style={styles.ready}>
-        <Feather name="check" size={19} color={styles.buttonText.color} accessible={false} />
-        <Text accessibilityLiveRegion="polite" style={styles.buttonText}>{t("audioDownload.downloaded")}</Text>
+        <Feather name="check" size={19} color={styles.readyText.color} accessible={false} />
+        <Text accessibilityLiveRegion="polite" style={[styles.buttonText, styles.readyText]}>{t("audioDownload.downloaded")}</Text>
       </View> : checking && !showButton ? <ActivityIndicator color={styles.title.color} /> : null}
       {showButton ? <Pressable accessibilityRole="button" accessibilityLabel={t("audioDownload.languageAction", { action: t(`audioDownload.${button}`), language: languageName })}
         accessibilityState={{ disabled: checking }} disabled={checking}
@@ -103,8 +103,10 @@ function luminance(hex: string) {
   return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
 }
 const useStyles = createThemeStylesHook((colors) => {
-  const value = luminance(colors.my_green) + 0.05;
-  const buttonForeground = value / (luminance(colors.darkbg) + 0.05) >= (luminance(colors.lightbg) + 0.05) / value ? colors.darkbg : colors.lightbg;
+  const foreground = (background: string) => {
+    const value = luminance(background) + 0.05;
+    return value / (luminance(colors.darkbg) + 0.05) >= (luminance(colors.lightbg) + 0.05) / value ? colors.darkbg : colors.lightbg;
+  };
   return {
     panel: {
       borderRadius: 15,
@@ -119,8 +121,9 @@ const useStyles = createThemeStylesHook((colors) => {
     description: { fontSize: 14, lineHeight: 20, color: colors.paragraph },
     divider: { height: 1, backgroundColor: colors.border, marginTop: 16, marginBottom: 12 },
     footer: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "flex-end", gap: 10 },
-    button: { minHeight: 44, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 12, backgroundColor: colors.my_green, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 9, maxWidth: "100%", flexShrink: 1 },
-    buttonText: { fontSize: 15, lineHeight: 22, fontWeight: "700", color: buttonForeground, flexShrink: 1 },
+    button: { minHeight: 44, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 12, backgroundColor: colors.my_yellow, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 9, maxWidth: "100%", flexShrink: 1 },
+    buttonText: { fontSize: 15, lineHeight: 22, fontWeight: "700", color: foreground(colors.my_yellow), flexShrink: 1 },
+    readyText: { color: foreground(colors.my_green) },
     ready: { minHeight: 44, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 12, backgroundColor: colors.my_green, flexDirection: "row", alignItems: "center", gap: 9, maxWidth: "100%" },
     sizeRow: { flexDirection: "row", alignItems: "center", gap: 6, marginRight: "auto", flexShrink: 0 },
     size: { fontSize: 14, lineHeight: 20, color: colors.paragraph },

@@ -8,6 +8,16 @@ import { COURSE_CATEGORIES } from "@/src/constants/courseCategories";
 import { resolveThemeColors } from "@/src/theme/theme";
 import { recordCourseActivationEvent } from "@/src/services/courseActivationDiagnostics";
 
+jest.mock("@/Audio/runtime/catalog", () => ({
+  getCourseAudioPacks: () => ["audio_fr"],
+}));
+jest.mock("@/Audio/runtime/LanguageAudioDownloadPanel", () => ({
+  LanguageAudioDownloadPanel: ({ packName }: { packName: string }) => {
+    const { Text } = jest.requireActual<typeof import("react-native")>("react-native");
+    return <Text>{`Download ${packName}`}</Text>;
+  },
+}));
+
 const mockCardRender = jest.fn();
 const mockThemeContext = React.createContext({
   colors: resolveThemeColors("light"), accessibilityPreferences: {}, fontScaleMultiplier: 1,
@@ -145,4 +155,13 @@ it("updates memoized groups and headings through translation, theme and font-sca
   for (const heading of app.screen.getAllByText("Kursy")) {
     expect(heading).toHaveStyle({ color: colors.headline, fontSize: 18 * 1.3 });
   }
+});
+
+it("shows audio downloads only when the screen opts in, once per shared pack", async () => {
+  const app = await setup();
+  expect(app.screen.queryByText("Download audio_fr")).toBeNull();
+  app.update({ showAudioDownloads: true });
+  expect(app.screen.getAllByText("Download audio_fr")).toHaveLength(1);
+  app.update({ showAudioDownloads: false });
+  expect(app.screen.queryByText("Download audio_fr")).toBeNull();
 });

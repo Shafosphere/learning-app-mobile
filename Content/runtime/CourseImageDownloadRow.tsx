@@ -89,7 +89,7 @@ function CourseRow({ slug, courseName, expanded }: { slug: string; courseName: s
       </View>
       {ready ? <View style={[styles.ready, { backgroundColor: colors.my_green }]}>
         <View accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <FontAwesome6 name="check" size={14} color={buttonTextColor} />
+          <Feather name="check" size={19} color={buttonTextColor} />
         </View>
         <Text accessibilityLiveRegion="polite" style={[styles.buttonText, { color: buttonTextColor }]}>{t("audioDownload.downloaded")}</Text>
       </View> : null}
@@ -100,11 +100,11 @@ function CourseRow({ slug, courseName, expanded }: { slug: string; courseName: s
         accessibilityState={{ disabled: checking }}
         disabled={checking}
         onPress={(event) => { event?.stopPropagation(); action(); }}
-        style={({ pressed }) => [styles.button, { backgroundColor: colors.my_yellow, opacity: checking ? 0.6 : pressed ? 0.8 : 1 }]}
+        style={({ pressed }) => [styles.button, { backgroundColor: colors.my_yellow, opacity: checking || pressed ? 0.65 : 1 }]}
       >
         {checking ? <ActivityIndicator size="small" color={buttonTextColor} /> : button === "download" ? (
           <View accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-            <Feather name="download" size={16} color={buttonTextColor} />
+            <Feather name="download" size={20} color={buttonTextColor} />
           </View>
         ) : null}
         <Text style={[styles.buttonText, { color: buttonTextColor }]}>
@@ -131,9 +131,9 @@ const styles = StyleSheet.create({
   icon: { width: 20, alignItems: "center" },
   title: { fontSize: 13, fontWeight: "600", flexShrink: 1 },
   status: { width: "100%", fontSize: 12, lineHeight: 17 },
-  button: { paddingHorizontal: 14, paddingVertical: 12, minHeight: 44, maxWidth: "100%", borderRadius: 10, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  buttonText: { fontSize: 13, fontWeight: "700", flexShrink: 1 },
-  ready: { paddingHorizontal: 14, paddingVertical: 12, minHeight: 44, maxWidth: "100%", borderRadius: 10, flexDirection: "row", alignItems: "center", gap: 8 },
+  button: { paddingHorizontal: 18, paddingVertical: 10, minHeight: 44, maxWidth: "100%", borderRadius: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 9, flexShrink: 1 },
+  buttonText: { fontSize: 15, lineHeight: 22, fontWeight: "700", flexShrink: 1 },
+  ready: { paddingHorizontal: 18, paddingVertical: 10, minHeight: 44, maxWidth: "100%", borderRadius: 12, flexDirection: "row", alignItems: "center", gap: 9 },
   progressTrack: { width: "100%", height: 3, borderRadius: 2, overflow: "hidden", marginTop: 5 },
   progressFill: { height: "100%", borderRadius: 2 },
 });
