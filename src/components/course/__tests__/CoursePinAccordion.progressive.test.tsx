@@ -28,7 +28,7 @@ jest.mock("@expo/vector-icons/FontAwesome6", () => () => null);
 const makeGroup = (series?: string): AccordionGroupItem => ({
   key: series ?? "flags", title: series ?? "Flagi", subtitle: "Opis", count: 1,
   progressiveDescriptionKey: series
-    ? `courses.progressive.${series === "roadSigns" ? "roadSignsDescription" : "description"}`
+    ? `courses.progressive.${series === "roadSigns" ? "roadSignsDescription" : series === "elements" ? "elementsDescription" : series === "mushrooms" ? "mushroomsDescription" : "description"}`
     : undefined,
   regularItems: [{
     id: 1, name: "Zestaw", iconId: "flag:es", iconColor: "#F97316", slug: "es_to_pl_first_50",
@@ -55,14 +55,14 @@ it("preserves an expanded group and pin actions when switching between one and t
   expect(screen.getByText("Kurs 3")).toBeTruthy();
 });
 
-it.each(["englishFromZero", "frenchFromZero", "spanishFromZero", "roadSigns"] as const)("shows info on collapsed and expanded %s without changing pin or expansion state", (id) => {
+it.each(["englishFromZero", "frenchFromZero", "spanishFromZero", "roadSigns", "elements", "mushrooms"] as const)("shows info on collapsed and expanded %s without changing pin or expansion state", (id) => {
   const onPin = jest.fn();
   const screen = render(<CoursePinAccordion groups={[makeGroup(id)]} renderCourseCard={(course) => <Text key={course.id} onPress={onPin}>Zestaw</Text>} />);
   const header = () => screen.getByLabelText(`Kategoria ${id}, 1 kursów`);
   const info = () => screen.getByLabelText(pl.courses.progressive.infoLabel);
   expect(header().props.accessibilityState.expanded).toBe(false);
   fireEvent.press(info());
-  const description = id === "roadSigns" ? pl.courses.progressive.roadSignsDescription : pl.courses.progressive.description;
+  const description = id === "roadSigns" ? pl.courses.progressive.roadSignsDescription : id === "elements" ? pl.courses.progressive.elementsDescription : id === "mushrooms" ? pl.courses.progressive.mushroomsDescription : pl.courses.progressive.description;
   expect(screen.getByText(description)).toBeTruthy();
   fireEvent.press(screen.getByText(pl.courses.progressive.confirm));
   expect(screen.queryByText(pl.courses.progressive.title)).toBeNull();

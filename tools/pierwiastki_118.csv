@@ -1,0 +1,119 @@
+atomicNumber,symbol,namePl,nameEn,latinName,group,period,familyPl,classPl,classificationStatus,classificationQuizEligible,basicCourse
+1,H,wodór,Hydrogen,,1,1,niemetal,niemetal,standardowa,True,True
+2,He,hel,Helium,,18,1,gaz szlachetny,niemetal,standardowa,True,True
+3,Li,lit,Lithium,,1,2,metal alkaliczny (litowiec),metal,standardowa,True,True
+4,Be,beryl,Beryllium,,2,2,metal ziem alkalicznych (berylowiec),metal,standardowa,True,False
+5,B,bor,Boron,,13,2,półmetal,półmetal,standardowa,True,True
+6,C,węgiel,Carbon,,14,2,niemetal,niemetal,standardowa,True,True
+7,N,azot,Nitrogen,,15,2,niemetal,niemetal,standardowa,True,True
+8,O,tlen,Oxygen,,16,2,niemetal,niemetal,standardowa,True,True
+9,F,fluor,Fluorine,,17,2,fluorowiec (halogen),niemetal,standardowa,True,True
+10,Ne,neon,Neon,,18,2,gaz szlachetny,niemetal,standardowa,True,True
+11,Na,sód,Sodium,natrium,1,3,metal alkaliczny (litowiec),metal,standardowa,True,True
+12,Mg,magnez,Magnesium,,2,3,metal ziem alkalicznych (berylowiec),metal,standardowa,True,True
+13,Al,glin,Aluminium,,13,3,metal bloku p,metal,standardowa,True,True
+14,Si,krzem,Silicon,,14,3,półmetal,półmetal,standardowa,True,True
+15,P,fosfor,Phosphorus,,15,3,niemetal,niemetal,standardowa,True,True
+16,S,siarka,Sulfur,,16,3,niemetal,niemetal,standardowa,True,True
+17,Cl,chlor,Chlorine,,17,3,fluorowiec (halogen),niemetal,standardowa,True,True
+18,Ar,argon,Argon,,18,3,gaz szlachetny,niemetal,standardowa,True,True
+19,K,potas,Potassium,kalium,1,4,metal alkaliczny (litowiec),metal,standardowa,True,True
+20,Ca,wapń,Calcium,,2,4,metal ziem alkalicznych (berylowiec),metal,standardowa,True,True
+21,Sc,skand,Scandium,,3,4,metal bloku d,metal,standardowa,True,False
+22,Ti,tytan,Titanium,,4,4,metal bloku d,metal,standardowa,True,False
+23,V,wanad,Vanadium,,5,4,metal bloku d,metal,standardowa,True,False
+24,Cr,chrom,Chromium,,6,4,metal bloku d,metal,standardowa,True,False
+25,Mn,mangan,Manganese,,7,4,metal bloku d,metal,standardowa,True,False
+26,Fe,żelazo,Iron,ferrum,8,4,metal bloku d,metal,standardowa,True,True
+27,Co,kobalt,Cobalt,,9,4,metal bloku d,metal,standardowa,True,False
+28,Ni,nikiel,Nickel,,10,4,metal bloku d,metal,standardowa,True,False
+29,Cu,miedź,Copper,cuprum,11,4,metal bloku d,metal,standardowa,True,True
+30,Zn,cynk,Zinc,,12,4,metal grupy 12,metal,standardowa,True,True
+31,Ga,gal,Gallium,,13,4,metal bloku p,metal,standardowa,True,False
+32,Ge,german,Germanium,,14,4,półmetal,półmetal,standardowa,True,False
+33,As,arsen,Arsenic,,15,4,półmetal,półmetal,standardowa,True,False
+34,Se,selen,Selenium,,16,4,niemetal,niemetal,standardowa,True,False
+35,Br,brom,Bromine,,17,4,fluorowiec (halogen),niemetal,standardowa,True,True
+36,Kr,krypton,Krypton,,18,4,gaz szlachetny,niemetal,standardowa,True,False
+37,Rb,rubid,Rubidium,,1,5,metal alkaliczny (litowiec),metal,standardowa,True,False
+38,Sr,stront,Strontium,,2,5,metal ziem alkalicznych (berylowiec),metal,standardowa,True,False
+39,Y,itr,Yttrium,,3,5,metal bloku d,metal,standardowa,True,False
+40,Zr,cyrkon,Zirconium,,4,5,metal bloku d,metal,standardowa,True,False
+41,Nb,niob,Niobium,,5,5,metal bloku d,metal,standardowa,True,False
+42,Mo,molibden,Molybdenum,,6,5,metal bloku d,metal,standardowa,True,False
+43,Tc,technet,Technetium,,7,5,metal bloku d,metal,standardowa,True,False
+44,Ru,ruten,Ruthenium,,8,5,metal bloku d,metal,standardowa,True,False
+45,Rh,rod,Rhodium,,9,5,metal bloku d,metal,standardowa,True,False
+46,Pd,pallad,Palladium,,10,5,metal bloku d,metal,standardowa,True,False
+47,Ag,srebro,Silver,argentum,11,5,metal bloku d,metal,standardowa,True,True
+48,Cd,kadm,Cadmium,,12,5,metal grupy 12,metal,standardowa,True,False
+49,In,ind,Indium,,13,5,metal bloku p,metal,standardowa,True,False
+50,Sn,cyna,Tin,stannum,14,5,metal bloku p,metal,standardowa,True,True
+51,Sb,antymon,Antimony,stibium,15,5,półmetal,półmetal,standardowa,True,False
+52,Te,tellur,Tellurium,,16,5,półmetal,półmetal,standardowa,True,False
+53,I,jod,Iodine,,17,5,fluorowiec (halogen),niemetal,standardowa,True,True
+54,Xe,ksenon,Xenon,,18,5,gaz szlachetny,niemetal,standardowa,True,False
+55,Cs,cez,Caesium,,1,6,metal alkaliczny (litowiec),metal,standardowa,True,False
+56,Ba,bar,Barium,,2,6,metal ziem alkalicznych (berylowiec),metal,standardowa,True,False
+57,La,lantan,Lanthanum,,,6,lantanowiec,metal,standardowa,True,False
+58,Ce,cer,Cerium,,,6,lantanowiec,metal,standardowa,True,False
+59,Pr,prazeodym,Praseodymium,,,6,lantanowiec,metal,standardowa,True,False
+60,Nd,neodym,Neodymium,,,6,lantanowiec,metal,standardowa,True,False
+61,Pm,promet,Promethium,,,6,lantanowiec,metal,standardowa,True,False
+62,Sm,samar,Samarium,,,6,lantanowiec,metal,standardowa,True,False
+63,Eu,europ,Europium,,,6,lantanowiec,metal,standardowa,True,False
+64,Gd,gadolin,Gadolinium,,,6,lantanowiec,metal,standardowa,True,False
+65,Tb,terb,Terbium,,,6,lantanowiec,metal,standardowa,True,False
+66,Dy,dysproz,Dysprosium,,,6,lantanowiec,metal,standardowa,True,False
+67,Ho,holm,Holmium,,,6,lantanowiec,metal,standardowa,True,False
+68,Er,erb,Erbium,,,6,lantanowiec,metal,standardowa,True,False
+69,Tm,tul,Thulium,,,6,lantanowiec,metal,standardowa,True,False
+70,Yb,iterb,Ytterbium,,,6,lantanowiec,metal,standardowa,True,False
+71,Lu,lutet,Lutetium,,,6,lantanowiec,metal,standardowa,True,False
+72,Hf,hafn,Hafnium,,4,6,metal bloku d,metal,standardowa,True,False
+73,Ta,tantal,Tantalum,,5,6,metal bloku d,metal,standardowa,True,False
+74,W,wolfram,Tungsten,,6,6,metal bloku d,metal,standardowa,True,False
+75,Re,ren,Rhenium,,7,6,metal bloku d,metal,standardowa,True,False
+76,Os,osm,Osmium,,8,6,metal bloku d,metal,standardowa,True,False
+77,Ir,iryd,Iridium,,9,6,metal bloku d,metal,standardowa,True,False
+78,Pt,platyna,Platinum,,10,6,metal bloku d,metal,standardowa,True,False
+79,Au,złoto,Gold,aurum,11,6,metal bloku d,metal,standardowa,True,True
+80,Hg,rtęć,Mercury,hydrargyrum,12,6,metal grupy 12,metal,standardowa,True,True
+81,Tl,tal,Thallium,,13,6,metal bloku p,metal,standardowa,True,False
+82,Pb,ołów,Lead,plumbum,14,6,metal bloku p,metal,standardowa,True,True
+83,Bi,bizmut,Bismuth,,15,6,metal bloku p,metal,standardowa,True,False
+84,Po,polon,Polonium,,16,6,metal bloku p (klasyfikacja sporna),,sporna,False,False
+85,At,astat,Astatine,,17,6,fluorowiec (halogen),,sporna,False,False
+86,Rn,radon,Radon,,18,6,gaz szlachetny,niemetal,standardowa,True,False
+87,Fr,frans,Francium,,1,7,metal alkaliczny (litowiec),metal,standardowa,True,False
+88,Ra,rad,Radium,,2,7,metal ziem alkalicznych (berylowiec),metal,standardowa,True,False
+89,Ac,aktyn,Actinium,,,7,aktynowiec,metal,standardowa,True,False
+90,Th,tor,Thorium,,,7,aktynowiec,metal,standardowa,True,False
+91,Pa,protaktyn,Protactinium,,,7,aktynowiec,metal,standardowa,True,False
+92,U,uran,Uranium,,,7,aktynowiec,metal,standardowa,True,True
+93,Np,neptun,Neptunium,,,7,aktynowiec,metal,standardowa,True,False
+94,Pu,pluton,Plutonium,,,7,aktynowiec,metal,standardowa,True,False
+95,Am,ameryk,Americium,,,7,aktynowiec,metal,standardowa,True,False
+96,Cm,kiur,Curium,,,7,aktynowiec,metal,standardowa,True,False
+97,Bk,berkel,Berkelium,,,7,aktynowiec,metal,standardowa,True,False
+98,Cf,kaliforn,Californium,,,7,aktynowiec,metal,standardowa,True,False
+99,Es,einstein,Einsteinium,,,7,aktynowiec,metal,standardowa,True,False
+100,Fm,ferm,Fermium,,,7,aktynowiec,metal,standardowa,True,False
+101,Md,mendelew,Mendelevium,,,7,aktynowiec,metal,standardowa,True,False
+102,No,nobel,Nobelium,,,7,aktynowiec,metal,standardowa,True,False
+103,Lr,lorens,Lawrencium,,,7,aktynowiec,metal,standardowa,True,False
+104,Rf,rutherford,Rutherfordium,,4,7,metal bloku d,metal,przewidywana,False,False
+105,Db,dubn,Dubnium,,5,7,metal bloku d,metal,przewidywana,False,False
+106,Sg,seaborg,Seaborgium,,6,7,metal bloku d,metal,przewidywana,False,False
+107,Bh,bohr,Bohrium,,7,7,metal bloku d,metal,przewidywana,False,False
+108,Hs,has,Hassium,,8,7,metal bloku d,metal,przewidywana,False,False
+109,Mt,meitner,Meitnerium,,9,7,metal bloku d,metal,przewidywana,False,False
+110,Ds,darmsztadt,Darmstadtium,,10,7,metal bloku d,metal,przewidywana,False,False
+111,Rg,roentgen,Roentgenium,,11,7,metal bloku d,metal,przewidywana,False,False
+112,Cn,kopernik,Copernicium,,12,7,metal grupy 12,metal,przewidywana,False,False
+113,Nh,nihon,Nihonium,,13,7,metal bloku p,metal,przewidywana,False,False
+114,Fl,flerow,Flerovium,,14,7,metal bloku p,metal,przewidywana,False,False
+115,Mc,moskow,Moscovium,,15,7,metal bloku p,metal,przewidywana,False,False
+116,Lv,liwermor,Livermorium,,16,7,metal bloku p,metal,przewidywana,False,False
+117,Ts,tenes,Tennessine,,17,7,fluorowiec (halogen),,przewidywana,False,False
+118,Og,oganeson,Oganesson,,18,7,gaz szlachetny,,przewidywana,False,False

@@ -1,0 +1,31 @@
+{
+  "checkedOn": "2026-11-20",
+  "sources": {
+    "forestAtlas": {
+      "title": "Lasy Państwowe — Grzyby polskich lasów",
+      "url": "https://www.lasy.gov.pl/pl/informacje/publikacje/do-poczytania/grzyby-polskich-lasow/grzyby-polskich-lasow_internet-1.pdf"
+    }
+  },
+  "corrections": [
+    {
+      "id": "grzyb_032",
+      "field": "polishName",
+      "from": "Zasłonak rudy",
+      "to": "Zasłonak rudawy",
+      "reason": "Cortinarius rubellus to zasłonak rudawy; w źródłowym CSV zamieniono polskie nazwy dwóch gatunków.",
+      "sources": [
+        "forestAtlas"
+      ]
+    },
+    {
+      "id": "grzyb_038",
+      "field": "polishName",
+      "from": "Zasłonak rudawy",
+      "to": "Zasłonak rudy",
+      "reason": "Cortinarius orellanus to zasłonak rudy.",
+      "sources": [
+        "forestAtlas"
+      ]
+    }
+  ]
+}

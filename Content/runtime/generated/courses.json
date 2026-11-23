@@ -1,5 +1,14 @@
 {
   "ptaki": [
     "images_birds"
+  ],
+  "grzyby_podstawowe": [
+    "images_mushrooms"
+  ],
+  "grzyby_rozpoznawanie": [
+    "images_mushrooms"
+  ],
+  "drzewa_europy": [
+    "images_trees"
   ]
 }

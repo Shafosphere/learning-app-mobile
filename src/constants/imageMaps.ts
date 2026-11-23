@@ -509,6 +509,8 @@ export const imageMaps = {
     "D/D-53.svg": require("@/assets/learning/flashcards/road-signs/D/D-53.svg"),
   },
   birds: bundledImageSets.images_birds,
+  trees: bundledImageSets.images_trees,
+  mushrooms: bundledImageSets.images_mushrooms,
   // Dodaj kolejne mapy tutaj, np.
   // asiaFlags: { "jp.svg": require("@/assets/flags/countries/asia/jp.svg"), ... }
 } as const;

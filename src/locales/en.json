@@ -903,7 +903,7 @@
           "changes": "Changes"
         },
         "columns": {
-          "bird": "Bird",
+          "bird": "Species",
           "title": "Image title",
           "author": "Creator",
           "license": "License",
@@ -1373,6 +1373,8 @@
       "infoLabel": "About progressive courses",
       "title": "How does a progressive course work?",
       "description": "Each larger set includes the words from the previous set and adds new ones. You can start with 50 words or choose the largest set right away.",
+      "mushroomsDescription": "Stage 1 contains 20 basic mushrooms. Stage 2 includes all 50 mushrooms, including every mushroom from stage 1, and adds 30 new ones. You can start with the basics or choose the full set right away.",
+      "elementsDescription": "Stage 1 contains 30 basic elements. Stage 2 includes all 118 elements, including every element from stage 1, and adds 88 new ones. You can start with the basics or choose the full set right away.",
       "roadSignsDescription": "Each larger set includes signs from the previous set and adds new ones: basic (80), extended (132), all (165). You can start with basic signs or choose the largest set right away.",
       "confirm": "Got it",
       "close": "Close progressive course information"
@@ -1703,12 +1705,16 @@
       "label": {
         "capitals": "Capitals",
         "flags": "Flags",
-        "roadSigns": "Road signs"
+        "roadSigns": "Road signs",
+        "mushrooms": "Mushrooms",
+        "elements": "Elements"
       },
       "description": {
         "capitals": "Capitals of the world",
         "flags": "Flags of the world",
-        "roadSigns": "From 80 to 165 signs"
+        "roadSigns": "From 80 to 165 signs",
+        "mushrooms": "From 20 to 50 mushrooms",
+        "elements": "From 30 to 118 elements"
       }
     }
   },
@@ -2448,6 +2454,8 @@
   "contentDownload": {
     "title": "Images",
     "birds": "Bird images",
+    "trees": "Tree and leaf images",
+    "mushrooms": "Mushroom images",
     "required": "Download the images to start studying.",
     "unavailable": "Materials unavailable",
     "start": "Start",

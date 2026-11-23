@@ -68,11 +68,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   progressiveGroupWrapper: {
     position: "relative",
-    paddingTop: 22,
   },
   progressiveInfoButton: {
     position: "absolute",
-    top: 5,
+    top: -17,
     left: 12,
     width: 44,
     height: 44,
@@ -113,9 +112,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: 44,
     alignItems: "center",
     justifyContent: "center",
-  },
-  headerIconFa: {
-    color: colors.headline,
   },
   headerFlagRow: {
     flexDirection: "row",

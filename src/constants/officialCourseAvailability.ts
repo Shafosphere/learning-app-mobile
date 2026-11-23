@@ -35,6 +35,8 @@ const ENGLISH_LANGUAGE_COURSE_SLUGS = [
 ] as const;
 
 const POLISH_GENERAL_COURSE_SLUGS = [
+  "pierwiastki_podstawowe",
+  "pierwiastki_pozostale",
   "astronomia",
   "polska_historia",
   "grecka_mitologia_prawda_falsz_50",
@@ -42,6 +44,9 @@ const POLISH_GENERAL_COURSE_SLUGS = [
   "znaki_drogowe_rozszerzone",
   "znaki_drogowe",
   "ptaki",
+  "drzewa_europy",
+  "grzyby_podstawowe",
+  "grzyby_rozpoznawanie",
   "flagi_europy",
   "flagi_afryki",
   "flagi_azji",

@@ -308,6 +308,922 @@
           "fileSha256": "df4d033e0838ecbab3d058ce131d0c083328971c545e02a8038f7c5b91f5a0e3"
         }
       }
+    },
+    "images_mushrooms": {
+      "kind": "images",
+      "titleKey": "contentDownload.mushrooms",
+      "sourceBytes": 12838603,
+      "manifestHash": "334556a8eb8b517d6735b7cbbcbf5c39dd7b1313ab3666cc11005ae232e56b92",
+      "files": {
+        "grzyb_001_Boletus_edulis.jpg": {
+          "relativePath": "grzyb_001_Boletus_edulis.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_001_Boletus_edulis.jpg",
+          "bytes": 397712,
+          "fileSha256": "bbdb5058fa8bfbb421b2802d97176de5c01eac55a4e5f90e5eede2dd477a1943"
+        },
+        "grzyb_002_Imleria_badia.jpg": {
+          "relativePath": "grzyb_002_Imleria_badia.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_002_Imleria_badia.jpg",
+          "bytes": 219297,
+          "fileSha256": "7309335d7075efa7cf5534b4128be4b6b535ee2cf5a91e8d3934def0fa4d0718"
+        },
+        "grzyb_003_Cantharellus_cibarius.jpg": {
+          "relativePath": "grzyb_003_Cantharellus_cibarius.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_003_Cantharellus_cibarius.jpg",
+          "bytes": 223845,
+          "fileSha256": "b74dc5fb852a0485ee79d8fa3c09fbf2046d9479d1546b6f0b1dec214273c282"
+        },
+        "grzyb_004_Macrolepiota_procera.jpg": {
+          "relativePath": "grzyb_004_Macrolepiota_procera.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_004_Macrolepiota_procera.jpg",
+          "bytes": 225093,
+          "fileSha256": "4575837e4040d9bd13c1c24902c2caf9183a9ad5dad0e55a190bcd1c6acb6ba6"
+        },
+        "grzyb_005_Lactarius_deliciosus.jpg": {
+          "relativePath": "grzyb_005_Lactarius_deliciosus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_005_Lactarius_deliciosus.jpg",
+          "bytes": 150972,
+          "fileSha256": "d1f69d9e4772afdecd561e59aa722799271db6b77bae53f74b3abd6b869b3ee4"
+        },
+        "grzyb_006_Leccinum_scabrum.jpg": {
+          "relativePath": "grzyb_006_Leccinum_scabrum.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_006_Leccinum_scabrum.jpg",
+          "bytes": 228158,
+          "fileSha256": "d8d015d497b5161e8af4057f278b437c65f76718028e373d733f019a1ef9e900"
+        },
+        "grzyb_007_Leccinum_aurantiacum.jpg": {
+          "relativePath": "grzyb_007_Leccinum_aurantiacum.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_007_Leccinum_aurantiacum.jpg",
+          "bytes": 268462,
+          "fileSha256": "020009faf4a531abe0db2fe82ad3dd0f522b2b954e766ad8f4010fb231315d81"
+        },
+        "grzyb_008_Suillus_luteus.jpg": {
+          "relativePath": "grzyb_008_Suillus_luteus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_008_Suillus_luteus.jpg",
+          "bytes": 315389,
+          "fileSha256": "d023cd75ede3dbfd60714b31c77b2c27c30f44e0236098bb3aa58de98ad1324d"
+        },
+        "grzyb_009_Suillus_bovinus.jpg": {
+          "relativePath": "grzyb_009_Suillus_bovinus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_009_Suillus_bovinus.jpg",
+          "bytes": 212689,
+          "fileSha256": "207bf313efca7a583e4ed8e7fa3509e75bf84112554bcbc9383fbcbf0ad5938d"
+        },
+        "grzyb_010_Xerocomus_subtomentosus.jpg": {
+          "relativePath": "grzyb_010_Xerocomus_subtomentosus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_010_Xerocomus_subtomentosus.jpg",
+          "bytes": 200645,
+          "fileSha256": "e8777269bd30c98d7a319a1fb5e40cf2bb0e52721528fe213e2968650b7da5ce"
+        },
+        "grzyb_011_Agaricus_campestris.jpg": {
+          "relativePath": "grzyb_011_Agaricus_campestris.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_011_Agaricus_campestris.jpg",
+          "bytes": 328584,
+          "fileSha256": "d24adb957cc9902ae4f28fbfd6e8714ccde78105d8257a59de7afa71c5ecba5a"
+        },
+        "grzyb_012_Pleurotus_ostreatus.jpg": {
+          "relativePath": "grzyb_012_Pleurotus_ostreatus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_012_Pleurotus_ostreatus.jpg",
+          "bytes": 267448,
+          "fileSha256": "703d79229fb6e5732b6a7bdf32a4ded54f4585958b2926617124f028cc499b39"
+        },
+        "grzyb_013_Armillaria_mellea.jpg": {
+          "relativePath": "grzyb_013_Armillaria_mellea.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_013_Armillaria_mellea.jpg",
+          "bytes": 245504,
+          "fileSha256": "7b786ec224251f9f248cbceec01ea06095a706ab6c8aa20c5eb3854fc1d4f712"
+        },
+        "grzyb_014_Hydnum_repandum.jpg": {
+          "relativePath": "grzyb_014_Hydnum_repandum.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_014_Hydnum_repandum.jpg",
+          "bytes": 217219,
+          "fileSha256": "ba9ca00bb109ba8a82b662e9b82e4ce807b48b665dfc1b5ef8d88a5911375a3b"
+        },
+        "grzyb_015_Craterellus_cornucopioides.jpg": {
+          "relativePath": "grzyb_015_Craterellus_cornucopioides.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_015_Craterellus_cornucopioides.jpg",
+          "bytes": 192002,
+          "fileSha256": "f09c96d064235425395844cb4d92c79d374e5a5e30e1f5a92b7d4fec52a65a17"
+        },
+        "grzyb_016_Sparassis_crispa.jpg": {
+          "relativePath": "grzyb_016_Sparassis_crispa.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_016_Sparassis_crispa.jpg",
+          "bytes": 250948,
+          "fileSha256": "daa76dd3cc5dd33c76a6a9a3d4785d03daff3eead7bfefdf086f23e92b611d33"
+        },
+        "grzyb_017_Morchella_esculenta.jpg": {
+          "relativePath": "grzyb_017_Morchella_esculenta.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_017_Morchella_esculenta.jpg",
+          "bytes": 199314,
+          "fileSha256": "735e7e5201bc6be1b62a9cc6e9e900a94eb4e05d2d73a2e80a22eb70ec3b89e1"
+        },
+        "grzyb_018_Lycoperdon_perlatum.jpg": {
+          "relativePath": "grzyb_018_Lycoperdon_perlatum.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_018_Lycoperdon_perlatum.jpg",
+          "bytes": 118047,
+          "fileSha256": "c5f767df9d8242cda43be6de1d87663b614c59f4d5b2aa685d115c30cb15fac3"
+        },
+        "grzyb_019_Coprinus_comatus.jpg": {
+          "relativePath": "grzyb_019_Coprinus_comatus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_019_Coprinus_comatus.jpg",
+          "bytes": 261993,
+          "fileSha256": "48b8939e04d545ec448770336db44fa39906f2a3fefc211e5524366917d90470"
+        },
+        "grzyb_020_Neoboletus_luridiformis.jpeg": {
+          "relativePath": "grzyb_020_Neoboletus_luridiformis.jpeg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_020_Neoboletus_luridiformis.jpeg",
+          "bytes": 232085,
+          "fileSha256": "dbe101cefa3660cf893b8cb214e846bb0b0abcbb86b1d13e8caf248e6d265189"
+        },
+        "grzyb_021_Russula_virescens.jpg": {
+          "relativePath": "grzyb_021_Russula_virescens.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_021_Russula_virescens.jpg",
+          "bytes": 150679,
+          "fileSha256": "9f5b92d546a8d4991e25f0d1913df0d51374d6c6908c5becf688d71c39c80547"
+        },
+        "grzyb_022_Boletus_reticulatus.jpg": {
+          "relativePath": "grzyb_022_Boletus_reticulatus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_022_Boletus_reticulatus.jpg",
+          "bytes": 189579,
+          "fileSha256": "24f7dc00b8ff1941faa0e37ce7b71f7bc1ed62565c8c63a8cf06cca27f503b72"
+        },
+        "grzyb_023_Suillus_grevillei.jpg": {
+          "relativePath": "grzyb_023_Suillus_grevillei.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_023_Suillus_grevillei.jpg",
+          "bytes": 144059,
+          "fileSha256": "911321155a77ee622b656c3db969fee266d52410f8e795d3d64f19a9eccbfa53"
+        },
+        "grzyb_024_Marasmius_oreades.jpg": {
+          "relativePath": "grzyb_024_Marasmius_oreades.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_024_Marasmius_oreades.jpg",
+          "bytes": 216419,
+          "fileSha256": "d74c8a513e5c2193f9fa266514b0ba729a763ee8f21d3e801ab7bb01402051b1"
+        },
+        "grzyb_025_Tricholoma_portentosum.jpg": {
+          "relativePath": "grzyb_025_Tricholoma_portentosum.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_025_Tricholoma_portentosum.jpg",
+          "bytes": 214017,
+          "fileSha256": "fcb5abafb25fa43773d9f6a28be2eebb760b2d2a3b2fa7e8b0334448e0237f7d"
+        },
+        "grzyb_026_Russula_cyanoxantha.jpg": {
+          "relativePath": "grzyb_026_Russula_cyanoxantha.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_026_Russula_cyanoxantha.jpg",
+          "bytes": 222745,
+          "fileSha256": "27cf1858f9d5b4cce9815069bf83c13f71180d73f2dec7697b3f343d1f49204f"
+        },
+        "grzyb_027_Boletus_pinophilus.jpg": {
+          "relativePath": "grzyb_027_Boletus_pinophilus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_027_Boletus_pinophilus.jpg",
+          "bytes": 248908,
+          "fileSha256": "855364ff4525574f19fc77b5f645727d7edb14a5b70a65d984998be949a60424"
+        },
+        "grzyb_028_Amanita_phalloides.jpg": {
+          "relativePath": "grzyb_028_Amanita_phalloides.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_028_Amanita_phalloides.jpg",
+          "bytes": 376954,
+          "fileSha256": "e671710f35afd411ee889d14c0f581475aa3e8dfe2b666ecac5a72dd6dd3483b"
+        },
+        "grzyb_029_Amanita_muscaria.jpg": {
+          "relativePath": "grzyb_029_Amanita_muscaria.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_029_Amanita_muscaria.jpg",
+          "bytes": 198817,
+          "fileSha256": "d647d2dcaac751df52c85dd2af4df5a5a6499fb1802251dbcc17eb116b5d4025"
+        },
+        "grzyb_030_Amanita_pantherina.jpg": {
+          "relativePath": "grzyb_030_Amanita_pantherina.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_030_Amanita_pantherina.jpg",
+          "bytes": 224554,
+          "fileSha256": "6ebfa7eed537962b3b4a0956630752cae409de878c984da9b859e61d8bbb9537"
+        },
+        "grzyb_031_Amanita_virosa.jpg": {
+          "relativePath": "grzyb_031_Amanita_virosa.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_031_Amanita_virosa.jpg",
+          "bytes": 187328,
+          "fileSha256": "ae1d7f4e67be958bd159f1e4ea84b7d9507ddeb9c5bc866fcd9598e3d072eb48"
+        },
+        "grzyb_032_Cortinarius_rubellus.jpg": {
+          "relativePath": "grzyb_032_Cortinarius_rubellus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_032_Cortinarius_rubellus.jpg",
+          "bytes": 158529,
+          "fileSha256": "7b1e9f4e2b6370edd35b3920621eacc40733dfb7957a61a7252593cde4c3ed35"
+        },
+        "grzyb_033_Gyromitra_esculenta.jpg": {
+          "relativePath": "grzyb_033_Gyromitra_esculenta.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_033_Gyromitra_esculenta.jpg",
+          "bytes": 165107,
+          "fileSha256": "42774ac3e6443e4e704a7b0e0c85df872f704026c9f3df68cfbde244558ab9ad"
+        },
+        "grzyb_034_Paxillus_involutus.jpg": {
+          "relativePath": "grzyb_034_Paxillus_involutus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_034_Paxillus_involutus.jpg",
+          "bytes": 266975,
+          "fileSha256": "5b4d6542f373bf5fcc7f849f2b2d93f2e5183a8a4c11739f05c8cefa79ac0bb9"
+        },
+        "grzyb_035_Galerina_marginata.jpg": {
+          "relativePath": "grzyb_035_Galerina_marginata.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_035_Galerina_marginata.jpg",
+          "bytes": 175829,
+          "fileSha256": "942ae7a11bfbb83a98cba4e506e8d08119d0c34768e4a3ff858af9292a73c488"
+        },
+        "grzyb_036_Amanita_verna.jpg": {
+          "relativePath": "grzyb_036_Amanita_verna.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_036_Amanita_verna.jpg",
+          "bytes": 283716,
+          "fileSha256": "7fe3c9160f6664bd88945cebb6b87d1ba3ee843aa7e9df23fbcc3a32a6990dad"
+        },
+        "grzyb_037_Lepiota_brunneoincarnata.jpg": {
+          "relativePath": "grzyb_037_Lepiota_brunneoincarnata.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_037_Lepiota_brunneoincarnata.jpg",
+          "bytes": 339249,
+          "fileSha256": "9fe43b6b86115fe55dacba65388efce943a430f3be44d7656880da7e0ce1b101"
+        },
+        "grzyb_038_Cortinarius_orellanus.jpg": {
+          "relativePath": "grzyb_038_Cortinarius_orellanus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_038_Cortinarius_orellanus.jpg",
+          "bytes": 248937,
+          "fileSha256": "b86d67aa0a68945b5d49105ca16466ac1c01cf103e25415fdf16ceb7f0771cdf"
+        },
+        "grzyb_039_Hypholoma_fasciculare.jpg": {
+          "relativePath": "grzyb_039_Hypholoma_fasciculare.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_039_Hypholoma_fasciculare.jpg",
+          "bytes": 237423,
+          "fileSha256": "39f941ef9d025dac566bfaa4b0e1de6801deeeae385d654fd224a85dcd38ec42"
+        },
+        "grzyb_040_Inosperma_erubescens.jpg": {
+          "relativePath": "grzyb_040_Inosperma_erubescens.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_040_Inosperma_erubescens.jpg",
+          "bytes": 272203,
+          "fileSha256": "3c1e0d4e4b0e54f847a847c5fbeeb6875cd0560226143dc4df033673ac1d3ff3"
+        },
+        "grzyb_041_Entoloma_sinuatum.jpg": {
+          "relativePath": "grzyb_041_Entoloma_sinuatum.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_041_Entoloma_sinuatum.jpg",
+          "bytes": 164430,
+          "fileSha256": "773810a133b9f3b34ddfdd3db2582a1e7ec5d0f8286cd68083c58950d8453cba"
+        },
+        "grzyb_042_Clitocybe_rivulosa.jpg": {
+          "relativePath": "grzyb_042_Clitocybe_rivulosa.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_042_Clitocybe_rivulosa.jpg",
+          "bytes": 242558,
+          "fileSha256": "87006d33bf190d993f5ddea9683b989af657697ac4fce3addf6071694b3fbb13"
+        },
+        "grzyb_043_Agaricus_xanthodermus.jpg": {
+          "relativePath": "grzyb_043_Agaricus_xanthodermus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_043_Agaricus_xanthodermus.jpg",
+          "bytes": 226061,
+          "fileSha256": "dc1cbd7c3f6ab1b72701ec2f4ef25c633c82f79c4500f55eae350d3ee2f938b2"
+        },
+        "grzyb_044_Tylopilus_felleus.jpg": {
+          "relativePath": "grzyb_044_Tylopilus_felleus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_044_Tylopilus_felleus.jpg",
+          "bytes": 206810,
+          "fileSha256": "5cda515dd437db386bf732f4d684d23a5f62dba957fdc9fc654460fd8d8e6512"
+        },
+        "grzyb_045_Caloboletus_calopus.jpg": {
+          "relativePath": "grzyb_045_Caloboletus_calopus.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_045_Caloboletus_calopus.jpg",
+          "bytes": 240418,
+          "fileSha256": "fc1ee866030758bfd90c32494f16ee9942e7ca238ab9526eb89ac3cf1afcb7f8"
+        },
+        "grzyb_046_Fomes_fomentarius.png": {
+          "relativePath": "grzyb_046_Fomes_fomentarius.png",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_046_Fomes_fomentarius.png",
+          "bytes": 1435043,
+          "fileSha256": "ad77923a00d0e86200b6026403346ec55ca27c871a94ff3a511f2d596a0fe860"
+        },
+        "grzyb_047_Trametes_versicolor.jpg": {
+          "relativePath": "grzyb_047_Trametes_versicolor.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_047_Trametes_versicolor.jpg",
+          "bytes": 267896,
+          "fileSha256": "888734b996e55af35971e49668028a8eded261bc472887ed13ebf4024ac034c6"
+        },
+        "grzyb_048_Fomitopsis_betulina.jpg": {
+          "relativePath": "grzyb_048_Fomitopsis_betulina.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_048_Fomitopsis_betulina.jpg",
+          "bytes": 245049,
+          "fileSha256": "5af4c94247be8827994881ff4833f2f33db5aff53a5c68a1e6d8799a568ccff3"
+        },
+        "grzyb_049_Russula_fellea.jpg": {
+          "relativePath": "grzyb_049_Russula_fellea.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_049_Russula_fellea.jpg",
+          "bytes": 333887,
+          "fileSha256": "e22af01aa9228c59a57f96eee11b24f749433104db2c5fb6d7004a75feb21878"
+        },
+        "grzyb_050_Ganoderma_applanatum.jpg": {
+          "relativePath": "grzyb_050_Ganoderma_applanatum.jpg",
+          "source": "assets/learning/flashcards/mushrooms/grzyb_050_Ganoderma_applanatum.jpg",
+          "bytes": 199018,
+          "fileSha256": "81e95278c0b2495adb617d99349d82a208d0f1324e4324d468a95f39a83a75f0"
+        }
+      }
+    },
+    "images_trees": {
+      "kind": "images",
+      "titleKey": "contentDownload.trees",
+      "sourceBytes": 31014200,
+      "manifestHash": "2f8862bd3bdacb09485c488698b137560a9ac3d845a80a38a582e176789d69a3",
+      "files": {
+        "01_Quercus_robur_leaf.jpg": {
+          "relativePath": "01_Quercus_robur_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/01_Quercus_robur_leaf.jpg",
+          "bytes": 253396,
+          "fileSha256": "df6ec832b9538700b484249f1e42e1f0cd50e4d1e93226604e9d90e6b89cb1a3"
+        },
+        "01_Quercus_robur_tree.jpg": {
+          "relativePath": "01_Quercus_robur_tree.jpg",
+          "source": "assets/learning/flashcards/trees/01_Quercus_robur_tree.jpg",
+          "bytes": 776177,
+          "fileSha256": "8e3712352582d28be293029e2054995db03aabb2c4a06bbd6f89400fea197c40"
+        },
+        "02_Quercus_petraea_leaf.jpg": {
+          "relativePath": "02_Quercus_petraea_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/02_Quercus_petraea_leaf.jpg",
+          "bytes": 114801,
+          "fileSha256": "b41a5b795feb32c86215d39106cffa42dad2e71f9c809bcf11a8c65deb1f7da1"
+        },
+        "02_Quercus_petraea_tree.jpg": {
+          "relativePath": "02_Quercus_petraea_tree.jpg",
+          "source": "assets/learning/flashcards/trees/02_Quercus_petraea_tree.jpg",
+          "bytes": 477655,
+          "fileSha256": "ee4273ee70a1cb81d49d1139c88476048f133fa31e8f1358e5657b7c7b5ebe65"
+        },
+        "03_Fagus_sylvatica_leaf.jpg": {
+          "relativePath": "03_Fagus_sylvatica_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/03_Fagus_sylvatica_leaf.jpg",
+          "bytes": 109868,
+          "fileSha256": "002e12d14a3ba9475ea31c571ff459d05a63e6de24c6340b2a881fa95fc0c9cd"
+        },
+        "03_Fagus_sylvatica_tree.jpg": {
+          "relativePath": "03_Fagus_sylvatica_tree.jpg",
+          "source": "assets/learning/flashcards/trees/03_Fagus_sylvatica_tree.jpg",
+          "bytes": 357316,
+          "fileSha256": "06be3670b2e47d750eaa62f94723dcd28ba6c6078d918f5cb8f624372bff2c26"
+        },
+        "04_Carpinus_betulus_leaf.jpg": {
+          "relativePath": "04_Carpinus_betulus_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/04_Carpinus_betulus_leaf.jpg",
+          "bytes": 199851,
+          "fileSha256": "cadc5003324f7a77a94fec698fe37f91a86ea183759645c67d234ac559763657"
+        },
+        "04_Carpinus_betulus_tree.jpg": {
+          "relativePath": "04_Carpinus_betulus_tree.jpg",
+          "source": "assets/learning/flashcards/trees/04_Carpinus_betulus_tree.jpg",
+          "bytes": 169153,
+          "fileSha256": "a3245b1cf2eea27c32948db7ed5a2eb1c4e35c1e6d28299ce3c6bc2eee451e00"
+        },
+        "05_Betula_pendula_leaf.jpg": {
+          "relativePath": "05_Betula_pendula_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/05_Betula_pendula_leaf.jpg",
+          "bytes": 248356,
+          "fileSha256": "6162077e46684e5cc29bd667dfb8e7f70e4fd8fae11cbc85951b552a078622f0"
+        },
+        "05_Betula_pendula_tree.jpg": {
+          "relativePath": "05_Betula_pendula_tree.jpg",
+          "source": "assets/learning/flashcards/trees/05_Betula_pendula_tree.jpg",
+          "bytes": 192821,
+          "fileSha256": "b74c465038664cb9f24ca1904baaddad0f1bded2220bce7b2fa6ace4e19d575e"
+        },
+        "06_Betula_pubescens_leaf.jpg": {
+          "relativePath": "06_Betula_pubescens_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/06_Betula_pubescens_leaf.jpg",
+          "bytes": 89477,
+          "fileSha256": "4954ab8d252ffe87d2a334f29bbc497c785b7c57aa465a9d77678a6f021bffcc"
+        },
+        "06_Betula_pubescens_tree.jpg": {
+          "relativePath": "06_Betula_pubescens_tree.jpg",
+          "source": "assets/learning/flashcards/trees/06_Betula_pubescens_tree.jpg",
+          "bytes": 198133,
+          "fileSha256": "e2653e6ae3898286cbc184ae3353229992e8bae0df4a3bec4c5a74c08a1c9e1e"
+        },
+        "07_Acer_platanoides_leaf.jpg": {
+          "relativePath": "07_Acer_platanoides_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/07_Acer_platanoides_leaf.jpg",
+          "bytes": 348885,
+          "fileSha256": "5995c4e0f442a99bf3f6c065cf1883479e8f3cf9cb09b9d1893a8ecb8ac9f4a6"
+        },
+        "07_Acer_platanoides_tree.jpg": {
+          "relativePath": "07_Acer_platanoides_tree.jpg",
+          "source": "assets/learning/flashcards/trees/07_Acer_platanoides_tree.jpg",
+          "bytes": 282368,
+          "fileSha256": "0decd645d49b0984e8d4e26b03a3f9b9d2b5914553007be3399da3624d331172"
+        },
+        "08_Acer_pseudoplatanus_leaf.jpg": {
+          "relativePath": "08_Acer_pseudoplatanus_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/08_Acer_pseudoplatanus_leaf.jpg",
+          "bytes": 128459,
+          "fileSha256": "50efaa57908049ed48b8f8fc9f9346be06a0832462c3334b33c5b113bb3d1d09"
+        },
+        "08_Acer_pseudoplatanus_tree.jpg": {
+          "relativePath": "08_Acer_pseudoplatanus_tree.jpg",
+          "source": "assets/learning/flashcards/trees/08_Acer_pseudoplatanus_tree.jpg",
+          "bytes": 195320,
+          "fileSha256": "d83fea4343f7ceff2bd56d64dd36125191eeca490471042eb0bfe36f69cb9609"
+        },
+        "09_Acer_campestre_leaf.jpg": {
+          "relativePath": "09_Acer_campestre_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/09_Acer_campestre_leaf.jpg",
+          "bytes": 273650,
+          "fileSha256": "71832c501cee7d39d56dd1ee52a83281e24c23f45a152e462cc1d1c8ee5d2890"
+        },
+        "09_Acer_campestre_tree.jpg": {
+          "relativePath": "09_Acer_campestre_tree.jpg",
+          "source": "assets/learning/flashcards/trees/09_Acer_campestre_tree.jpg",
+          "bytes": 175001,
+          "fileSha256": "0a9f6bf23d18c81d35bdb9e83c58fec3b1b9a9c20893bd2e781de4baef7738f0"
+        },
+        "10_Tilia_cordata_leaf.jpg": {
+          "relativePath": "10_Tilia_cordata_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/10_Tilia_cordata_leaf.jpg",
+          "bytes": 163754,
+          "fileSha256": "acc7fecd56c5bc1b406e87fdc900867b9b520c2c5f42a3d0ddf8625043167f73"
+        },
+        "10_Tilia_cordata_tree.jpg": {
+          "relativePath": "10_Tilia_cordata_tree.jpg",
+          "source": "assets/learning/flashcards/trees/10_Tilia_cordata_tree.jpg",
+          "bytes": 450553,
+          "fileSha256": "4004b13c2ace5d5ae058117225fc012f32e0663aa6f7db614cd92e28d1de8e61"
+        },
+        "11_Tilia_platyphyllos_leaf.jpg": {
+          "relativePath": "11_Tilia_platyphyllos_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/11_Tilia_platyphyllos_leaf.jpg",
+          "bytes": 241829,
+          "fileSha256": "daee3f58a47f5457a41fa59e371fb66728b2b26e0c093aa8ee8f694fb2b454aa"
+        },
+        "11_Tilia_platyphyllos_tree.jpg": {
+          "relativePath": "11_Tilia_platyphyllos_tree.jpg",
+          "source": "assets/learning/flashcards/trees/11_Tilia_platyphyllos_tree.jpg",
+          "bytes": 272964,
+          "fileSha256": "22829b01eda364d6068b1a2931f5a629296a71c65084ae9b1db157089268b958"
+        },
+        "12_Fraxinus_excelsior_leaf.jpg": {
+          "relativePath": "12_Fraxinus_excelsior_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/12_Fraxinus_excelsior_leaf.jpg",
+          "bytes": 291708,
+          "fileSha256": "7d3ae4cd1bdf4e285c1a44cc1b15feef3eadcfde794fb29f9afd7ad4986b7155"
+        },
+        "12_Fraxinus_excelsior_tree.jpg": {
+          "relativePath": "12_Fraxinus_excelsior_tree.jpg",
+          "source": "assets/learning/flashcards/trees/12_Fraxinus_excelsior_tree.jpg",
+          "bytes": 549728,
+          "fileSha256": "b5487f0e6e4285d186bd1da7423f6b834108b33243b4dba0285b48fd0c8a7ea3"
+        },
+        "13_Alnus_glutinosa_leaf.jpg": {
+          "relativePath": "13_Alnus_glutinosa_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/13_Alnus_glutinosa_leaf.jpg",
+          "bytes": 416863,
+          "fileSha256": "636525feb6da26a8a608032cf1314f3210b98f924167101c6e84773711263067"
+        },
+        "13_Alnus_glutinosa_tree.jpg": {
+          "relativePath": "13_Alnus_glutinosa_tree.jpg",
+          "source": "assets/learning/flashcards/trees/13_Alnus_glutinosa_tree.jpg",
+          "bytes": 302686,
+          "fileSha256": "6590c67393ba594c94de37bc2a797a4efb8f69ba549320eb2359e37af9363d24"
+        },
+        "14_Alnus_incana_leaf.jpg": {
+          "relativePath": "14_Alnus_incana_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/14_Alnus_incana_leaf.jpg",
+          "bytes": 247742,
+          "fileSha256": "a8dbe8f1707f1c9b58ebe68053a301dbbd1cb9ea8d75d0116a3c67ab296b253f"
+        },
+        "14_Alnus_incana_tree.jpg": {
+          "relativePath": "14_Alnus_incana_tree.jpg",
+          "source": "assets/learning/flashcards/trees/14_Alnus_incana_tree.jpg",
+          "bytes": 189194,
+          "fileSha256": "c38bfd645fb7c3ff7afbc17b017f5213fe521d8259c5564ffd2b29d30b32cb4a"
+        },
+        "15_Sorbus_aucuparia_leaf.jpg": {
+          "relativePath": "15_Sorbus_aucuparia_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/15_Sorbus_aucuparia_leaf.jpg",
+          "bytes": 139920,
+          "fileSha256": "f7166c7e2a3eefdda301ccd44764ce55a1a974abaffc2d9f14c7b2cf6191587b"
+        },
+        "15_Sorbus_aucuparia_tree.jpg": {
+          "relativePath": "15_Sorbus_aucuparia_tree.jpg",
+          "source": "assets/learning/flashcards/trees/15_Sorbus_aucuparia_tree.jpg",
+          "bytes": 369835,
+          "fileSha256": "3b1b0eb4f720c944c0c57e01f4d9df010b8f123eb56afd05e5c303ce59f51684"
+        },
+        "16_Populus_tremula_leaf.jpg": {
+          "relativePath": "16_Populus_tremula_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/16_Populus_tremula_leaf.jpg",
+          "bytes": 104446,
+          "fileSha256": "038ed624f5165f605f130192971b20d8732a14a5f3af9a75d6d3c229a970aada"
+        },
+        "16_Populus_tremula_tree.jpg": {
+          "relativePath": "16_Populus_tremula_tree.jpg",
+          "source": "assets/learning/flashcards/trees/16_Populus_tremula_tree.jpg",
+          "bytes": 207219,
+          "fileSha256": "306a7e303e30e2159b97f611cb1b463353cf3bba4393bd6cb8c9aa0cbb3c1d33"
+        },
+        "17_Populus_nigra_leaf.jpg": {
+          "relativePath": "17_Populus_nigra_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/17_Populus_nigra_leaf.jpg",
+          "bytes": 193254,
+          "fileSha256": "77f370b3b5c6918ce282cca1edaf8a4370fd03cc782a69fd1ec4483cacb2d900"
+        },
+        "17_Populus_nigra_tree.jpg": {
+          "relativePath": "17_Populus_nigra_tree.jpg",
+          "source": "assets/learning/flashcards/trees/17_Populus_nigra_tree.jpg",
+          "bytes": 544781,
+          "fileSha256": "0cd3198b8594c333bc8ae37662ea9edd4a76a724fb7cebbc1464939b2d028b65"
+        },
+        "18_Populus_alba_leaf.jpg": {
+          "relativePath": "18_Populus_alba_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/18_Populus_alba_leaf.jpg",
+          "bytes": 279117,
+          "fileSha256": "3d6e6c67e831f38229edd87b168114a53b96468a8a04843e72a67580d964c667"
+        },
+        "18_Populus_alba_tree.jpg": {
+          "relativePath": "18_Populus_alba_tree.jpg",
+          "source": "assets/learning/flashcards/trees/18_Populus_alba_tree.jpg",
+          "bytes": 605434,
+          "fileSha256": "76f67c093373cad7adc2679e4ab65102ff21abfe53bb5fa2a0e069e519825588"
+        },
+        "19_Salix_alba_leaf.jpg": {
+          "relativePath": "19_Salix_alba_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/19_Salix_alba_leaf.jpg",
+          "bytes": 593685,
+          "fileSha256": "b5266ee9c0ac10279ed4481a9f806f8f8829d304ea34fb4b85b6c925afa6e1e1"
+        },
+        "19_Salix_alba_tree.jpg": {
+          "relativePath": "19_Salix_alba_tree.jpg",
+          "source": "assets/learning/flashcards/trees/19_Salix_alba_tree.jpg",
+          "bytes": 313511,
+          "fileSha256": "daa6c2f378ce7f02f87fb487c309ea09a989425fc4c3377b67104a7ea859ad81"
+        },
+        "20_Salix_fragilis_leaf.jpg": {
+          "relativePath": "20_Salix_fragilis_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/20_Salix_fragilis_leaf.jpg",
+          "bytes": 182806,
+          "fileSha256": "3ad6d2ebf3006b1967b5f679cf017cfd39b45871afa91e86c67cd713d0ca16eb"
+        },
+        "20_Salix_fragilis_tree.jpg": {
+          "relativePath": "20_Salix_fragilis_tree.jpg",
+          "source": "assets/learning/flashcards/trees/20_Salix_fragilis_tree.jpg",
+          "bytes": 237648,
+          "fileSha256": "d814f44a345387813bc490c0700de22e0628527be7eceaf197b7b53d911d202a"
+        },
+        "21_Ulmus_laevis_leaf.jpg": {
+          "relativePath": "21_Ulmus_laevis_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/21_Ulmus_laevis_leaf.jpg",
+          "bytes": 175948,
+          "fileSha256": "3c9ab55dfd30b12ad73c29bb62f7687a19190a039950b2fefe9c8f4b30d4c168"
+        },
+        "21_Ulmus_laevis_tree.jpg": {
+          "relativePath": "21_Ulmus_laevis_tree.jpg",
+          "source": "assets/learning/flashcards/trees/21_Ulmus_laevis_tree.jpg",
+          "bytes": 771331,
+          "fileSha256": "b0ba19181733c7d46745c3311ed1ce88a69429ff9059b92504f0d3236e57bd61"
+        },
+        "22_Ulmus_glabra_leaf.jpg": {
+          "relativePath": "22_Ulmus_glabra_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/22_Ulmus_glabra_leaf.jpg",
+          "bytes": 392681,
+          "fileSha256": "d7d695f6930c0c67ab412ffa876605b8410f17918ab45ea68b285c902fce1c75"
+        },
+        "22_Ulmus_glabra_tree.jpg": {
+          "relativePath": "22_Ulmus_glabra_tree.jpg",
+          "source": "assets/learning/flashcards/trees/22_Ulmus_glabra_tree.jpg",
+          "bytes": 222054,
+          "fileSha256": "90f9eacd6290487c1039b5e7ca4c5bfc75e28546af64b9bd7e21a657db3a599c"
+        },
+        "23_Ulmus_minor_leaf.jpg": {
+          "relativePath": "23_Ulmus_minor_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/23_Ulmus_minor_leaf.jpg",
+          "bytes": 128024,
+          "fileSha256": "dff582e2c27c692aa020e627841626d4175b2b0338856c5d6c3fcad1191f740e"
+        },
+        "23_Ulmus_minor_tree.jpg": {
+          "relativePath": "23_Ulmus_minor_tree.jpg",
+          "source": "assets/learning/flashcards/trees/23_Ulmus_minor_tree.jpg",
+          "bytes": 250173,
+          "fileSha256": "4a5e391f2955ba6645943428ea733634d4735029f546f3362a771f750bcb779e"
+        },
+        "24_Aesculus_hippocastanum_leaf.jpg": {
+          "relativePath": "24_Aesculus_hippocastanum_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/24_Aesculus_hippocastanum_leaf.jpg",
+          "bytes": 96290,
+          "fileSha256": "1920aa135c50f50846560d0c507b5fd8b70db12cc940eb58de6e5031b0caa5b1"
+        },
+        "24_Aesculus_hippocastanum_tree.jpg": {
+          "relativePath": "24_Aesculus_hippocastanum_tree.jpg",
+          "source": "assets/learning/flashcards/trees/24_Aesculus_hippocastanum_tree.jpg",
+          "bytes": 593234,
+          "fileSha256": "0b59020dafef67d207e51d9a10fad323add9bf19efb2b1d9b71be693e277e06b"
+        },
+        "25_Castanea_sativa_leaf.jpg": {
+          "relativePath": "25_Castanea_sativa_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/25_Castanea_sativa_leaf.jpg",
+          "bytes": 201026,
+          "fileSha256": "92edc6ccf0c64183497c76dc8e08bb95c28e1c24196ac115c13583e3827baeb3"
+        },
+        "25_Castanea_sativa_tree.jpg": {
+          "relativePath": "25_Castanea_sativa_tree.jpg",
+          "source": "assets/learning/flashcards/trees/25_Castanea_sativa_tree.jpg",
+          "bytes": 364012,
+          "fileSha256": "9298632771c953efec1d2d281347966bbb026a392176035f1cf4f6d6e4c5e814"
+        },
+        "26_Juglans_regia_leaf.jpg": {
+          "relativePath": "26_Juglans_regia_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/26_Juglans_regia_leaf.jpg",
+          "bytes": 252951,
+          "fileSha256": "49ff02c67e67fbf011cb477f92d434751127a1124094b183a67a31962d26f0bf"
+        },
+        "26_Juglans_regia_tree.jpg": {
+          "relativePath": "26_Juglans_regia_tree.jpg",
+          "source": "assets/learning/flashcards/trees/26_Juglans_regia_tree.jpg",
+          "bytes": 139970,
+          "fileSha256": "701182a14eff4969e360e2b0af98f4f23916a28a2a66569afddc18ac47e95efe"
+        },
+        "27_Corylus_avellana_leaf.jpg": {
+          "relativePath": "27_Corylus_avellana_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/27_Corylus_avellana_leaf.jpg",
+          "bytes": 324752,
+          "fileSha256": "4f7882acb735eac508082c23e1df9c84d8b984ff65a8a5a8e30b7b1680479194"
+        },
+        "27_Corylus_avellana_tree.jpg": {
+          "relativePath": "27_Corylus_avellana_tree.jpg",
+          "source": "assets/learning/flashcards/trees/27_Corylus_avellana_tree.jpg",
+          "bytes": 331792,
+          "fileSha256": "d9366a231a805c22294bcee58e1ad442d52ef1d57f12fefe5e9f27688feeae88"
+        },
+        "28_Prunus_padus_leaf.jpg": {
+          "relativePath": "28_Prunus_padus_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/28_Prunus_padus_leaf.jpg",
+          "bytes": 89573,
+          "fileSha256": "a01b5d35d7a5853a62446e543038ae1cbf90a5467729202b808540704699734b"
+        },
+        "28_Prunus_padus_tree.jpg": {
+          "relativePath": "28_Prunus_padus_tree.jpg",
+          "source": "assets/learning/flashcards/trees/28_Prunus_padus_tree.jpg",
+          "bytes": 94941,
+          "fileSha256": "88f2e13459910a63e4d8546ed1bae24e26d0ceccf204992122d63816f903b562"
+        },
+        "29_Prunus_avium_leaf.jpg": {
+          "relativePath": "29_Prunus_avium_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/29_Prunus_avium_leaf.jpg",
+          "bytes": 410082,
+          "fileSha256": "3c80a885055509608bf5f42e99fda41998113dd2abb6df5294c3f55046b48f5b"
+        },
+        "29_Prunus_avium_tree.jpg": {
+          "relativePath": "29_Prunus_avium_tree.jpg",
+          "source": "assets/learning/flashcards/trees/29_Prunus_avium_tree.jpg",
+          "bytes": 221630,
+          "fileSha256": "e0affe130b0e00fe44c98201c143cc3e79c77ee17aa058d3ec00db270a603cf6"
+        },
+        "30_Malus_sylvestris_leaf.jpg": {
+          "relativePath": "30_Malus_sylvestris_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/30_Malus_sylvestris_leaf.jpg",
+          "bytes": 269327,
+          "fileSha256": "1d35a90b05439a46606c568c3fb2bb49beed9a4cbf5023557856beec781f81df"
+        },
+        "30_Malus_sylvestris_tree.jpg": {
+          "relativePath": "30_Malus_sylvestris_tree.jpg",
+          "source": "assets/learning/flashcards/trees/30_Malus_sylvestris_tree.jpg",
+          "bytes": 173563,
+          "fileSha256": "25064ba78af2cc5c38d367256c99f2774a30e5a6688bd7637100158d149b4a25"
+        },
+        "31_Pyrus_communis_leaf.jpg": {
+          "relativePath": "31_Pyrus_communis_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/31_Pyrus_communis_leaf.jpg",
+          "bytes": 79949,
+          "fileSha256": "85c5a14fabbe854339508f58e7c66989aa619c0ce60fe507621a97a7f145981f"
+        },
+        "31_Pyrus_communis_tree.jpg": {
+          "relativePath": "31_Pyrus_communis_tree.jpg",
+          "source": "assets/learning/flashcards/trees/31_Pyrus_communis_tree.jpg",
+          "bytes": 285000,
+          "fileSha256": "48da7a23583eec21526119ad828de0412a21b5bdbba2ff033fcf678a25cee596"
+        },
+        "32_Robinia_pseudoacacia_leaf.jpg": {
+          "relativePath": "32_Robinia_pseudoacacia_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/32_Robinia_pseudoacacia_leaf.jpg",
+          "bytes": 230834,
+          "fileSha256": "2a0f98deb02e888c52e6f211d46c30263a63e90749be152c44089d00392f401e"
+        },
+        "32_Robinia_pseudoacacia_tree.jpg": {
+          "relativePath": "32_Robinia_pseudoacacia_tree.jpg",
+          "source": "assets/learning/flashcards/trees/32_Robinia_pseudoacacia_tree.jpg",
+          "bytes": 208006,
+          "fileSha256": "d68a060929801d659fee1dc7872d427ad202b863a507f954e236c3f4fddbf893"
+        },
+        "33_Platanus_acerifolia_leaf.jpg": {
+          "relativePath": "33_Platanus_acerifolia_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/33_Platanus_acerifolia_leaf.jpg",
+          "bytes": 368492,
+          "fileSha256": "73da9ea4f31510c3f12af6f908b3857ef22ba7e3e693cd2680d154a170395894"
+        },
+        "33_Platanus_acerifolia_tree.jpg": {
+          "relativePath": "33_Platanus_acerifolia_tree.jpg",
+          "source": "assets/learning/flashcards/trees/33_Platanus_acerifolia_tree.jpg",
+          "bytes": 367669,
+          "fileSha256": "2d9558e20872577ef0debfdc7d4fdf7f0c3d0ca793cd482ce808f9952d23696f"
+        },
+        "34_Ginkgo_biloba_leaf.jpg": {
+          "relativePath": "34_Ginkgo_biloba_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/34_Ginkgo_biloba_leaf.jpg",
+          "bytes": 37417,
+          "fileSha256": "ed13e0b500dd42b512de9b2af9f459981966c6fa9d9624af44677c7db1a5388e"
+        },
+        "34_Ginkgo_biloba_tree.jpg": {
+          "relativePath": "34_Ginkgo_biloba_tree.jpg",
+          "source": "assets/learning/flashcards/trees/34_Ginkgo_biloba_tree.jpg",
+          "bytes": 456634,
+          "fileSha256": "a51caee6815f2debcbb61882f72bbcdbba30ac856c45b8bf98237e14d5d2218b"
+        },
+        "35_Morus_alba_leaf.jpg": {
+          "relativePath": "35_Morus_alba_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/35_Morus_alba_leaf.jpg",
+          "bytes": 160736,
+          "fileSha256": "030fd691a54185e7fa4cf874338cd4fb86db871932e862613a9975ea56cfc8da"
+        },
+        "35_Morus_alba_tree.jpg": {
+          "relativePath": "35_Morus_alba_tree.jpg",
+          "source": "assets/learning/flashcards/trees/35_Morus_alba_tree.jpg",
+          "bytes": 296960,
+          "fileSha256": "71c1e70495b585e13a47276294ade0fe77c415a2db2dd310dfe01b704b5a44d3"
+        },
+        "36_Taxus_baccata_leaf.jpg": {
+          "relativePath": "36_Taxus_baccata_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/36_Taxus_baccata_leaf.jpg",
+          "bytes": 178146,
+          "fileSha256": "8ec2295baa1a0c83e841e6d2bffa6c99d04626dc082b890cc4950547fb8398c7"
+        },
+        "36_Taxus_baccata_tree.jpg": {
+          "relativePath": "36_Taxus_baccata_tree.jpg",
+          "source": "assets/learning/flashcards/trees/36_Taxus_baccata_tree.jpg",
+          "bytes": 391930,
+          "fileSha256": "f87d781a0c1f33597398d475c5a0ecd8a6d8059cf4d1a080869227ee0cd7e2b5"
+        },
+        "37_Abies_alba_leaf.jpg": {
+          "relativePath": "37_Abies_alba_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/37_Abies_alba_leaf.jpg",
+          "bytes": 148653,
+          "fileSha256": "a24d5826386e661462c657360146244f3b3783e3cef26e0284040ffe18df79c6"
+        },
+        "37_Abies_alba_tree.jpg": {
+          "relativePath": "37_Abies_alba_tree.jpg",
+          "source": "assets/learning/flashcards/trees/37_Abies_alba_tree.jpg",
+          "bytes": 525417,
+          "fileSha256": "13364ed8ba1363f8056370f396242cfcc2beab5c80a40823d1ce727561c4e9d6"
+        },
+        "38_Picea_abies_leaf.jpg": {
+          "relativePath": "38_Picea_abies_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/38_Picea_abies_leaf.jpg",
+          "bytes": 120103,
+          "fileSha256": "2d3f7156e2a6450744a542779cf4d4c968411108985e9330b1e82c64b5226e79"
+        },
+        "38_Picea_abies_tree.jpg": {
+          "relativePath": "38_Picea_abies_tree.jpg",
+          "source": "assets/learning/flashcards/trees/38_Picea_abies_tree.jpg",
+          "bytes": 535848,
+          "fileSha256": "59cf18b88c32dcd625db8bdcf5ae1b6609f81f0916d0c045982af348577a8411"
+        },
+        "39_Pinus_sylvestris_leaf.jpg": {
+          "relativePath": "39_Pinus_sylvestris_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/39_Pinus_sylvestris_leaf.jpg",
+          "bytes": 191765,
+          "fileSha256": "82b23c218bab3694bc8bdda17594d16df1208d0976abf03a19f6b076e713b73d"
+        },
+        "39_Pinus_sylvestris_tree.jpg": {
+          "relativePath": "39_Pinus_sylvestris_tree.jpg",
+          "source": "assets/learning/flashcards/trees/39_Pinus_sylvestris_tree.jpg",
+          "bytes": 777839,
+          "fileSha256": "058c56ee11d67edfa522b78a101a468261bbabf2ca3332864db8013f3b7c4014"
+        },
+        "40_Larix_decidua_leaf.jpg": {
+          "relativePath": "40_Larix_decidua_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/40_Larix_decidua_leaf.jpg",
+          "bytes": 201354,
+          "fileSha256": "8e44026c8b8e3ae1097e72c584f96bddc1e1e3846f666fc0cb57ab131d5ebb19"
+        },
+        "40_Larix_decidua_tree.jpg": {
+          "relativePath": "40_Larix_decidua_tree.jpg",
+          "source": "assets/learning/flashcards/trees/40_Larix_decidua_tree.jpg",
+          "bytes": 498968,
+          "fileSha256": "9b19862a4c710c9adec6b37db1209c6cf7bb91f1ae263e7d41aa7d50c83d4175"
+        },
+        "41_Pinus_nigra_leaf.jpg": {
+          "relativePath": "41_Pinus_nigra_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/41_Pinus_nigra_leaf.jpg",
+          "bytes": 188449,
+          "fileSha256": "b396984ad873db9daca0e3f64dbf0066fed4af75c75e636c0f7b2163f4b4b7f7"
+        },
+        "41_Pinus_nigra_tree.jpeg": {
+          "relativePath": "41_Pinus_nigra_tree.jpeg",
+          "source": "assets/learning/flashcards/trees/41_Pinus_nigra_tree.jpeg",
+          "bytes": 597534,
+          "fileSha256": "81a8f925e099f044064be90ab1358ee0816f4c28e14853ab32b49d4b391c06a6"
+        },
+        "42_Pinus_mugo_leaf.jpeg": {
+          "relativePath": "42_Pinus_mugo_leaf.jpeg",
+          "source": "assets/learning/flashcards/trees/42_Pinus_mugo_leaf.jpeg",
+          "bytes": 378451,
+          "fileSha256": "56a8e8609934cba7fa5d92ae77ec03841cd6f6234eff743456f5ebe4708240b4"
+        },
+        "42_Pinus_mugo_tree.jpeg": {
+          "relativePath": "42_Pinus_mugo_tree.jpeg",
+          "source": "assets/learning/flashcards/trees/42_Pinus_mugo_tree.jpeg",
+          "bytes": 806783,
+          "fileSha256": "cf4983427971dc69c26cbe5e83d559dd594fd8e1c3fa2718f5f8c98c90874db7"
+        },
+        "43_Pseudotsuga_menziesii_leaf.jpg": {
+          "relativePath": "43_Pseudotsuga_menziesii_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/43_Pseudotsuga_menziesii_leaf.jpg",
+          "bytes": 280444,
+          "fileSha256": "295daa99bb3df073bf7164cb5c46bf307ecf5fbdd1d10127566b132ed46f059c"
+        },
+        "43_Pseudotsuga_menziesii_tree.jpg": {
+          "relativePath": "43_Pseudotsuga_menziesii_tree.jpg",
+          "source": "assets/learning/flashcards/trees/43_Pseudotsuga_menziesii_tree.jpg",
+          "bytes": 490105,
+          "fileSha256": "637e55abd4616dcebcc208b99042e4f5264966e9ecc3524678db750e070a5f49"
+        },
+        "44_Picea_pungens_leaf.jpg": {
+          "relativePath": "44_Picea_pungens_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/44_Picea_pungens_leaf.jpg",
+          "bytes": 144784,
+          "fileSha256": "847376e1b81227e51e9e564f82dd7e2677ee913a77f552d4dd2e166267737746"
+        },
+        "44_Picea_pungens_tree.jpg": {
+          "relativePath": "44_Picea_pungens_tree.jpg",
+          "source": "assets/learning/flashcards/trees/44_Picea_pungens_tree.jpg",
+          "bytes": 762860,
+          "fileSha256": "5c8c1173765987e3833057d6548cc0a2820ff52750f94cdc4c92aebf325410e7"
+        },
+        "45_Thuja_occidentalis_leaf.jpg": {
+          "relativePath": "45_Thuja_occidentalis_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/45_Thuja_occidentalis_leaf.jpg",
+          "bytes": 123784,
+          "fileSha256": "6058067c0a2e498bdc43968509e1b40598cd456eac179613e0c4862979b4b7fe"
+        },
+        "45_Thuja_occidentalis_tree.jpg": {
+          "relativePath": "45_Thuja_occidentalis_tree.jpg",
+          "source": "assets/learning/flashcards/trees/45_Thuja_occidentalis_tree.jpg",
+          "bytes": 477651,
+          "fileSha256": "c9b2c8e290afbe857dc8f57b05f243ea04c5b9f5c867b50461c73565fae359a6"
+        },
+        "46_Juniperus_communis_leaf.jpg": {
+          "relativePath": "46_Juniperus_communis_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/46_Juniperus_communis_leaf.jpg",
+          "bytes": 220918,
+          "fileSha256": "f8d6efde9a8be32250304f2427f379a77cb382bcdee6568b1a89b5c8146fdcd5"
+        },
+        "46_Juniperus_communis_tree.jpg": {
+          "relativePath": "46_Juniperus_communis_tree.jpg",
+          "source": "assets/learning/flashcards/trees/46_Juniperus_communis_tree.jpg",
+          "bytes": 569219,
+          "fileSha256": "f9ef15e4c0d13f66ca9a9226086c0929e9c5dba2a2d63336fe177a294d2b24f1"
+        },
+        "47_Quercus_ilex_leaf.jpg": {
+          "relativePath": "47_Quercus_ilex_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/47_Quercus_ilex_leaf.jpg",
+          "bytes": 138479,
+          "fileSha256": "35d12a9edf445126674cd18c7adfeff80a915e8d97175fb3ed26d43556008f3e"
+        },
+        "47_Quercus_ilex_tree.jpg": {
+          "relativePath": "47_Quercus_ilex_tree.jpg",
+          "source": "assets/learning/flashcards/trees/47_Quercus_ilex_tree.jpg",
+          "bytes": 185605,
+          "fileSha256": "8b126fb69e264d55bc596bd1108b38e94d9ffcc9e4930727c7399e485ca5c29a"
+        },
+        "48_Quercus_suber_leaf.jpg": {
+          "relativePath": "48_Quercus_suber_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/48_Quercus_suber_leaf.jpg",
+          "bytes": 460195,
+          "fileSha256": "d44c0019820624ac1e7afa224c53813a6eb9ccce9658202094b1ac151e5485d1"
+        },
+        "48_Quercus_suber_tree.jpg": {
+          "relativePath": "48_Quercus_suber_tree.jpg",
+          "source": "assets/learning/flashcards/trees/48_Quercus_suber_tree.jpg",
+          "bytes": 301882,
+          "fileSha256": "f36e9bb37e9d8ec77ddb02f89e3b06d22d94ace606625f5c41c0a15f83ca1fdc"
+        },
+        "49_Pinus_pinea_leaf.jpg": {
+          "relativePath": "49_Pinus_pinea_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/49_Pinus_pinea_leaf.jpg",
+          "bytes": 381175,
+          "fileSha256": "dfe74e9ed81e160e4f6cb643fe492555acc88ff1cb9e78bf6d7468a032e0a68c"
+        },
+        "49_Pinus_pinea_tree.jpg": {
+          "relativePath": "49_Pinus_pinea_tree.jpg",
+          "source": "assets/learning/flashcards/trees/49_Pinus_pinea_tree.jpg",
+          "bytes": 406075,
+          "fileSha256": "13d2343263a9cc248e94ed7c32abad50b7dba7fabc4cefcccc18650efa7b0cfd"
+        },
+        "50_Cupressus_sempervirens_leaf.jpg": {
+          "relativePath": "50_Cupressus_sempervirens_leaf.jpg",
+          "source": "assets/learning/flashcards/trees/50_Cupressus_sempervirens_leaf.jpg",
+          "bytes": 247458,
+          "fileSha256": "686c104a9c9736a05fbf2207f0a0b367cc330f432b5b282fe70fcf8ea880d84b"
+        },
+        "50_Cupressus_sempervirens_tree.jpg": {
+          "relativePath": "50_Cupressus_sempervirens_tree.jpg",
+          "source": "assets/learning/flashcards/trees/50_Cupressus_sempervirens_tree.jpg",
+          "bytes": 797911,
+          "fileSha256": "6d31ab2d0f69e72802413fa7e1994745c0e598e20595aa4ab2b51d2be9f7e80a"
+        }
+      }
     }
   }
 }

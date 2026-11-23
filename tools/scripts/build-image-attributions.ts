@@ -35,7 +35,7 @@ function titleFromFileName(fileName: string) {
 }
 
 function parseTsv(sourcePath: string) {
-  const input = fs.readFileSync(path.join(ROOT_DIR, sourcePath), "utf8").replace(/^\uFEFF/, "");
+  const input = fs.readFileSync(path.resolve(ROOT_DIR, sourcePath), "utf8").replace(/^\uFEFF/, "");
   const lines = input.trimEnd().split(/\r?\n/);
   if (lines.length < 2) throw new Error(`${sourcePath}: no attribution rows`);
 

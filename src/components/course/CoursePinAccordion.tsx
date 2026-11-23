@@ -1,7 +1,7 @@
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { CourseCardGrid } from "./CourseCardGrid";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import {
   Image,
@@ -30,8 +30,9 @@ type OfficialCourseListItem = {
 
 type AccordionIcon =
   | {
-      kind: "fa6";
-      name: string;
+      kind: "course";
+      iconId: string;
+      color: string;
     }
   | {
       kind: "flagPair";
@@ -66,10 +67,16 @@ function GroupHeaderIcon({ icon }: { icon?: AccordionIcon }) {
     return null;
   }
 
-  if (icon.kind === "fa6") {
+  if (icon.kind === "course") {
+    const { icon: courseIcon, mainImageSource } = resolveCourseIconProps(icon.iconId, icon.color);
+    const IconComponent = courseIcon.Component as ComponentType<{ name: string; size: number; color: string }>;
     return (
       <View style={styles.headerIconBox}>
-        <FontAwesome6 name={icon.name} size={40} style={styles.headerIconFa} />
+        {mainImageSource ? (
+          <Image source={mainImageSource} style={styles.headerIconFlag} />
+        ) : (
+          <IconComponent name={courseIcon.name} size={40} color={courseIcon.color} />
+        )}
       </View>
     );
   }

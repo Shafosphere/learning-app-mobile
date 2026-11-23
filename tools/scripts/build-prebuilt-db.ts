@@ -12,7 +12,7 @@ const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 // Increment this whenever the bundled database content changes.
-const PREBUILT_DATABASE_VERSION = 12;
+const PREBUILT_DATABASE_VERSION = 18;
 
 const OFFICIAL_PACKS = [
   {
@@ -196,6 +196,28 @@ const OFFICIAL_PACKS = [
     csvFile: "jezyki/francuski/French_B2.csv",
   },
   {
+    slug: "pierwiastki_podstawowe",
+    packVersion: 1,
+    name: "Podstawowe pierwiastki",
+    iconId: "microscope",
+    iconColor: "#0891B2",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    csvFile: "przyroda/pierwiastki/podstawowe.csv",
+  },
+  {
+    slug: "pierwiastki_pozostale",
+    packVersion: 2,
+    name: "Wszystkie pierwiastki",
+    iconId: "microscope",
+    iconColor: "#0891B2",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    csvFile: "przyroda/pierwiastki/pozostale.csv",
+  },
+  {
     slug: "astronomia",
     packVersion: 2,
     name: "Astronomia",
@@ -269,6 +291,39 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: false,
     csvFile: "przyroda/ptaki/patki.csv",
+  },
+  {
+    slug: "grzyby_podstawowe",
+    packVersion: 1,
+    name: "Podstawowe grzyby",
+    iconId: "mushroom",
+    iconColor: "#B45309",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    csvFile: "przyroda/grzyby/podstawowe.csv",
+  },
+  {
+    slug: "grzyby_rozpoznawanie",
+    packVersion: 3,
+    name: "Wszystkie grzyby",
+    iconId: "mushroom",
+    iconColor: "#B45309",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    csvFile: "przyroda/grzyby/rozpoznawanie.csv",
+  },
+  {
+    slug: "drzewa_europy",
+    packVersion: 2,
+    name: "Drzewa Europy — drzewa i liście",
+    iconId: "tree",
+    iconColor: "#16A34A",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    csvFile: "przyroda/drzewa/drzewa.csv",
   },
   {
     slug: "flagi_europy",

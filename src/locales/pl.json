@@ -907,7 +907,7 @@
           "changes": "Zmiany"
         },
         "columns": {
-          "bird": "Ptak",
+          "bird": "Gatunek",
           "title": "Tytuł obrazu",
           "author": "Autor",
           "license": "Licencja",
@@ -1377,6 +1377,8 @@
       "infoLabel": "Informacja o kursie progresywnym",
       "title": "Jak działa kurs progresywny?",
       "description": "Każdy kolejny zestaw zawiera słowa z poprzedniego i dodaje nowe. Możesz zacząć od 50 słów albo od razu wybrać największy zestaw.",
+      "mushroomsDescription": "Etap 1 zawiera 20 podstawowych grzybów. Etap 2 obejmuje wszystkie 50 grzybów, w tym cały etap 1, i dodaje 30 nowych. Możesz zacząć od podstaw albo od razu wybrać pełny zestaw.",
+      "elementsDescription": "Etap 1 zawiera 30 podstawowych pierwiastków. Etap 2 obejmuje wszystkie 118 pierwiastków, w tym cały etap 1, i dodaje 88 nowych. Możesz zacząć od podstaw albo od razu wybrać pełny zestaw.",
       "roadSignsDescription": "Każdy kolejny zestaw zawiera znaki z poprzedniego i dodaje nowe: podstawowe (80), rozszerzone (132), wszystkie (165). Możesz zacząć od podstawowych znaków albo od razu wybrać największy zestaw.",
       "confirm": "Rozumiem",
       "close": "Zamknij informację o kursie progresywnym"
@@ -1707,12 +1709,16 @@
       "label": {
         "capitals": "Stolice",
         "flags": "Flagi",
-        "roadSigns": "Znaki drogowe"
+        "roadSigns": "Znaki drogowe",
+        "mushrooms": "Grzyby",
+        "elements": "Pierwiastki"
       },
       "description": {
         "capitals": "Stolice państw świata",
         "flags": "Flagi państw świata",
-        "roadSigns": "Od 80 do 165 znaków"
+        "roadSigns": "Od 80 do 165 znaków",
+        "mushrooms": "Od 20 do 50 grzybów",
+        "elements": "Od 30 do 118 pierwiastków"
       }
     }
   },
@@ -2452,6 +2458,8 @@
   "contentDownload": {
     "title": "Zdjęcia",
     "birds": "Zdjęcia ptaków",
+    "trees": "Zdjęcia drzew i liści",
+    "mushrooms": "Zdjęcia grzybów",
     "required": "Pobierz zdjęcia, aby rozpocząć naukę.",
     "unavailable": "Materiały niedostępne",
     "start": "Rozpocznij",

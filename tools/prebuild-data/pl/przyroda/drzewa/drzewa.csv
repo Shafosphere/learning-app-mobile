@@ -1,0 +1,101 @@
+external_id,front_image,back_text
+0001,01_Quercus_robur_tree.jpg,dąb; dąb szypułkowy; Quercus robur
+0002,01_Quercus_robur_leaf.jpg,dąb; dąb szypułkowy; Quercus robur
+0003,02_Quercus_petraea_tree.jpg,dąb; dąb bezszypułkowy; Quercus petraea
+0004,02_Quercus_petraea_leaf.jpg,dąb; dąb bezszypułkowy; Quercus petraea
+0005,03_Fagus_sylvatica_tree.jpg,buk; buk zwyczajny; Fagus sylvatica
+0006,03_Fagus_sylvatica_leaf.jpg,buk; buk zwyczajny; Fagus sylvatica
+0007,04_Carpinus_betulus_tree.jpg,grab; grab pospolity; Carpinus betulus
+0008,04_Carpinus_betulus_leaf.jpg,grab; grab pospolity; Carpinus betulus
+0009,05_Betula_pendula_tree.jpg,brzoza; brzoza brodawkowata; Betula pendula
+0010,05_Betula_pendula_leaf.jpg,brzoza; brzoza brodawkowata; Betula pendula
+0011,06_Betula_pubescens_tree.jpg,brzoza; brzoza omszona; Betula pubescens
+0012,06_Betula_pubescens_leaf.jpg,brzoza; brzoza omszona; Betula pubescens
+0013,07_Acer_platanoides_tree.jpg,klon; klon zwyczajny; Acer platanoides
+0014,07_Acer_platanoides_leaf.jpg,klon; klon zwyczajny; Acer platanoides
+0015,08_Acer_pseudoplatanus_tree.jpg,jawor; klon jawor; Acer pseudoplatanus
+0016,08_Acer_pseudoplatanus_leaf.jpg,jawor; klon jawor; Acer pseudoplatanus
+0017,09_Acer_campestre_tree.jpg,klon; klon polny; Acer campestre
+0018,09_Acer_campestre_leaf.jpg,klon; klon polny; Acer campestre
+0019,10_Tilia_cordata_tree.jpg,lipa; lipa drobnolistna; Tilia cordata
+0020,10_Tilia_cordata_leaf.jpg,lipa; lipa drobnolistna; Tilia cordata
+0021,11_Tilia_platyphyllos_tree.jpg,lipa; lipa szerokolistna; Tilia platyphyllos
+0022,11_Tilia_platyphyllos_leaf.jpg,lipa; lipa szerokolistna; Tilia platyphyllos
+0023,12_Fraxinus_excelsior_tree.jpg,jesion; jesion wyniosły; Fraxinus excelsior
+0024,12_Fraxinus_excelsior_leaf.jpg,jesion; jesion wyniosły; Fraxinus excelsior
+0025,13_Alnus_glutinosa_tree.jpg,olcha; olsza czarna; Alnus glutinosa
+0026,13_Alnus_glutinosa_leaf.jpg,olcha; olsza czarna; Alnus glutinosa
+0027,14_Alnus_incana_tree.jpg,olcha; olsza szara; Alnus incana
+0028,14_Alnus_incana_leaf.jpg,olcha; olsza szara; Alnus incana
+0029,15_Sorbus_aucuparia_tree.jpg,jarzębina; jarząb pospolity; Sorbus aucuparia
+0030,15_Sorbus_aucuparia_leaf.jpg,jarzębina; jarząb pospolity; Sorbus aucuparia
+0031,16_Populus_tremula_tree.jpg,osika; topola osika; Populus tremula
+0032,16_Populus_tremula_leaf.jpg,osika; topola osika; Populus tremula
+0033,17_Populus_nigra_tree.jpg,topola; topola czarna; Populus nigra
+0034,17_Populus_nigra_leaf.jpg,topola; topola czarna; Populus nigra
+0035,18_Populus_alba_tree.jpg,topola; topola biała; Populus alba
+0036,18_Populus_alba_leaf.jpg,topola; topola biała; Populus alba
+0037,19_Salix_alba_tree.jpg,wierzba; wierzba biała; Salix alba
+0038,19_Salix_alba_leaf.jpg,wierzba; wierzba biała; Salix alba
+0039,20_Salix_fragilis_tree.jpg,wierzba; wierzba krucha; Salix fragilis
+0040,20_Salix_fragilis_leaf.jpg,wierzba; wierzba krucha; Salix fragilis
+0041,21_Ulmus_laevis_tree.jpg,wiąz; wiąz szypułkowy; Ulmus laevis
+0042,21_Ulmus_laevis_leaf.jpg,wiąz; wiąz szypułkowy; Ulmus laevis
+0043,22_Ulmus_glabra_tree.jpg,wiąz; wiąz górski; Ulmus glabra
+0044,22_Ulmus_glabra_leaf.jpg,wiąz; wiąz górski; Ulmus glabra
+0045,23_Ulmus_minor_tree.jpg,wiąz; wiąz polny; Ulmus minor
+0046,23_Ulmus_minor_leaf.jpg,wiąz; wiąz polny; Ulmus minor
+0047,24_Aesculus_hippocastanum_tree.jpg,kasztanowiec; kasztanowiec zwyczajny; Aesculus hippocastanum
+0048,24_Aesculus_hippocastanum_leaf.jpg,kasztanowiec; kasztanowiec zwyczajny; Aesculus hippocastanum
+0049,25_Castanea_sativa_tree.jpg,kasztan jadalny; kasztan jadalny; Castanea sativa
+0050,25_Castanea_sativa_leaf.jpg,kasztan jadalny; kasztan jadalny; Castanea sativa
+0051,26_Juglans_regia_tree.jpg,orzech włoski; orzech włoski; Juglans regia
+0052,26_Juglans_regia_leaf.jpg,orzech włoski; orzech włoski; Juglans regia
+0053,27_Corylus_avellana_tree.jpg,leszczyna; leszczyna pospolita; Corylus avellana
+0054,27_Corylus_avellana_leaf.jpg,leszczyna; leszczyna pospolita; Corylus avellana
+0055,28_Prunus_padus_tree.jpg,czeremcha; czeremcha zwyczajna; Prunus padus
+0056,28_Prunus_padus_leaf.jpg,czeremcha; czeremcha zwyczajna; Prunus padus
+0057,29_Prunus_avium_tree.jpg,czereśnia; czereśnia ptasia; Prunus avium
+0058,29_Prunus_avium_leaf.jpg,czereśnia; czereśnia ptasia; Prunus avium
+0059,30_Malus_sylvestris_tree.jpg,dzika jabłoń; jabłoń dzika; Malus sylvestris
+0060,30_Malus_sylvestris_leaf.jpg,dzika jabłoń; jabłoń dzika; Malus sylvestris
+0061,31_Pyrus_communis_tree.jpg,grusza; grusza pospolita; Pyrus communis
+0062,31_Pyrus_communis_leaf.jpg,grusza; grusza pospolita; Pyrus communis
+0063,32_Robinia_pseudoacacia_tree.jpg,akacja; robinia akacjowa; Robinia pseudoacacia
+0064,32_Robinia_pseudoacacia_leaf.jpg,akacja; robinia akacjowa; Robinia pseudoacacia
+0065,33_Platanus_acerifolia_tree.jpg,platan; platan klonolistny; Platanus × acerifolia
+0066,33_Platanus_acerifolia_leaf.jpg,platan; platan klonolistny; Platanus × acerifolia
+0067,34_Ginkgo_biloba_tree.jpg,miłorząb; miłorząb dwuklapowy; Ginkgo biloba
+0068,34_Ginkgo_biloba_leaf.jpg,miłorząb; miłorząb dwuklapowy; Ginkgo biloba
+0069,35_Morus_alba_tree.jpg,morwa; morwa biała; Morus alba
+0070,35_Morus_alba_leaf.jpg,morwa; morwa biała; Morus alba
+0071,36_Taxus_baccata_tree.jpg,cis; cis pospolity; Taxus baccata
+0072,36_Taxus_baccata_leaf.jpg,cis; cis pospolity; Taxus baccata
+0073,37_Abies_alba_tree.jpg,jodła; jodła pospolita; Abies alba
+0074,37_Abies_alba_leaf.jpg,jodła; jodła pospolita; Abies alba
+0075,38_Picea_abies_tree.jpg,świerk; świerk pospolity; Picea abies
+0076,38_Picea_abies_leaf.jpg,świerk; świerk pospolity; Picea abies
+0077,39_Pinus_sylvestris_tree.jpg,sosna; sosna zwyczajna; Pinus sylvestris
+0078,39_Pinus_sylvestris_leaf.jpg,sosna; sosna zwyczajna; Pinus sylvestris
+0079,40_Larix_decidua_tree.jpg,modrzew; modrzew europejski; Larix decidua
+0080,40_Larix_decidua_leaf.jpg,modrzew; modrzew europejski; Larix decidua
+0081,41_Pinus_nigra_tree.jpeg,sosna; sosna czarna; Pinus nigra
+0082,41_Pinus_nigra_leaf.jpg,sosna; sosna czarna; Pinus nigra
+0083,42_Pinus_mugo_tree.jpeg,kosodrzewina; sosna górska; Pinus mugo
+0084,42_Pinus_mugo_leaf.jpeg,kosodrzewina; sosna górska; Pinus mugo
+0085,43_Pseudotsuga_menziesii_tree.jpg,daglezja; daglezja zielona; Pseudotsuga menziesii
+0086,43_Pseudotsuga_menziesii_leaf.jpg,daglezja; daglezja zielona; Pseudotsuga menziesii
+0087,44_Picea_pungens_tree.jpg,świerk srebrny; świerk kłujący; Picea pungens
+0088,44_Picea_pungens_leaf.jpg,świerk srebrny; świerk kłujący; Picea pungens
+0089,45_Thuja_occidentalis_tree.jpg,tuja; żywotnik zachodni; Thuja occidentalis
+0090,45_Thuja_occidentalis_leaf.jpg,tuja; żywotnik zachodni; Thuja occidentalis
+0091,46_Juniperus_communis_tree.jpg,jałowiec; jałowiec pospolity; Juniperus communis
+0092,46_Juniperus_communis_leaf.jpg,jałowiec; jałowiec pospolity; Juniperus communis
+0093,47_Quercus_ilex_tree.jpg,dąb wiecznie zielony; dąb ostrolistny; Quercus ilex
+0094,47_Quercus_ilex_leaf.jpg,dąb wiecznie zielony; dąb ostrolistny; Quercus ilex
+0095,48_Quercus_suber_tree.jpg,dąb korkowy; dąb korkowy; Quercus suber
+0096,48_Quercus_suber_leaf.jpg,dąb korkowy; dąb korkowy; Quercus suber
+0097,49_Pinus_pinea_tree.jpg,pinia; sosna pinia; Pinus pinea
+0098,49_Pinus_pinea_leaf.jpg,pinia; sosna pinia; Pinus pinea
+0099,50_Cupressus_sempervirens_tree.jpg,cyprys; cyprys wieczniezielony; Cupressus sempervirens
+0100,50_Cupressus_sempervirens_leaf.jpg,cyprys; cyprys wieczniezielony; Cupressus sempervirens

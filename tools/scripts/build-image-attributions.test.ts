@@ -18,6 +18,16 @@ function fixtureCourse(rows: string) {
 }
 
 describe("image attribution generator", () => {
+  it("includes verified credits for all tree and leaf cards", () => {
+    const course = buildImageAttributions().find((entry) => entry.id === "drzewa_europy")!;
+    expect(course.attributions).toHaveLength(100);
+    expect(new Set(course.attributions.map((entry) => entry.id)).size).toBe(100);
+    expect(course.attributions.every((entry) => entry.author && !entry.license.includes("WERYFIKACJI"))).toBe(true);
+    expect(course.attributions.find((entry) => entry.id === "0032")?.author).toBe("Kuba G");
+    expect(course.attributions.find((entry) => entry.id === "0036")?.author).toBe("MPF");
+    expect(course.attributions.find((entry) => entry.id === "0095")?.author).toBe("Martin Olsson");
+  });
+
   it("imports 50 birds, Jerzyk, and public domain", () => {
     const [course] = buildImageAttributions([birds]);
     expect(course.attributions).toHaveLength(50);

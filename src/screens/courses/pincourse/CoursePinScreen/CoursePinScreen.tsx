@@ -84,26 +84,34 @@ const KNOWLEDGE_ACCORDION_GROUPS: {
   titleKey: string;
   descriptionKey: string;
   progressiveDescriptionKey?: string;
-  icon: "city" | "flag" | "road";
 }[] = [
   {
     id: "capitals",
     titleKey: "constants.knowledgeCourseGroups.label.capitals",
     descriptionKey: "constants.knowledgeCourseGroups.description.capitals",
-    icon: "city",
   },
   {
     id: "flags",
     titleKey: "constants.knowledgeCourseGroups.label.flags",
     descriptionKey: "constants.knowledgeCourseGroups.description.flags",
-    icon: "flag",
   },
   {
     id: "roadSigns",
     titleKey: "constants.knowledgeCourseGroups.label.roadSigns",
     descriptionKey: "constants.knowledgeCourseGroups.description.roadSigns",
     progressiveDescriptionKey: "courses.progressive.roadSignsDescription",
-    icon: "road",
+  },
+  {
+    id: "elements",
+    titleKey: "constants.knowledgeCourseGroups.label.elements",
+    descriptionKey: "constants.knowledgeCourseGroups.description.elements",
+    progressiveDescriptionKey: "courses.progressive.elementsDescription",
+  },
+  {
+    id: "mushrooms",
+    titleKey: "constants.knowledgeCourseGroups.label.mushrooms",
+    descriptionKey: "constants.knowledgeCourseGroups.description.mushrooms",
+    progressiveDescriptionKey: "courses.progressive.mushroomsDescription",
   },
 ];
 
@@ -349,7 +357,9 @@ export default function CoursePinScreen() {
         count: items.length,
         regularItems,
         miniItems,
-        icon: { kind: "fa6", name: knowledgeGroup.icon },
+        icon: items[0] ? {
+          kind: "course", iconId: items[0].iconId, color: items[0].iconColor,
+        } : undefined,
       };
     });
   }, [t, visibleKnowledgeCourses]);

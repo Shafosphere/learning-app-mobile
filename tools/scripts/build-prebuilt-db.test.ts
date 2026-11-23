@@ -35,13 +35,17 @@ const EXPECTED_CARD_COUNTS: Record<string, number> = {
   french_b1: 2544,
   french_b2: 3931,
   astronomia: 107,
+  pierwiastki_podstawowe: 30,
+  pierwiastki_pozostale: 118,
   polska_historia: 144,
-  math: 258,
   grecka_mitologia_prawda_falsz_50: 50,
   znaki_drogowe_najwazniejsze: 80,
   znaki_drogowe_rozszerzone: 132,
   znaki_drogowe: 165,
   ptaki: 50,
+  drzewa_europy: 100,
+  grzyby_podstawowe: 20,
+  grzyby_rozpoznawanie: 50,
   flagi_europy: 52,
   flagi_afryki: 55,
   flagi_azji: 50,
@@ -75,6 +79,27 @@ const OFFICIAL_PACK_CASES: Array<[string, Record<string, unknown>]> =
   ]);
 
 describe("prebuilt CSV parser", () => {
+  it("accepts common, formal Polish and Latin names for all 50 tree and leaf pairs", () => {
+    const source = require("papaparse").parse(fs.readFileSync(path.join(process.cwd(), "tools/drzewa_europy_50_zdjecia_licencje.csv"), "utf8"), {
+      header: true, delimiter: ";", skipEmptyLines: true,
+    }).data;
+    const pack = OFFICIAL_PACKS.find((entry: { slug: string }) => entry.slug === "drzewa_europy");
+    const cards = readCardsFromCsv(pack);
+    expect(cards).toHaveLength(100);
+    expect(new Set(cards.map((card: { imageFront: string }) => card.imageFront)).size).toBe(100);
+    for (let index = 0; index < cards.length; index += 2) {
+      const tree = cards[index];
+      const leaf = cards[index + 1];
+      expect(tree.answers).toEqual(leaf.answers);
+      const row = source[index / 2];
+      expect(tree.answers).toEqual([...new Set([row.nazwa_potoczna, row.nazwa_formalna_pl, row.nazwa_lacinska])]);
+      expect(tree.flipped).toBe(false);
+      expect(leaf.flipped).toBe(false);
+      expect(tree.imageFront).toMatch(/^asset:\/\/images_trees\/.+_tree\.jpe?g$/);
+      expect(leaf.imageFront).toMatch(/^asset:\/\/images_trees\/.+_leaf\.jpe?g$/);
+    }
+  });
+
   it.each([
     "es_to_pl_first_50", "es_to_pl_first_150", "es_to_pl_first_327",
     "fr_to_pl_first_50", "fr_to_pl_first_150", "fr_to_pl_first_332",
@@ -218,8 +243,8 @@ describe("prebuilt CSV parser", () => {
 
 describe("registered prebuilt CSV packs", () => {
   it("keeps registered pack inventory and card counts stable", () => {
-    expect(OFFICIAL_PACKS).toHaveLength(56);
-    expect(Object.keys(EXPECTED_CARD_COUNTS)).toHaveLength(56);
+    expect(OFFICIAL_PACKS).toHaveLength(60);
+    expect(Object.keys(EXPECTED_CARD_COUNTS)).toHaveLength(60);
 
     const actualCounts = Object.fromEntries(
       OFFICIAL_PACKS.map((pack: { slug: string }) => [
@@ -234,7 +259,7 @@ describe("registered prebuilt CSV packs", () => {
         (total: number, count) => total + (count as number),
         0
       )
-    ).toBe(20488);
+    ).toBe(20548);
   });
 
   it("capitalizes country names in built-in course cards", () => {
