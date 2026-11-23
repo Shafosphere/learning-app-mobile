@@ -1,0 +1,487 @@
+diff --git a/node_modules/react-native-gesture-image-viewer/lib/module/GestureViewerManager.js b/node_modules/react-native-gesture-image-viewer/lib/module/GestureViewerManager.js
+index 89f5aa7..b361924
+--- a/node_modules/react-native-gesture-image-viewer/lib/module/GestureViewerManager.js
++++ b/node_modules/react-native-gesture-image-viewer/lib/module/GestureViewerManager.js
+@@ -128,7 +128,7 @@ class GestureViewerManager {
+   rotate = (angle = 90, clockwise = true) => {
+     const MAX_ANGLE = 360;
+     const currentRotation = this.rotation?.get();
+-    if (currentRotation === undefined || angle < 0 || angle > MAX_ANGLE || angle !== 0 && currentRotation % angle !== 0 && angle !== 360) {
++    if (currentRotation === undefined || angle < 0 || angle > MAX_ANGLE) {
+       return;
+     }
+     if (angle === 0) {
+diff --git a/node_modules/react-native-gesture-image-viewer/lib/module/useGestureViewer.js b/node_modules/react-native-gesture-image-viewer/lib/module/useGestureViewer.js
+index 7c89142..e0b90f0
+--- a/node_modules/react-native-gesture-image-viewer/lib/module/useGestureViewer.js
++++ b/node_modules/react-native-gesture-image-viewer/lib/module/useGestureViewer.js
+@@ -1,3 +1,4 @@
++import { getRotationGeometry } from "./utils/previewRotation.js";
+ "use strict";
+ 
+ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+@@ -255,18 +256,19 @@ export const useGestureViewer = ({
+   }) => {
+     'worklet';
+ 
++const rotated = getRotationGeometry(contentWidth.get(), contentHeight.get(), width, height, rotation.get());
+     return clampTranslationToBounds({
+       overflowX,
+       overflowY,
+-      contentHeight: contentHeight.get(),
+-      contentWidth: contentWidth.get(),
++      contentHeight: rotated.height,
++      contentWidth: rotated.width,
+       height,
+       scale: targetScale,
+       translateX: targetX,
+       translateY: targetY,
+       width
+     });
+-  }, [contentHeight, contentWidth, height, width]);
++  }, [contentHeight, contentWidth, height, width, rotation]);
+   const resetTransformState = useCallback(() => {
+     translateX.set(withTiming(0));
+     translateY.set(withTiming(0));
+@@ -691,7 +693,7 @@ export const useGestureViewer = ({
+     };
+   }, []);
+   const isWebInteractionLocked = useCallback(() => isPageTransitioningRef.current || pageTransitionLocked.get(), [isPageTransitioningRef, pageTransitionLocked]);
+-  const emitSingleTap = useCallback((x, y, tapTarget) => {
++  const emitSingleTap = useCallback((x, y, tapTarget, contentX, contentY) => {
+     if (isPageTransitioningRef.current) {
+       return;
+     }
+@@ -715,6 +717,8 @@ export const useGestureViewer = ({
+     onSingleTapRef.current?.({
+       x,
+       y,
++      contentX,
++      contentY,
+       index: targetIndex,
+       item: targetItem
+     });
+@@ -732,8 +736,14 @@ export const useGestureViewer = ({
+     if (!success || pageTransitionLocked.get() || suppressNativeTap.get()) {
+       return;
+     }
+-    scheduleOnRN(emitSingleTap, event.x, event.y);
+-  }), [emitSingleTap, nativeInteractionHadMultipleTouches, pageTransitionLocked, suppressNativeTap]);
++    const radians = -rotation.get() * Math.PI / 180;
++          const effectiveScale = scale.get() * getRotationGeometry(contentWidth.get(), contentHeight.get(), width, height, rotation.get()).fitScale;
++          const dx = (event.x - width / 2 - translateX.get()) / effectiveScale;
++          const dy = (event.y - height / 2 - translateY.get()) / effectiveScale;
++          const contentX = width / 2 + dx * Math.cos(radians) - dy * Math.sin(radians);
++          const contentY = height / 2 + dx * Math.sin(radians) + dy * Math.cos(radians);
++          scheduleOnRN(emitSingleTap, event.x, event.y, undefined, contentX, contentY);
++  }), [emitSingleTap, nativeInteractionHadMultipleTouches, pageTransitionLocked, suppressNativeTap, rotation, scale, translateX, translateY, width, height, contentWidth, contentHeight]);
+   const doubleTapGesture = useMemo(() => Gesture.Tap().enabled(enableDoubleTapZoom && enableNativeTapGestures).numberOfTaps(2).maxDistance(NATIVE_TAP_MAX_DISTANCE).onTouchesDown((event, stateManager) => {
+     if (event.numberOfTouches === 1) {
+       return;
+@@ -760,7 +770,7 @@ export const useGestureViewer = ({
+     });
+   }), [tapZoomTarget, contentHeight, contentWidth, enableDoubleTapZoom, height, maxZoomScale, nativeInteractionHadMultipleTouches, pageTransitionLocked, scale, suppressNativeTap, translateX, translateY, width]);
+   const tapGesture = useMemo(() => Gesture.Exclusive(doubleTapGesture, singleTapGesture), [doubleTapGesture, singleTapGesture]);
+-  const zoomPinchGesture = useMemo(() => Gesture.Pinch().enabled(enablePinchZoom).onTouchesDown(event => {
++  const pinchGesture = useMemo(() => Gesture.Pinch().enabled(enablePinchZoom).onTouchesDown(event => {
+     if (event.numberOfTouches === 2) {
+       stopPanInertia();
+       nativeInteractionHadMultipleTouches.set(true);
+@@ -913,6 +923,29 @@ export const useGestureViewer = ({
+     hasActiveFocal.set(false);
+     scheduleOnRN(setIsPinching, false);
+   }), [stopPanInertia, scale, enablePinchZoom, maxZoomScale, translateX, translateY, startScale, initialTranslateX, initialTranslateY, width, height, constrainTranslation, lastFocalX, lastFocalY, startFocalX, startFocalY, hasActiveFocal, nativeInteractionHadMultipleTouches, pageTransitionLocked, suppressNativeTap]);
++  const rotationStart = useSharedValue(0);
++  const rotationGesture = useMemo(() => Gesture.Rotation()
++    .onStart(() => {
++      stopPanInertia();
++      cancelAnimation(rotation);
++      rotationStart.set(rotation.get());
++      nativeInteractionHadMultipleTouches.set(true);
++      suppressNativeTap.set(true);
++    })
++    .onUpdate((event) => {
++      rotation.set(rotationStart.get() + event.rotation * 180 / Math.PI);
++    })
++    .onEnd(() => {
++      const bounded = constrainTranslation({
++        scale: scale.get(), translateX: translateX.get(), translateY: translateY.get(),
++      });
++      translateX.set(withTiming(bounded.translateX));
++      translateY.set(withTiming(bounded.translateY));
++    }), [stopPanInertia, rotation, rotationStart, nativeInteractionHadMultipleTouches,
++      suppressNativeTap, constrainTranslation, scale, translateX, translateY]);
++  const zoomPinchGesture = useMemo(() => Gesture.Simultaneous(pinchGesture, rotationGesture),
++    [pinchGesture, rotationGesture]);
++
+   const zoomPanGesture = useMemo(() => Gesture.Pan().enabled(enablePanWhenZoomed && !isPinching).maxPointers(1).activeCursor('grabbing').averageTouches(true).onTouchesDown((event, stateManager) => {
+     stopPanInertia();
+     if (event.numberOfTouches > 1) {
+@@ -1017,7 +1050,7 @@ export const useGestureViewer = ({
+     }, {
+       translateX: translateX.get()
+     }, {
+-      scale: scale.get()
++      scale: scale.get() * getRotationGeometry(contentWidth.get(), contentHeight.get(), width, height, rotation.get()).fitScale
+     }, {
+       rotate: `${rotation.get()}deg`
+     }]
+diff --git a/node_modules/react-native-gesture-image-viewer/lib/module/usePanInertia.js b/node_modules/react-native-gesture-image-viewer/lib/module/usePanInertia.js
+index 4474788..aff353b
+--- a/node_modules/react-native-gesture-image-viewer/lib/module/usePanInertia.js
++++ b/node_modules/react-native-gesture-image-viewer/lib/module/usePanInertia.js
+@@ -1,3 +1,4 @@
++import { getRotationGeometry } from "./utils/previewRotation.js";
+ "use strict";
+ 
+ import { useCallback, useEffect, useRef } from 'react';
+@@ -90,19 +91,20 @@ export function usePanInertia({
+   const stopAndConstrain = useCallback(() => {
+     'worklet';
+ 
++    const rotated = getRotationGeometry(contentWidth.get(), contentHeight.get(), width, height, rotation.get());
+     const {
+       maxTranslateX,
+       maxTranslateY
+     } = getTranslationBounds({
+       width,
+       height,
+-      contentWidth: contentWidth.get(),
+-      contentHeight: contentHeight.get(),
++      contentWidth: rotated.width,
++      contentHeight: rotated.height,
+       scale: scale.get()
+     });
+     stopAxis(translateX, ownerX, maxTranslateX);
+     stopAxis(translateY, ownerY, maxTranslateY);
+-  }, [ownerX, ownerY, translateX, translateY, width, height, contentWidth, contentHeight, scale]);
++  }, [ownerX, ownerY, translateX, translateY, width, height, contentWidth, contentHeight, scale, rotation]);
+   const start = useCallback((velocityX, velocityY) => {
+     'worklet';
+ 
+@@ -110,14 +112,15 @@ export function usePanInertia({
+       return;
+     }
+     stop();
++    const rotated = getRotationGeometry(contentWidth.get(), contentHeight.get(), width, height, rotation.get());
+     const {
+       maxTranslateX,
+       maxTranslateY
+     } = getTranslationBounds({
+       width,
+       height,
+-      contentWidth: contentWidth.get(),
+-      contentHeight: contentHeight.get(),
++      contentWidth: rotated.width,
++      contentHeight: rotated.height,
+       scale: scale.get()
+     });
+     const token = sequence.get() + 1;
+@@ -130,7 +133,7 @@ export function usePanInertia({
+     };
+     startAxis(translateX, ownerX, token, maxTranslateX, enabled ? velocityX : 0, config);
+     startAxis(translateY, ownerY, token, maxTranslateY, enabled ? velocityY : 0, config);
+-  }, [enabled, scale, stop, width, height, contentWidth, contentHeight, sequence, translateX, translateY, ownerX, ownerY, deceleration, velocityFactor, rubberBandEffect, rubberBandFactor]);
++  }, [enabled, scale, stop, width, height, contentWidth, contentHeight, rotation, sequence, translateX, translateY, ownerX, ownerY, deceleration, velocityFactor, rubberBandEffect, rubberBandFactor]);
+   useAnimatedReaction(() => [scale.get(), rotation.get(), contentWidth.get(), contentHeight.get()], (current, previous) => {
+     if (previous && current.some((value, index) => value !== previous[index])) {
+       stopAndConstrain();
+diff --git a/node_modules/react-native-gesture-image-viewer/lib/module/utils/previewRotation.js b/node_modules/react-native-gesture-image-viewer/lib/module/utils/previewRotation.js
+new file mode 100644
+index 0000000..34276ff
+--- /dev/null
++++ b/node_modules/react-native-gesture-image-viewer/lib/module/utils/previewRotation.js
+@@ -0,0 +1,10 @@
++export function getRotationGeometry(contentWidth, contentHeight, width, height, degrees) {
++  'worklet';
++  const radians = degrees * Math.PI / 180;
++  const cos = Math.abs(Math.cos(radians));
++  const sin = Math.abs(Math.sin(radians));
++  const rotatedWidth = contentWidth * cos + contentHeight * sin;
++  const rotatedHeight = contentWidth * sin + contentHeight * cos;
++  const fitScale = Math.min(1, width / rotatedWidth, height / rotatedHeight);
++  return { width: rotatedWidth * fitScale, height: rotatedHeight * fitScale, fitScale };
++}
+diff --git a/node_modules/react-native-gesture-image-viewer/lib/typescript/src/gestureViewerGestures.d.ts b/node_modules/react-native-gesture-image-viewer/lib/typescript/src/gestureViewerGestures.d.ts
+index ef3769c..748318c
+--- a/node_modules/react-native-gesture-image-viewer/lib/typescript/src/gestureViewerGestures.d.ts
++++ b/node_modules/react-native-gesture-image-viewer/lib/typescript/src/gestureViewerGestures.d.ts
+@@ -3,7 +3,7 @@ type GestureViewerGestures = {
+     dismissGesture: GestureType;
+     horizontalPagingGesture: GestureType;
+     zoomGesture: ComposedGesture;
+-    zoomPinchGesture: GestureType;
++    zoomPinchGesture: GestureType | ComposedGesture;
+ };
+ export declare function composeGestureViewerGestures({ dismissGesture, horizontalPagingGesture, zoomGesture, zoomPinchGesture, }: GestureViewerGestures): ComposedGesture;
+ export {};
+diff --git a/node_modules/react-native-gesture-image-viewer/lib/typescript/src/types.d.ts b/node_modules/react-native-gesture-image-viewer/lib/typescript/src/types.d.ts
+index c309770..bc54e23
+--- a/node_modules/react-native-gesture-image-viewer/lib/typescript/src/types.d.ts
++++ b/node_modules/react-native-gesture-image-viewer/lib/typescript/src/types.d.ts
+@@ -36,6 +36,8 @@ export type TriggerRect = {
+     height: number;
+ };
+ export type GestureViewerSingleTapEvent<ItemT> = {
++  contentX?: number;
++  contentY?: number;
+     x: number;
+     y: number;
+     index: number;
+diff --git a/node_modules/react-native-gesture-image-viewer/src/GestureViewerManager.ts b/node_modules/react-native-gesture-image-viewer/src/GestureViewerManager.ts
+index b8e1859..c2e4d3e
+--- a/node_modules/react-native-gesture-image-viewer/src/GestureViewerManager.ts
++++ b/node_modules/react-native-gesture-image-viewer/src/GestureViewerManager.ts
+@@ -201,8 +201,7 @@ class GestureViewerManager {
+     if (
+       currentRotation === undefined ||
+       angle < 0 ||
+-      angle > MAX_ANGLE ||
+-      (angle !== 0 && currentRotation % angle !== 0 && angle !== 360)
++      angle > MAX_ANGLE
+     ) {
+       return;
+     }
+diff --git a/node_modules/react-native-gesture-image-viewer/src/gestureViewerGestures.ts b/node_modules/react-native-gesture-image-viewer/src/gestureViewerGestures.ts
+index 045f028..0f616a5
+--- a/node_modules/react-native-gesture-image-viewer/src/gestureViewerGestures.ts
++++ b/node_modules/react-native-gesture-image-viewer/src/gestureViewerGestures.ts
+@@ -4,7 +4,7 @@ type GestureViewerGestures = {
+   dismissGesture: GestureType;
+   horizontalPagingGesture: GestureType;
+   zoomGesture: ComposedGesture;
+-  zoomPinchGesture: GestureType;
++  zoomPinchGesture: GestureType | ComposedGesture;
+ };
+ 
+ export function composeGestureViewerGestures({
+diff --git a/node_modules/react-native-gesture-image-viewer/src/types.ts b/node_modules/react-native-gesture-image-viewer/src/types.ts
+index 5ebc3c8..ed65799
+--- a/node_modules/react-native-gesture-image-viewer/src/types.ts
++++ b/node_modules/react-native-gesture-image-viewer/src/types.ts
+@@ -46,6 +46,8 @@ export type TriggerRect = {
+ };
+ 
+ export type GestureViewerSingleTapEvent<ItemT> = {
++  contentX?: number;
++  contentY?: number;
+   x: number;
+   y: number;
+   index: number;
+diff --git a/node_modules/react-native-gesture-image-viewer/src/useGestureViewer.ts b/node_modules/react-native-gesture-image-viewer/src/useGestureViewer.ts
+index 09b546e..78ce8f3
+--- a/node_modules/react-native-gesture-image-viewer/src/useGestureViewer.ts
++++ b/node_modules/react-native-gesture-image-viewer/src/useGestureViewer.ts
+@@ -1,3 +1,4 @@
++import { getRotationGeometry } from "./utils/previewRotation";
+ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+ import { type View, useWindowDimensions } from 'react-native';
+ import { Gesture, type GestureType } from 'react-native-gesture-handler';
+@@ -358,11 +359,12 @@ export const useGestureViewer = <ItemT>({
+       translateY: number;
+     }) => {
+       'worklet';
++const rotated = getRotationGeometry(contentWidth.get(), contentHeight.get(), width, height, rotation.get());
+       return clampTranslationToBounds({
+         overflowX,
+         overflowY,
+-        contentHeight: contentHeight.get(),
+-        contentWidth: contentWidth.get(),
++        contentHeight: rotated.height,
++        contentWidth: rotated.width,
+         height,
+         scale: targetScale,
+         translateX: targetX,
+@@ -370,7 +372,7 @@ export const useGestureViewer = <ItemT>({
+         width,
+       });
+     },
+-    [contentHeight, contentWidth, height, width],
++    [contentHeight, contentWidth, height, width, rotation],
+   );
+ 
+   const resetTransformState = useCallback(() => {
+@@ -1043,7 +1045,7 @@ export const useGestureViewer = <ItemT>({
+   );
+ 
+   const emitSingleTap = useCallback<EmitSingleTap<ItemT>>(
+-    (x, y, tapTarget) => {
++    (x, y, tapTarget, contentX, contentY) => {
+       if (isPageTransitioningRef.current) {
+         return;
+       }
+@@ -1061,7 +1063,7 @@ export const useGestureViewer = <ItemT>({
+       }
+ 
+       managerRef.current?.emitTap({ kind: 'single', x, y, index: targetIndex });
+-      onSingleTapRef.current?.({ x, y, index: targetIndex, item: targetItem });
++      onSingleTapRef.current?.({ x, y, contentX, contentY, index: targetIndex, item: targetItem });
+     },
+     [getCurrentTapTarget, isPageTransitioningRef],
+   );
+@@ -1088,9 +1090,15 @@ export const useGestureViewer = <ItemT>({
+             return;
+           }
+ 
+-          scheduleOnRN(emitSingleTap, event.x, event.y);
++          const radians = -rotation.get() * Math.PI / 180;
++          const effectiveScale = scale.get() * getRotationGeometry(contentWidth.get(), contentHeight.get(), width, height, rotation.get()).fitScale;
++          const dx = (event.x - width / 2 - translateX.get()) / effectiveScale;
++          const dy = (event.y - height / 2 - translateY.get()) / effectiveScale;
++          const contentX = width / 2 + dx * Math.cos(radians) - dy * Math.sin(radians);
++          const contentY = height / 2 + dx * Math.sin(radians) + dy * Math.cos(radians);
++          scheduleOnRN(emitSingleTap, event.x, event.y, undefined, contentX, contentY);
+         }),
+-    [emitSingleTap, nativeInteractionHadMultipleTouches, pageTransitionLocked, suppressNativeTap],
++    [emitSingleTap, nativeInteractionHadMultipleTouches, pageTransitionLocked, suppressNativeTap, rotation, scale, translateX, translateY, width, height, contentWidth, contentHeight],
+   );
+ 
+   const doubleTapGesture = useMemo(
+@@ -1149,7 +1157,7 @@ export const useGestureViewer = <ItemT>({
+     [doubleTapGesture, singleTapGesture],
+   );
+ 
+-  const zoomPinchGesture = useMemo(
++  const pinchGesture = useMemo(
+     () =>
+       Gesture.Pinch()
+         .enabled(enablePinchZoom)
+@@ -1350,6 +1358,29 @@ export const useGestureViewer = <ItemT>({
+     ],
+   );
+ 
++  const rotationStart = useSharedValue(0);
++  const rotationGesture = useMemo(() => Gesture.Rotation()
++    .onStart(() => {
++      stopPanInertia();
++      cancelAnimation(rotation);
++      rotationStart.set(rotation.get());
++      nativeInteractionHadMultipleTouches.set(true);
++      suppressNativeTap.set(true);
++    })
++    .onUpdate((event) => {
++      rotation.set(rotationStart.get() + event.rotation * 180 / Math.PI);
++    })
++    .onEnd(() => {
++      const bounded = constrainTranslation({
++        scale: scale.get(), translateX: translateX.get(), translateY: translateY.get(),
++      });
++      translateX.set(withTiming(bounded.translateX));
++      translateY.set(withTiming(bounded.translateY));
++    }), [stopPanInertia, rotation, rotationStart, nativeInteractionHadMultipleTouches,
++      suppressNativeTap, constrainTranslation, scale, translateX, translateY]);
++  const zoomPinchGesture = useMemo(() => Gesture.Simultaneous(pinchGesture, rotationGesture),
++    [pinchGesture, rotationGesture]);
++
+   const zoomPanGesture = useMemo(
+     () =>
+       Gesture.Pan()
+@@ -1495,7 +1526,7 @@ export const useGestureViewer = <ItemT>({
+ 
+       { translateY: translateY.get() },
+       { translateX: translateX.get() },
+-      { scale: scale.get() },
++      { scale: scale.get() * getRotationGeometry(contentWidth.get(), contentHeight.get(), width, height, rotation.get()).fitScale },
+       { rotate: `${rotation.get()}deg` },
+     ],
+   }));
+diff --git a/node_modules/react-native-gesture-image-viewer/src/usePanInertia.ts b/node_modules/react-native-gesture-image-viewer/src/usePanInertia.ts
+index 9443af8..a836215
+--- a/node_modules/react-native-gesture-image-viewer/src/usePanInertia.ts
++++ b/node_modules/react-native-gesture-image-viewer/src/usePanInertia.ts
+@@ -1,3 +1,4 @@
++import { getRotationGeometry } from "./utils/previewRotation";
+ import { useCallback, useEffect, useRef } from 'react';
+ import {
+   cancelAnimation,
+@@ -124,16 +125,17 @@ export function usePanInertia({
+ 
+   const stopAndConstrain = useCallback(() => {
+     'worklet';
++    const rotated = getRotationGeometry(contentWidth.get(), contentHeight.get(), width, height, rotation.get());
+     const { maxTranslateX, maxTranslateY } = getTranslationBounds({
+       width,
+       height,
+-      contentWidth: contentWidth.get(),
+-      contentHeight: contentHeight.get(),
++      contentWidth: rotated.width,
++      contentHeight: rotated.height,
+       scale: scale.get(),
+     });
+     stopAxis(translateX, ownerX, maxTranslateX);
+     stopAxis(translateY, ownerY, maxTranslateY);
+-  }, [ownerX, ownerY, translateX, translateY, width, height, contentWidth, contentHeight, scale]);
++  }, [ownerX, ownerY, translateX, translateY, width, height, contentWidth, contentHeight, scale, rotation]);
+ 
+   const start = useCallback(
+     (velocityX: number, velocityY: number) => {
+@@ -142,11 +144,12 @@ export function usePanInertia({
+         return;
+       }
+       stop();
+-      const { maxTranslateX, maxTranslateY } = getTranslationBounds({
++      const rotated = getRotationGeometry(contentWidth.get(), contentHeight.get(), width, height, rotation.get());
++    const { maxTranslateX, maxTranslateY } = getTranslationBounds({
+         width,
+         height,
+-        contentWidth: contentWidth.get(),
+-        contentHeight: contentHeight.get(),
++        contentWidth: rotated.width,
++        contentHeight: rotated.height,
+         scale: scale.get(),
+       });
+       const token = sequence.get() + 1;
+@@ -168,6 +171,7 @@ export function usePanInertia({
+       height,
+       contentWidth,
+       contentHeight,
++      rotation,
+       sequence,
+       translateX,
+       translateY,
+diff --git a/node_modules/react-native-gesture-image-viewer/src/useWebClickHandler.ts b/node_modules/react-native-gesture-image-viewer/src/useWebClickHandler.ts
+index e1f4d07..cd0b2dc
+--- a/node_modules/react-native-gesture-image-viewer/src/useWebClickHandler.ts
++++ b/node_modules/react-native-gesture-image-viewer/src/useWebClickHandler.ts
+@@ -22,7 +22,9 @@ export type WebClickEvent = {
+ 
+ export type WebClickHandler = (event: WebClickEvent) => void;
+ 
+-export type EmitSingleTap<ItemT> = (x: number, y: number, tapTarget?: WebTapTarget<ItemT>) => void;
++export type EmitSingleTap<ItemT> = (x: number, y: number, tapTarget?: WebTapTarget<ItemT>, contentX?: number,
++  contentY?: number,
++) => void;
+ 
+ export type WebClickHandlerConfig<ItemT> = {
+   clearPendingWebSingleTap: () => void;
+diff --git a/node_modules/react-native-gesture-image-viewer/src/useWebClickHandler.web.ts b/node_modules/react-native-gesture-image-viewer/src/useWebClickHandler.web.ts
+index 6fab7ae..d18a194
+--- a/node_modules/react-native-gesture-image-viewer/src/useWebClickHandler.web.ts
++++ b/node_modules/react-native-gesture-image-viewer/src/useWebClickHandler.web.ts
+@@ -23,7 +23,9 @@ export type WebClickEvent = {
+ 
+ export type WebClickHandler = (event: WebClickEvent) => void;
+ 
+-export type EmitSingleTap<ItemT> = (x: number, y: number, tapTarget?: WebTapTarget<ItemT>) => void;
++export type EmitSingleTap<ItemT> = (x: number, y: number, tapTarget?: WebTapTarget<ItemT>, contentX?: number,
++  contentY?: number,
++) => void;
+ 
+ export type WebClickHandlerConfig<ItemT> = {
+   clearPendingWebSingleTap: () => void;
+diff --git a/node_modules/react-native-gesture-image-viewer/src/utils/previewRotation.ts b/node_modules/react-native-gesture-image-viewer/src/utils/previewRotation.ts
+new file mode 100644
+index 0000000..f7150c1
+--- /dev/null
++++ b/node_modules/react-native-gesture-image-viewer/src/utils/previewRotation.ts
+@@ -0,0 +1,10 @@
++export function getRotationGeometry(contentWidth: number, contentHeight: number, width: number, height: number, degrees: number) {
++  'worklet';
++  const radians = degrees * Math.PI / 180;
++  const cos = Math.abs(Math.cos(radians));
++  const sin = Math.abs(Math.sin(radians));
++  const rotatedWidth = contentWidth * cos + contentHeight * sin;
++  const rotatedHeight = contentWidth * sin + contentHeight * cos;
++  const fitScale = Math.min(1, width / rotatedWidth, height / rotatedHeight);
++  return { width: rotatedWidth * fitScale, height: rotatedHeight * fitScale, fitScale };
++}

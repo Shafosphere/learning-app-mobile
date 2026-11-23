@@ -30,6 +30,7 @@ type FlashcardsCardSectionProps = {
   t: TFunction;
 } & Pick<
   CardProps,
+  | "onImagePreviewVisibilityChange"
   | "activeBox"
   | "inlineAction"
   | "keyboardBridgeInputRef"
@@ -64,6 +65,7 @@ type FlashcardsCardSectionProps = {
 };
 
 export const FlashcardsCardSection = memo(function FlashcardsCardSection({
+  onImagePreviewVisibilityChange,
   holdContent = false,
   heldBackgroundColor,
   activeCustomCourseId,
@@ -111,6 +113,7 @@ export const FlashcardsCardSection = memo(function FlashcardsCardSection({
 }: FlashcardsCardSectionProps) {
   const { cardProps, isHeld } = useStableFlashcardPresentation({
     activeBox,
+    onImagePreviewVisibilityChange,
     contentDebugSource: "flashcards",
     audioCourseId: activeCustomCourseId,
     keyboardBridgeInputRef,

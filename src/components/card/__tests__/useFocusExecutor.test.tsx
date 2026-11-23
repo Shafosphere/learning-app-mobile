@@ -5,7 +5,7 @@ import type { TextInput } from "react-native";
 import { useFocusExecutor } from "@/src/components/card/useFocusExecutor";
 import type { FocusTarget } from "@/src/components/card/card-types";
 
-type MockTextInput = Pick<TextInput, "focus" | "blur">;
+type MockTextInput = { focus: jest.Mock; blur: jest.Mock };
 
 function createInputRef() {
   return {
@@ -136,4 +136,31 @@ describe("useFocusExecutor", () => {
 
     expect(input(refs.main).focus).toHaveBeenCalledTimes(3);
   });
+  it("suppresses retries during a preview and restores only the previously focused field", () => {
+    const refs = createRefs();
+    refs.correction1.current.isFocused = jest.fn(() => true);
+    const { rerender } = renderHook(({ suspended }: { suspended: boolean }) => useFocusExecutor({
+      suspended, scopeKey: 1, focusTarget: "correction1", focusRequestId: 1, refs,
+    }), { initialProps: { suspended: false } });
+    rerender({ suspended: true });
+    const callsBefore = input(refs.correction1).focus.mock.calls.length;
+    act(() => jest.advanceTimersByTime(500));
+    expect(input(refs.correction1).focus).toHaveBeenCalledTimes(callsBefore);
+    rerender({ suspended: false });
+    act(() => jest.advanceTimersByTime(250));
+    expect(input(refs.correction1).focus).toHaveBeenCalledTimes(callsBefore + 1);
+    expect(input(refs.main).focus).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])("does not open a keyboard after closing when no input was focused or the card changed (%s)", (changed) => {
+    const refs = createRefs();
+    refs.main.current.isFocused = jest.fn(() => changed);
+    const { rerender } = renderHook(({ suspended, scopeKey }: { suspended: boolean; scopeKey: number }) => useFocusExecutor({
+      suspended, scopeKey, focusTarget: "main", focusRequestId: 1, refs,
+    }), { initialProps: { suspended: true, scopeKey: 1 } });
+    rerender({ suspended: false, scopeKey: changed ? 2 : 1 });
+    act(() => jest.advanceTimersByTime(500));
+    expect(input(refs.main).focus).not.toHaveBeenCalled();
+  });
+
 });

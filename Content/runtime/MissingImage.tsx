@@ -25,14 +25,14 @@ function RecoveryButton({ packName }: { packName: string }) {
     <Text style={{ color: colors.headline }}>{t(`audioDownload.${key}`)}</Text>
   </Pressable>;
 }
-export function MissingImage({ reference, loading }: { reference: string; loading: boolean }) {
+export function MissingImage({ reference, loading, onRetry }: { reference: string; loading: boolean; onRetry?: () => void }) {
   const { t } = useTranslation();
   const { colors } = useThemeSettings();
   const ref = parseImageReference(reference);
   return <View style={{ padding: 12, alignItems: 'center' }}>
     {loading ? <ActivityIndicator color={colors.headline} /> : <>
       <Text style={{ color: colors.paragraph }}>{t('contentDownload.unavailable')}</Text>
-      {usesImagePAD && ref ? <RecoveryButton packName={ref.packName} /> : <Pressable accessibilityRole="button" onPress={invalidateImages} style={{ padding: 12 }}><Text style={{ color: colors.headline }}>{t('audioDownload.retry')}</Text></Pressable>}
+      {usesImagePAD && ref ? <RecoveryButton packName={ref.packName} /> : <Pressable accessibilityRole="button" onPress={() => { onRetry?.(); invalidateImages(); }} style={{ padding: 12 }}><Text style={{ color: colors.headline }}>{t('audioDownload.retry')}</Text></Pressable>}
     </>}
   </View>;
 }

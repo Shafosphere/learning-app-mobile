@@ -1,5 +1,5 @@
 import type { BoxZeroAnswerSide } from "@/src/contexts/SettingsContext";
-import { scheduleAudioTransition } from "@/Audio/runtime/scheduleAudioTransition";
+import { usePausableAudioTransition } from "./usePausableAudioTransition";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   logCustomLearningEvent,
@@ -101,6 +101,7 @@ export type WrongAnswerMeta = {
 };
 
 type UseFlashcardsInteractionParams = {
+  imagePreviewVisible?: boolean;
   boxes: BoxesState;
   setBoxes: React.Dispatch<React.SetStateAction<BoxesState>>;
   checkSpelling: SpellcheckFn;
@@ -118,6 +119,7 @@ type UseFlashcardsInteractionParams = {
 };
 
 export function useFlashcardsInteraction({
+  imagePreviewVisible = false,
   boxes,
   setBoxes,
   checkSpelling,
@@ -133,6 +135,7 @@ export function useFlashcardsInteraction({
   courseName,
   sourceType = "builtin",
 }: UseFlashcardsInteractionParams) {
+  const scheduleAudioTransition = usePausableAudioTransition(imagePreviewVisible);
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setSelectedItem] = useState<WordWithTranslations | null>(null);
   const [queueNext, setQueueNext] = useState(false);
@@ -190,7 +193,7 @@ export function useFlashcardsInteraction({
       transitionTimersRef.current.add(cancel);
       return cancel;
     },
-    []
+    [scheduleAudioTransition]
   );
 
   const reversed = useMemo(
@@ -875,7 +878,7 @@ export function useFlashcardsInteraction({
   }, [correction]);
 
   useEffect(() => {
-    if (!correction) {
+    if (!correction || imagePreviewVisible) {
       return;
     }
     const correctionFieldRequirements =
@@ -921,6 +924,7 @@ export function useFlashcardsInteraction({
       setQueueNext(true);
     }
   }, [
+    imagePreviewVisible,
     correction,
     matchesAnyCorrectionField,
     matchesCorrectionField,
@@ -928,7 +932,7 @@ export function useFlashcardsInteraction({
   ]);
 
   useEffect(() => {
-    if (queueNext && activeBox) {
+    if (queueNext && activeBox && !imagePreviewVisible) {
       // Upewnij się, że pole odpowiedzi jest puste zanim załadujemy nową kartę.
       setAnswer("");
       const currentId = selectedItem?.id ?? null;
@@ -941,7 +945,7 @@ export function useFlashcardsInteraction({
       setResult(null);
       setQueueNext(false);
     }
-  }, [activeBox, boxes, queueNext, selectNextWord, selectedItem]);
+  }, [activeBox, boxes, queueNext, selectNextWord, selectedItem, imagePreviewVisible]);
 
   useEffect(() => {
     if (!activeBox) return;

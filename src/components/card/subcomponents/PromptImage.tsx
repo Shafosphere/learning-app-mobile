@@ -1,10 +1,11 @@
 import { useContentImage } from "@/Content/runtime/useContentImage";
 import { MissingImage } from "@/Content/runtime/MissingImage";
-import { Image } from "expo-image";
+import { invalidateImages } from "@/Content/runtime/images";
 import * as FileSystem from "expo-file-system/legacy";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   StyleSheet,
+  Pressable,
   View,
   Image as RNImage,
   ImageStyle,
@@ -12,7 +13,9 @@ import {
   ViewStyle,
 } from "react-native";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { SvgUri, SvgXml } from "react-native-svg";
+import { useTranslation } from "react-i18next";
+import { CardImagePreviewContext } from "../imagePreviewContext";
+import { PromptImageContent } from "./PromptImageContent";
 import { getPreloadedImage } from "@/src/features/flashcards/flashcardImagePreload";
 
 type PromptImageProps = {
@@ -310,8 +313,11 @@ function ResolvedPromptImage({
   maxHeight,
   onHeightChange,
   renderMode = "default",
-}: PromptImageProps) {
+  onLoadError,
+}: PromptImageProps & { onLoadError: () => void }) {
   const { colors, flashcardsImageFrameEnabled } = useSettings();
+  const openPreview = useContext(CardImagePreviewContext);
+  const { t } = useTranslation();
   const overlayColor = renderMode === "correction" ? "#FDE047" : "#FF5470";
   // Read the preload cache during render so remounting the same URI never
   // produces a transparent first frame before the effect can run.
@@ -327,6 +333,7 @@ function ResolvedPromptImage({
   const [isSvg, setIsSvg] = useState(
     () => initialImage.preparedSvg != null || isSvgUri(uri),
   );
+  const [hasLoadedContent, setHasLoadedContent] = useState(() => initialImage.preloaded != null);
   const [svgXml, setSvgXml] = useState<string | null>(
     () => initialImage.preparedSvg?.xml ?? null,
   );
@@ -617,37 +624,25 @@ function ResolvedPromptImage({
         style={frameStyle}
         onLayout={({ nativeEvent }) => onHeightChange?.(nativeEvent.layout.height)}
       >
-        {isSvg ? (
-          svgXml ? (
-            <SvgXml
-              xml={svgXml}
-              width="100%"
-              height="100%"
-              preserveAspectRatio="xMidYMid meet"
-            />
-          ) : uri.startsWith("data:image/svg+xml") ? null : (
-            <SvgUri
-              uri={uri}
-              width="100%"
-              height="100%"
-              preserveAspectRatio="xMidYMid meet"
-            />
-          )
-        ) : (
-          <Image
-            source={{ uri }}
-            recyclingKey={uri}
-            style={{ width: "100%", height: "100%" }}
-            contentFit="contain"
-            transition={0}
-            onError={(event) => {
-              console.warn("[PromptImage] failed to render image", {
-                uri,
-                error: event.error,
-              });
+        <Pressable
+          style={{ width: "100%", height: "100%" }}
+          disabled={!openPreview || !hasResolvedDimensions || !(hasLoadedContent || (isSvg && svgXml != null))}
+          accessibilityRole={openPreview ? "button" : "image"}
+          accessibilityLabel={openPreview ? t("cardImagePreview.open") : undefined}
+          onPress={() => openPreview?.({ uri, isSvg, svgXml, ratio: contentRatio })}
+        >
+          <PromptImageContent
+            image={{ uri, isSvg, svgXml }}
+            onError={onLoadError}
+            onReady={(size) => {
+              if (size && size.width > 0 && size.height > 0) {
+                setContentRatio(size.width / size.height);
+                setHasResolvedDimensions(true);
+              }
+              setHasLoadedContent(true);
             }}
           />
-        )}
+        </Pressable>
       </View>
     </View>
   );
@@ -655,7 +650,28 @@ function ResolvedPromptImage({
 
 export function PromptImage(props: PromptImageProps) {
   const { uri, loading } = useContentImage(props.uri);
-  if (uri) return <ResolvedPromptImage key={uri} {...props} uri={uri} />;
+  const [failedUri, setFailedUri] = useState<string | null>(null);
+  const retryReference = useRef<string | null>(null);
+  useEffect(() => {
+    if (loading) setFailedUri(null);
+  }, [loading]);
+  if (uri && uri !== failedUri) {
+    return (
+      <ResolvedPromptImage
+        key={uri}
+        {...props}
+        uri={uri}
+        onLoadError={() => {
+          setFailedUri(uri);
+          // Retry a managed asset once; a persistent failure exposes manual recovery.
+          if (props.uri.startsWith("asset://") && retryReference.current !== props.uri) {
+            retryReference.current = props.uri;
+            invalidateImages();
+          }
+        }}
+      />
+    );
+  }
 
   const flat = StyleSheet.flatten(props.imageStyle) || {};
   return (
@@ -668,7 +684,7 @@ export function PromptImage(props: PromptImageProps) {
       ]}
       onLayout={({ nativeEvent }) => props.onHeightChange?.(nativeEvent.layout.height)}
     >
-      <MissingImage reference={props.uri} loading={loading} />
+      <MissingImage reference={props.uri} loading={loading} onRetry={() => setFailedUri(null)} />
     </View>
   );
 }

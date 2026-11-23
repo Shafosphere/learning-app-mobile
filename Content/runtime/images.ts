@@ -1,10 +1,20 @@
 import { Asset } from 'expo-asset';
+import * as FileSystem from 'expo-file-system/legacy';
 import { AppState } from 'react-native';
 import { playAssetDelivery } from '@/Audio/modules/play-asset-delivery';
 import { bundledImageSets, usesImagePAD } from './generated/bundledImages';
 import { parseImageReference } from './catalog';
 import { getPackDownload, refreshPack, subscribePackDownloads } from './packDownloads';
 export { usesImagePAD };
+
+async function imageFileExists(uri: string): Promise<boolean> {
+  if (!uri.startsWith('file://')) return true;
+  try {
+    return (await FileSystem.getInfoAsync(uri)).exists;
+  } catch {
+    return false;
+  }
+}
 
 let epoch = 0;
 const cache = new Map<string, Promise<string | null>>();
@@ -39,14 +49,26 @@ export async function resolveImageUri(value: string): Promise<string | null> {
   const ref = parseImageReference(value);
   if (!ref) return null;
   const existing = cache.get(value);
-  if (existing) return existing;
+  if (existing) {
+    const uri = await existing;
+    if (usesImagePAD || !uri || await imageFileExists(uri)) return uri;
+    // Expo Go's cache can be removed while its Asset objects remain in memory.
+    if (cache.get(value) === existing) cache.delete(value);
+    else return resolveImageUri(value);
+  }
   const request = (async () => {
     if (!usesImagePAD) {
       const module = bundledImageSets[ref.packName]?.[ref.imageId];
       if (!module) return null;
       const asset = Asset.fromModule(module);
+      if (asset.localUri?.startsWith('file://') && !await imageFileExists(asset.localUri)) {
+        // downloadAsync otherwise returns immediately when downloaded is true.
+        asset.downloaded = false;
+        asset.localUri = null;
+      }
       await asset.downloadAsync();
-      return asset.localUri ?? asset.uri;
+      const uri = asset.localUri ?? asset.uri;
+      return await imageFileExists(uri) ? uri : null;
     }
     phases.set(ref.packName, getPackDownload(ref.packName).phase);
     if (getPackDownload(ref.packName).phase !== 'ready') await refreshPack(ref.packName);

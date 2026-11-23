@@ -525,4 +525,38 @@ describe("KeyboardStudyScroll", () => {
     expect(mockScrollTo).not.toHaveBeenCalled();
     expect(bottomPadding(screen)).toBe(8);
   });
+  it("holds the scroll offset through preview dismissal and keyboard restoration", () => {
+    const previewScene = (locked: boolean, keyboard: boolean, key = "1:10") => (
+      <KeyboardStudyScroll testID="study-scroll" keyboardVisible={keyboard}
+        keyboardTopInWindow={keyboard ? 340 : null} cardHeight={600}
+        positionLocked={locked} positionLockKey={key}>
+        <Text>Study</Text>
+      </KeyboardStudyScroll>
+    );
+    const screen = render(previewScene(false, true));
+    fireEvent(screen.getByTestId("study-scroll"), "scroll", { nativeEvent: { contentOffset: { y: 140 } } });
+    screen.rerender(previewScene(true, true));
+    mockScrollTo.mockClear();
+    screen.rerender(previewScene(true, false));
+    // Simulate the native offset changing as the keyboard hides.
+    fireEvent(screen.getByTestId("study-scroll"), "scroll", { nativeEvent: { contentOffset: { y: 0 } } });
+    screen.rerender(previewScene(false, false));
+    expect(mockScrollTo).not.toHaveBeenCalled();
+    screen.rerender(previewScene(false, true));
+    expect(mockScrollTo).toHaveBeenLastCalledWith({ y: 140, animated: false });
+  });
+
+  it("does not restore a previous card's offset after a scope change", () => {
+    const previewScene = (locked: boolean, key: string) => (
+      <KeyboardStudyScroll testID="study-scroll" keyboardVisible={false} keyboardTopInWindow={null}
+        cardHeight={600} positionLocked={locked} positionLockKey={key}><Text>Study</Text></KeyboardStudyScroll>
+    );
+    const screen = render(previewScene(false, "1:10"));
+    fireEvent(screen.getByTestId("study-scroll"), "scroll", { nativeEvent: { contentOffset: { y: 140 } } });
+    screen.rerender(previewScene(true, "1:10"));
+    mockScrollTo.mockClear();
+    screen.rerender(previewScene(false, "2:11"));
+    expect(mockScrollTo).not.toHaveBeenCalled();
+  });
+
 });

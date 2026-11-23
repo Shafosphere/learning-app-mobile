@@ -48,10 +48,18 @@ import CardFrame from "./subcomponents/CardFrame";
 import { CardHint } from "./subcomponents/CardHint";
 import { CardMeasure } from "./subcomponents/CardMeasure";
 import { getResponsiveFlashcardMetrics } from "./responsiveCardWidth";
+import { CardImagePreviewContext, type CardPreviewImage } from "./imagePreviewContext";
 import { useCardFocusController } from "./useCardFocusController";
 import { useFocusExecutor } from "./useFocusExecutor";
 import { VisibleStudyViewportContext } from "@/src/components/flashcards/StudyViewportContext";
 import { getLandscapeStudyLayout, LandscapeStudyContext } from "./landscapeStudyLayout";
+
+function DeferredCardImagePreview(props: { image: CardPreviewImage; onClose: () => void }) {
+  // Keep gesture-viewer initialization off the normal card render path.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { CardImagePreview } = require("./CardImagePreview") as typeof import("./CardImagePreview");
+  return <CardImagePreview {...props} />;
+}
 
 const INPUT_HORIZONTAL_PADDING = 8;
 const MIN_INPUT_SCROLL_AHEAD = 48; // keep at least ~2-3 letters visible ahead of the caret
@@ -135,6 +143,7 @@ const formatDateLikeInput = (
 
 export default function Card({
   activeBox = null,
+  onImagePreviewVisibilityChange,
   audioCourseId,
   contentDebugSource,
   isContentHeld = false,
@@ -258,6 +267,47 @@ export default function Card({
   const input1ScrollRef = useRef<ScrollView | null>(null);
   const input2ScrollRef = useRef<ScrollView | null>(null);
   const selectedItemId = selectedItem?.id ?? null;
+  const [preview, setPreview] = useState<{ image: CardPreviewImage; cardId: number | null; box: CardProps["activeBox"]; courseId: CardProps["audioCourseId"] } | null>(null);
+  const imagePreviewOpenRef = useRef(false);
+  const previewScopeRef = useRef<{ cardId: number | null; courseId: CardProps["audioCourseId"]; box: CardProps["activeBox"] } | null>(null);
+  const deferredAutoSubmitRef = useRef<(() => void) | null>(null);
+  const imagePreview = preview && preview.cardId === selectedItemId && preview.box === activeBox &&
+    preview.courseId === audioCourseId && isFocused ? preview.image : null;
+  const isImagePreviewVisible = imagePreview != null;
+  const previewVisibilityCallbackRef = useRef(onImagePreviewVisibilityChange);
+  previewVisibilityCallbackRef.current = onImagePreviewVisibilityChange;
+  const closeImagePreview = useCallback(() => setPreview(null), []);
+  const openImagePreview = useCallback((image: CardPreviewImage) => {
+    if (!isFocused || isBetweenCards || isContentHeld || selectedItemId == null) return;
+    imagePreviewOpenRef.current = true;
+    previewScopeRef.current = { cardId: selectedItemId, courseId: audioCourseId, box: activeBox };
+    previewVisibilityCallbackRef.current?.(true);
+    setPreview({ image, cardId: selectedItemId, box: activeBox, courseId: audioCourseId });
+  }, [activeBox, audioCourseId, isBetweenCards, isContentHeld, isFocused, selectedItemId]);
+  const runWhenPreviewClosed = useCallback((callback: () => void) => {
+    if (imagePreviewOpenRef.current) deferredAutoSubmitRef.current = callback;
+    else callback();
+  }, []);
+  useEffect(() => {
+    if (isImagePreviewVisible) {
+      Keyboard.dismiss();
+      return;
+    }
+    if (imagePreviewOpenRef.current) {
+      imagePreviewOpenRef.current = false;
+      previewVisibilityCallbackRef.current?.(false);
+    }
+    if (preview) setPreview(null);
+    const pending = deferredAutoSubmitRef.current;
+    deferredAutoSubmitRef.current = null;
+    if (pending && isFocused && previewScopeRef.current?.cardId === selectedItemId &&
+      previewScopeRef.current?.courseId === audioCourseId && previewScopeRef.current?.box === activeBox) pending();
+  }, [activeBox, audioCourseId, isFocused, isImagePreviewVisible, preview, selectedItemId]);
+  useEffect(() => () => {
+    if (imagePreviewOpenRef.current) previewVisibilityCallbackRef.current?.(false);
+    deferredAutoSubmitRef.current = null;
+  }, []);
+
   const lastFlashcardsStateRef = useRef<{
     activeBox: CardProps["activeBox"];
     displayedCardId: number | null;
@@ -426,15 +476,17 @@ export default function Card({
       if (canAutoSubmit) {
         autoSubmitTimerRef.current = setTimeout(() => {
           autoSubmitTimerRef.current = null;
-          const submitted = confirm(undefined, nextValue);
-          if (submitted === false) {
-            // Flashcards use a short action lock after a card appears. Retry
-            // once after it has had time to clear instead of losing the answer.
-            autoSubmitTimerRef.current = setTimeout(() => {
-              autoSubmitTimerRef.current = null;
-              confirm(undefined, nextValue);
-            }, 1000);
-          }
+          runWhenPreviewClosed(() => {
+            const submitted = confirm(undefined, nextValue);
+            if (submitted === false) {
+              // Flashcards use a short action lock after a card appears. Retry
+              // once after it has had time to clear instead of losing the answer.
+              autoSubmitTimerRef.current = setTimeout(() => {
+                autoSubmitTimerRef.current = null;
+                runWhenPreviewClosed(() => confirm(undefined, nextValue));
+              }, 1000);
+            }
+          });
         }, 200);
       }
     },
@@ -443,6 +495,7 @@ export default function Card({
       autoConvertSpanishPunctuation,
       ignoreDiacriticsInSpellcheck,
       autoSubmitCorrectAnswer,
+      runWhenPreviewClosed,
       checkSpelling,
       confirm,
       isMainAnswerDate,
@@ -457,6 +510,7 @@ export default function Card({
 
   useEffect(() => {
     return () => {
+      deferredAutoSubmitRef.current = null;
       if (autoSubmitTimerRef.current != null) {
         clearTimeout(autoSubmitTimerRef.current);
         autoSubmitTimerRef.current = null;
@@ -695,6 +749,8 @@ export default function Card({
     [],
   );
   useFocusExecutor({
+    suspended: isImagePreviewVisible,
+    scopeKey: selectedItemId,
     focusTarget,
     focusRequestId,
     refs: focusRefs,
@@ -1458,6 +1514,7 @@ export default function Card({
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
 
   return (
+    <CardImagePreviewContext.Provider value={!isBetweenCards && !isContentHeld && isFocused ? openImagePreview : null}>
     <View style={styles.container}>
       {/* Scrollable study screens provide their bridge outside the ScrollView.
           Focusing a bridge at the card's top would make Android scroll to it. */}
@@ -1571,6 +1628,9 @@ export default function Card({
         Actions (True/False, Download/OK) are now rendered outside Card
         from FlashcardsScreen via FlashcardsButtons.
       */}
+      {imagePreview ? (
+        <DeferredCardImagePreview image={imagePreview} onClose={closeImagePreview} />
+      ) : null}
       <NudgeModal
         visible={hintModal !== null}
         title={t("flashcards.card.hint.targetDialogTitle")}
@@ -1582,5 +1642,6 @@ export default function Card({
         onSecondaryPress={handleHintModalSecondaryPress}
       />
     </View>
+    </CardImagePreviewContext.Provider>
   );
 }

@@ -22,12 +22,15 @@ type Props = {
   boxes: BoxesProps | null;
   isCourseFinishedVisible: boolean;
   interactionBlocked: boolean;
+  imagePreviewVisible?: boolean;
+  scrollPositionKey?: string;
 };
 
 export function FlashcardsStudyLayout({
   testIDPrefix = "flashcards", bottomButtonsCoachmarkId,
   layout, styles, cardSection, topButtons, bottomButtons, boxes,
   isCourseFinishedVisible, interactionBlocked,
+  imagePreviewVisible = false, scrollPositionKey,
 }: Props) {
   const { studyLayout, dock, screenSectionLayout } = layout;
   return (
@@ -42,6 +45,8 @@ export function FlashcardsStudyLayout({
       pointerEvents={interactionBlocked ? "none" : "auto"}
     >
       <KeyboardStudyScroll
+        positionLocked={imagePreviewVisible}
+        positionLockKey={scrollPositionKey}
         testID={layout.isTabletCenteredStudyLayout ? `${testIDPrefix}-study-stack` : `${testIDPrefix}-study-scroll`}
         enabled={layout.studyScrollEnabled}
         keyboardVisible={studyLayout.keyboardVisible}

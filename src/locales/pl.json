@@ -1,4 +1,13 @@
 {
+  "cardImagePreview": {
+    "title": "Podgląd zdjęcia",
+    "open": "Otwórz podgląd zdjęcia",
+    "close": "Zamknij podgląd",
+    "rotate": "Obróć zdjęcie o 90 stopni",
+    "reset": "Reset",
+    "hint": "Rozsuń palce, aby przybliżyć. Obróć dwoma palcami.",
+    "unavailable": "Nie można wyświetlić zdjęcia."
+  },
   "tutorialOrientation": {
     "title": "Samouczek w pionie",
     "description": "Samouczek wyświetlamy w pionie, żeby zmieścić wszystkie wskazówki. Jeśli ekran się nie obrócił, obróć urządzenie do pionu. Po zakończeniu znów możesz obracać ekran.",

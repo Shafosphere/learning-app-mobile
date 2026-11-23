@@ -65,6 +65,7 @@ function ReviewFlashcardsContent() {
   const { isTabletLayout } = useDeviceLayout({ sizeSource: "screen" });
   const flashcardsContentWidth = isTabletLayout ? cardMetrics.width : undefined;
   const isFocused = useIsFocused();
+  const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
   const { t } = useTranslation();
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
   const emitStatsBurst = useFlashcardsStatsBurst(
@@ -370,6 +371,7 @@ function ReviewFlashcardsContent() {
     resetAnswerFlow,
     clearTransitionTimer,
   } = useReviewFlashcardsAnswerFlow({
+    imagePreviewVisible,
     courseId,
     selectedItem,
     activeBox,
@@ -521,6 +523,7 @@ function ReviewFlashcardsContent() {
     <CoachmarkAnchor id="review-flashcards-card-section" shape="rect" radius={20}>
       <View collapsable={false}>
         <Card
+          onImagePreviewVisibilityChange={setImagePreviewVisible}
           activeBox={activeBox}
           contentDebugSource="review"
           audioCourseId={courseId}
@@ -609,6 +612,8 @@ function ReviewFlashcardsContent() {
       <Confetti generateConfetti={shouldCelebrate} />
 
       <FlashcardsStudyLayout
+        imagePreviewVisible={imagePreviewVisible}
+        scrollPositionKey={`${courseId}:${selectedItem?.id}`}
         layout={studyPresentation}
         styles={styles}
         testIDPrefix="review-flashcards"

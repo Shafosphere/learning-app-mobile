@@ -131,11 +131,17 @@ jest.mock("react-i18next", () => ({
   }),
 }));
 
+let mockOpenImagePreview: ((image: any) => void) | null = null;
+let mockImagePreviewProps: { image: any; onClose: () => void } | null = null;
+jest.mock("@/src/components/card/CardImagePreview", () => ({
+  CardImagePreview: (props: any) => { mockImagePreviewProps = props; return null; },
+}));
 let latestResolverProps: Record<string, unknown> | null = null;
 
 jest.mock("@/src/components/card/subcomponents/CardContentResolver", () => ({
   CardContentResolver: (props: Record<string, unknown>) => {
     latestResolverProps = props;
+    mockOpenImagePreview = jest.requireActual("react").useContext(jest.requireActual("@/src/components/card/imagePreviewContext").CardImagePreviewContext);
     return null;
   },
 }));
@@ -208,6 +214,8 @@ describe("Card logic props", () => {
   beforeEach(() => {
     mockScreenDimensions = null;
     latestResolverProps = null;
+    mockOpenImagePreview = null;
+    mockImagePreviewProps = null;
     latestCardHintProps = null;
     latestNudgeModalProps = null;
     latestCardFrameProps = null;
@@ -1615,4 +1623,55 @@ describe("Card logic props", () => {
 
     expect(onHintUpdate).toHaveBeenCalledWith(20, "both", "both");
   });
+  it("opens a preview without changing the answer and notifies the screen on close", async () => {
+    const onImagePreviewVisibilityChange = jest.fn();
+    const props = createProps({ answer: "unfinished", onImagePreviewVisibilityChange });
+    renderCard(props);
+    act(() => mockOpenImagePreview!({ uri: "file:///tree.webp", isSvg: false, svgXml: null, ratio: 2 }));
+    await waitFor(() => expect(mockImagePreviewProps).not.toBeNull());
+    expect(onImagePreviewVisibilityChange).toHaveBeenLastCalledWith(true);
+    expect(latestResolverProps?.answer).toBe("unfinished");
+    expect(props.setAnswer).not.toHaveBeenCalled();
+    expect(mockedUseFocusExecutor).toHaveBeenLastCalledWith(expect.objectContaining({ suspended: true }));
+    act(() => mockImagePreviewProps!.onClose());
+    expect(onImagePreviewVisibilityChange).toHaveBeenLastCalledWith(false);
+    expect(latestResolverProps?.answer).toBe("unfinished");
+  });
+
+  it("defers a correct auto-submit until the preview closes", async () => {
+    jest.useFakeTimers();
+    try {
+      const props = createProps({ autoSubmitCorrectAnswer: true });
+      renderCard(props);
+      act(() => (latestResolverProps!.handleAnswerChange as (value: string) => void)("translation-1"));
+      act(() => mockOpenImagePreview!({ uri: "file:///tree.webp", isSvg: false, svgXml: null, ratio: 2 }));
+      await act(async () => { await Promise.resolve(); });
+      act(() => jest.advanceTimersByTime(2000));
+      expect(props.confirm).not.toHaveBeenCalled();
+      act(() => mockImagePreviewProps!.onClose());
+      expect(props.confirm).toHaveBeenCalledWith(undefined, "translation-1");
+    } finally { jest.useRealTimers(); }
+  });
+
+  it("closes on card change and discards a stale queued auto-submit", async () => {
+    jest.useFakeTimers();
+    try {
+      const onImagePreviewVisibilityChange = jest.fn();
+      const props = createProps({ autoSubmitCorrectAnswer: true, onImagePreviewVisibilityChange });
+      const screen = renderCard(props);
+      act(() => (latestResolverProps!.handleAnswerChange as (value: string) => void)("translation-1"));
+      act(() => mockOpenImagePreview!({ uri: "file:///tree.webp", isSvg: false, svgXml: null, ratio: 2 }));
+      await act(async () => { await Promise.resolve(); });
+      act(() => jest.advanceTimersByTime(2000));
+      screen.rerender(<Card {...props} selectedItem={makeCard({ id: 2 })} />);
+      expect(onImagePreviewVisibilityChange).toHaveBeenLastCalledWith(false);
+      expect(props.confirm).not.toHaveBeenCalled();
+    } finally { jest.useRealTimers(); }
+  });
+
+  it("keeps previews disabled during a card transition", () => {
+    renderCard(createProps({ isBetweenCards: true }));
+    expect(mockOpenImagePreview).toBeNull();
+  });
+
 });

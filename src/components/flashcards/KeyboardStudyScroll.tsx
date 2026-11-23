@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Keyboard, ScrollView, View, type StyleProp, type ViewStyle } from "react-native";
 import { useNavbarLayoutTransition } from "@/src/contexts/NavbarLayoutContext";
 import { logFlashcardsScrollDebug } from "@/src/services/flashcardsScrollDebug";
@@ -6,7 +6,7 @@ import { StudyInputRevealContext } from "./StudyInputRevealContext";
 import { StudyViewportContext, VisibleStudyViewportContext } from "./StudyViewportContext";
 
 /** Reveal the card's input rows, without scrolling past them into the boxes. */
-export function KeyboardStudyScroll({ children, keyboardVisible, keyboardTopInWindow, cardHeight, testID, enabled = true, contentContainerStyle }: {
+export function KeyboardStudyScroll({ children, keyboardVisible, keyboardTopInWindow, cardHeight, testID, enabled = true, contentContainerStyle, positionLocked = false, positionLockKey }: {
   children: ReactNode;
   keyboardVisible: boolean;
   keyboardTopInWindow: number | null;
@@ -14,6 +14,8 @@ export function KeyboardStudyScroll({ children, keyboardVisible, keyboardTopInWi
   testID: string;
   enabled?: boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
+  positionLocked?: boolean;
+  positionLockKey?: string;
 }) {
   const viewportRef = useRef<View>(null);
   const scrollRef = useRef<ScrollView>(null);
@@ -21,12 +23,33 @@ export function KeyboardStudyScroll({ children, keyboardVisible, keyboardTopInWi
   const [studyViewport, setStudyViewport] = useState<{ width: number; height: number } | null>(null);
   const [studyContentHeight, setStudyContentHeight] = useState(0);
   const scrollEnabled = enabled || (viewport.height > 0 && studyContentHeight > viewport.height + 1);
-  const scrollPadding = scrollEnabled ? Math.max(0, viewport.height - viewport.visibleHeight) + 8 : 0;
+  const naturalScrollPadding = scrollEnabled ? Math.max(0, viewport.height - viewport.visibleHeight) + 8 : 0;
+  const [savedPosition, setSavedPosition] = useState<{
+    offset: number; padding: number; contentHeight: number; keyboardVisible: boolean; key?: string;
+  } | null>(null);
+  const scrollPadding = savedPosition?.padding ?? naturalScrollPadding;
   const focusedRegionRef = useRef<View | null>(null);
   const hasFocusedRegionRef = useRef(false);
   const userScrolledRef = useRef(false);
   const previousKeyboardVisibleRef = useRef(keyboardVisible);
   const scrollOffsetRef = useRef(0);
+  useLayoutEffect(() => {
+    if (savedPosition && savedPosition.key !== positionLockKey) {
+      setSavedPosition(null);
+      return;
+    }
+    if (positionLocked && !savedPosition) {
+      setSavedPosition({ offset: scrollOffsetRef.current, padding: naturalScrollPadding,
+        contentHeight: studyContentHeight + naturalScrollPadding, keyboardVisible, key: positionLockKey });
+    } else if (!positionLocked && savedPosition && keyboardVisible === savedPosition.keyboardVisible) {
+      // Wait for the restored keyboard before releasing the preserved content
+      // size, otherwise native scrolling clamps the saved offset on dismissal.
+      scrollRef.current?.scrollTo({ y: savedPosition.offset, animated: false });
+      scrollOffsetRef.current = savedPosition.offset;
+      userScrolledRef.current = true;
+      setSavedPosition(null);
+    }
+  }, [keyboardVisible, naturalScrollPadding, positionLockKey, positionLocked, savedPosition, studyContentHeight]);
   const revealRequestRef = useRef(0);
   const viewportSnapshotRef = useRef(viewport);
   const revealInputRef = useRef(() => {});
@@ -112,7 +135,7 @@ export function KeyboardStudyScroll({ children, keyboardVisible, keyboardTopInWi
     if (previousKeyboardVisibleRef.current !== keyboardVisible) {
       logDebug("scroll.manual_guard.reset", { reason: "keyboard_visibility_change" });
       previousKeyboardVisibleRef.current = keyboardVisible;
-      userScrolledRef.current = false;
+      if (!savedPosition) userScrolledRef.current = false;
     }
     // Reveal once when the keyboard changes, then correct final geometry.
     measureViewport(true);
@@ -126,9 +149,10 @@ export function KeyboardStudyScroll({ children, keyboardVisible, keyboardTopInWi
       measurementRequestRef.current += 1;
       revealRequestRef.current += 1;
     };
-  }, [keyboardVisible, measureViewport, measure, layoutTransition, logDebug]);
+  }, [keyboardVisible, measureViewport, measure, layoutTransition, logDebug, savedPosition]);
   const revealInput = useCallback(() => {
     const request = ++revealRequestRef.current;
+    if (positionLocked || savedPosition) return;
     // Layout/result updates and keyboard dismissal must not reset the user's
     // position. A new focus or keyboard entry may reveal an input again.
     if (!scrollEnabled || !keyboardVisible || userScrolledRef.current) {
@@ -175,7 +199,7 @@ export function KeyboardStudyScroll({ children, keyboardVisible, keyboardTopInWi
       y: nextOffset,
       animated: false,
     });
-  }, [cardHeight, scrollEnabled, keyboardVisible, viewport, layoutTransition, logDebug]);
+  }, [cardHeight, scrollEnabled, keyboardVisible, viewport, layoutTransition, logDebug, positionLocked, savedPosition]);
   revealInputRef.current = revealInput;
   useEffect(revealInput, [revealInput]);
   const inputReveal = useMemo(() => ({
@@ -238,7 +262,7 @@ export function KeyboardStudyScroll({ children, keyboardVisible, keyboardTopInWi
         }}
         scrollEventThrottle={16}
         contentContainerStyle={[
-          { flexGrow: 1, paddingBottom: scrollPadding },
+          { flexGrow: 1, paddingBottom: scrollPadding, minHeight: savedPosition?.contentHeight },
           contentContainerStyle,
         ]}
         style={{ flex: 1 }}

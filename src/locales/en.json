@@ -1,4 +1,13 @@
 {
+  "cardImagePreview": {
+    "title": "Image preview",
+    "open": "Open image preview",
+    "close": "Close preview",
+    "rotate": "Rotate image by 90 degrees",
+    "reset": "Reset",
+    "hint": "Pinch to zoom. Rotate with two fingers.",
+    "unavailable": "This image could not be displayed."
+  },
   "tutorialOrientation": {
     "title": "Tutorial in portrait",
     "description": "The tutorial uses portrait orientation to fit all the tips. If the screen has not rotated, turn your device upright. You can rotate the screen again after the tutorial.",

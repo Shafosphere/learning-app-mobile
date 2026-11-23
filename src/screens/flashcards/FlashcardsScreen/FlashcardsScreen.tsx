@@ -75,6 +75,7 @@ export default function Flashcards() {
 }
 
 function FlashcardsContent() {
+  const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
   const router = useRouter();
   const isFocused = useIsFocused();
   const params = useLocalSearchParams<{ hintTutorialRestartToken?: string }>();
@@ -301,6 +302,7 @@ function FlashcardsContent() {
     getQueueForBox,
     canConfirm,
   } = useFlashcardsInteraction({
+    imagePreviewVisible,
     boxes,
     setBoxes,
     checkSpelling,
@@ -570,7 +572,7 @@ function FlashcardsContent() {
 
   // Allow autoflow to switch boxes even when a card is shown,
   // otherwise it never jumps to a clogged box until the current box is emptied.
-  const canAutoflowSwitch = !boxSelectionLocked && !resultPending;
+  const canAutoflowSwitch = !boxSelectionLocked && !resultPending && !imagePreviewVisible;
 
   useEffect(() => {
     if (selectedItem && displayResult === null) {
@@ -967,6 +969,7 @@ function FlashcardsContent() {
 
   const cardSection = (
     <FlashcardsCardSection
+      onImagePreviewVisibilityChange={setImagePreviewVisible}
       holdContent={holdCardContent}
       heldBackgroundColor={isIntroSwitchFeedbackPending ? colors.my_green : undefined}
       activeBox={activeBox}
@@ -1123,6 +1126,8 @@ function FlashcardsContent() {
       />
 
       <FlashcardsStudyLayout
+        imagePreviewVisible={imagePreviewVisible}
+        scrollPositionKey={`${activeCustomCourseId}:${selectedItem?.id}`}
         layout={studyPresentation}
         styles={styles}
         cardSection={cardSection}

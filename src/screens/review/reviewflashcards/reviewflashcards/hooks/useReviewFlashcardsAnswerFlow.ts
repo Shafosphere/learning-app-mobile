@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { scheduleAudioTransition } from "@/Audio/runtime/scheduleAudioTransition";
+import { usePausableAudioTransition } from "@/src/hooks/usePausableAudioTransition";
 import type { Dispatch, RefObject, SetStateAction } from "react";
 import type { TextInput } from "react-native";
 
@@ -28,6 +28,7 @@ type EnqueueReviewMutation = <T>(
 ) => Promise<T>;
 
 type UseReviewFlashcardsAnswerFlowParams = {
+  imagePreviewVisible?: boolean;
   courseId: number | null;
   selectedItem: WordWithTranslations | null;
   activeBox: keyof BoxesState | null;
@@ -68,6 +69,7 @@ type UseReviewFlashcardsAnswerFlowParams = {
 };
 
 export const useReviewFlashcardsAnswerFlow = ({
+  imagePreviewVisible = false,
   courseId,
   selectedItem,
   activeBox,
@@ -93,6 +95,7 @@ export const useReviewFlashcardsAnswerFlow = ({
   setShouldCelebrate,
   keyboardBridgeInputRef,
 }: UseReviewFlashcardsAnswerFlowParams) => {
+  const scheduleAudioTransition = usePausableAudioTransition(imagePreviewVisible);
   const [questionShownAt, setQuestionShownAt] = useState<number | null>(null);
   const [longThink, setLongThink] = useState(false);
   const [isBetweenCards, setIsBetweenCards] = useState(false);
@@ -196,7 +199,7 @@ export const useReviewFlashcardsAnswerFlow = ({
         setTimeout(() => setIsBetweenCards(false), 300);
       }, durationMs);
     },
-    [setQueueNext],
+    [setQueueNext, scheduleAudioTransition],
   );
 
   const acknowledgeExplanation = useCallback(() => {
@@ -237,7 +240,7 @@ export const useReviewFlashcardsAnswerFlow = ({
   }, [clearTransitionTimer]);
 
   useEffect(() => {
-    if (!correction || !activeBox || !courseId) return;
+    if (!correction || !activeBox || !courseId || imagePreviewVisible) return;
     if (transitionTimerRef.current) return;
 
     const correctionFieldRequirements =
@@ -290,6 +293,7 @@ export const useReviewFlashcardsAnswerFlow = ({
     if (!resolvedCard) return;
     void finalizeWrongReviewCard(resolvedCard, activeBox);
   }, [
+    imagePreviewVisible,
     activeBox,
     boxes,
     correction,
@@ -564,6 +568,7 @@ export const useReviewFlashcardsAnswerFlow = ({
     explanationOnlyOnWrong,
     finalizeWrongReviewCard,
     finishCardTransition,
+    scheduleAudioTransition,
     handleBoxFaceCorrectAnswer,
     handleBoxFaceWrongAnswer,
     handleStatsBurst,

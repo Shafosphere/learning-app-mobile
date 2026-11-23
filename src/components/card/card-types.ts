@@ -44,6 +44,7 @@ export type CardAudioActions = {
 };
 
 export type CardProps = {
+  onImagePreviewVisibilityChange?: (visible: boolean) => void;
   /** Context for content transition diagnostics. */
   activeBox?: keyof BoxesState | null;
   audioCourseId?: number | null;
