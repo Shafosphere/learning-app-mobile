@@ -39,6 +39,9 @@ const POLISH_GENERAL_COURSE_SLUGS = [
   "pierwiastki_pozostale",
   "astronomia",
   "polska_historia",
+  "wladcy_polski_portrety",
+  "wladcy_polski_portrety_daty",
+  "wladcy_polski_daty",
   "grecka_mitologia_prawda_falsz_50",
   "znaki_drogowe_najwazniejsze",
   "znaki_drogowe_rozszerzone",
@@ -62,6 +65,8 @@ const POLISH_GENERAL_COURSE_SLUGS = [
 ] as const;
 
 const ENGLISH_GENERAL_COURSE_SLUGS = [
+  "pierwiastki_podstawowe_en",
+  "pierwiastki_pozostale_en",
   "flagi_europy_en",
   "flagi_afryki_en",
   "flagi_azji_en",

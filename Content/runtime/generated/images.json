@@ -617,6 +617,302 @@
         }
       }
     },
+    "images_polish_rulers": {
+      "kind": "images",
+      "titleKey": "contentDownload.polishRulers",
+      "sourceBytes": 4282008,
+      "manifestHash": "2c368d191d534fc08f557af78b47ed2dd5d76104a8cce2c23423dce9ae28d5dc",
+      "files": {
+        "aleksander-jagiellonczyk.webp": {
+          "relativePath": "aleksander-jagiellonczyk.webp",
+          "source": "assets/learning/flashcards/polish-rulers/aleksander-jagiellonczyk.webp",
+          "bytes": 83312,
+          "fileSha256": "a5fa5dc45daf1bdc476e398af2a7368c8f06f173809d6844d9dfa7d5b2fdea6c"
+        },
+        "anna-jagiellonka.webp": {
+          "relativePath": "anna-jagiellonka.webp",
+          "source": "assets/learning/flashcards/polish-rulers/anna-jagiellonka.webp",
+          "bytes": 85810,
+          "fileSha256": "c8b64a4ba2c7c2ee30b3570ae58bf80be9e3616f28b66e2713fd455395df2aed"
+        },
+        "august-ii-mocny.webp": {
+          "relativePath": "august-ii-mocny.webp",
+          "source": "assets/learning/flashcards/polish-rulers/august-ii-mocny.webp",
+          "bytes": 93882,
+          "fileSha256": "03d893fb5732eb4f402ed6aafe42bcacf8c0c08f7d4dfdff4c126706ce51481b"
+        },
+        "august-iii-sas.webp": {
+          "relativePath": "august-iii-sas.webp",
+          "source": "assets/learning/flashcards/polish-rulers/august-iii-sas.webp",
+          "bytes": 85944,
+          "fileSha256": "5a076ad8cee4ad74bb800d98e85613e8309866081ca11e35c271cea6b810bd57"
+        },
+        "bezprym.webp": {
+          "relativePath": "bezprym.webp",
+          "source": "assets/learning/flashcards/polish-rulers/bezprym.webp",
+          "bytes": 109094,
+          "fileSha256": "96ea57d9f7f18f30a651b267f46f748fc6e36c7d74b81af385d7c999d0aec649"
+        },
+        "boleslaw-i-chrobry.webp": {
+          "relativePath": "boleslaw-i-chrobry.webp",
+          "source": "assets/learning/flashcards/polish-rulers/boleslaw-i-chrobry.webp",
+          "bytes": 64404,
+          "fileSha256": "81f4024a463d108a7a0a90ff3817047cee229e27c0136fb72ccb1bd2a8dd91f4"
+        },
+        "boleslaw-ii-szczodry.webp": {
+          "relativePath": "boleslaw-ii-szczodry.webp",
+          "source": "assets/learning/flashcards/polish-rulers/boleslaw-ii-szczodry.webp",
+          "bytes": 77386,
+          "fileSha256": "2dec18f41850cd0ada4c06d921fbfea0568d97fab3f5cf4d039d211a9b3e58bb"
+        },
+        "boleslaw-iii-krzywousty.webp": {
+          "relativePath": "boleslaw-iii-krzywousty.webp",
+          "source": "assets/learning/flashcards/polish-rulers/boleslaw-iii-krzywousty.webp",
+          "bytes": 57162,
+          "fileSha256": "fea41f787142982717ce40f37be2cb69df8cea8960d2efda226094e69f465bb4"
+        },
+        "boleslaw-iv-kedzierzawy.webp": {
+          "relativePath": "boleslaw-iv-kedzierzawy.webp",
+          "source": "assets/learning/flashcards/polish-rulers/boleslaw-iv-kedzierzawy.webp",
+          "bytes": 86748,
+          "fileSha256": "b1e592028a909b52ed8480bd1e875df309248bcdd0ca93530bac4e1c0894fa22"
+        },
+        "boleslaw-v-wstydliwy.webp": {
+          "relativePath": "boleslaw-v-wstydliwy.webp",
+          "source": "assets/learning/flashcards/polish-rulers/boleslaw-v-wstydliwy.webp",
+          "bytes": 82864,
+          "fileSha256": "5a54ee170a0a76cbdf194c2cfa0a7dc4bbac24dc84ec98fed9b4667ea9a7e9c1"
+        },
+        "henryk-i-brodaty.webp": {
+          "relativePath": "henryk-i-brodaty.webp",
+          "source": "assets/learning/flashcards/polish-rulers/henryk-i-brodaty.webp",
+          "bytes": 90546,
+          "fileSha256": "13385383c695c59e1761f1ec2eb04cf98e8101a265305946aaf546960f36b65a"
+        },
+        "henryk-ii-pobozny.webp": {
+          "relativePath": "henryk-ii-pobozny.webp",
+          "source": "assets/learning/flashcards/polish-rulers/henryk-ii-pobozny.webp",
+          "bytes": 114352,
+          "fileSha256": "a57adbceeb85a22a1b055e1bed28f1d8a5bf8891ea6da6902ceacf7138b8fa66"
+        },
+        "henryk-iv-probus.webp": {
+          "relativePath": "henryk-iv-probus.webp",
+          "source": "assets/learning/flashcards/polish-rulers/henryk-iv-probus.webp",
+          "bytes": 163310,
+          "fileSha256": "fbd9217de0769f12239c8541b1a1bf6dd3685c747c482c8cdce6a1514dde31e7"
+        },
+        "henryk-walezy.webp": {
+          "relativePath": "henryk-walezy.webp",
+          "source": "assets/learning/flashcards/polish-rulers/henryk-walezy.webp",
+          "bytes": 76952,
+          "fileSha256": "f13f824173c68435b9c35cadb1b0632e2d3332c04f630bc1693919be99031710"
+        },
+        "jadwiga-andegawenska.webp": {
+          "relativePath": "jadwiga-andegawenska.webp",
+          "source": "assets/learning/flashcards/polish-rulers/jadwiga-andegawenska.webp",
+          "bytes": 71146,
+          "fileSha256": "bbd77795b3cb97f28767f1bafde7230584a1054e81586150f7908a81e747f5b0"
+        },
+        "jan-i-olbracht.webp": {
+          "relativePath": "jan-i-olbracht.webp",
+          "source": "assets/learning/flashcards/polish-rulers/jan-i-olbracht.webp",
+          "bytes": 84896,
+          "fileSha256": "c01ed4c4fb9cb37601b20438cd280c16e6e0e50ad6b3f8bff47b698b7ee11bd8"
+        },
+        "jan-ii-kazimierz-waza.webp": {
+          "relativePath": "jan-ii-kazimierz-waza.webp",
+          "source": "assets/learning/flashcards/polish-rulers/jan-ii-kazimierz-waza.webp",
+          "bytes": 77022,
+          "fileSha256": "8a77deccf823b4989c56a3768500497d6a4b62eaadf2078ced2f7fe474184d1f"
+        },
+        "jan-iii-sobieski.webp": {
+          "relativePath": "jan-iii-sobieski.webp",
+          "source": "assets/learning/flashcards/polish-rulers/jan-iii-sobieski.webp",
+          "bytes": 140158,
+          "fileSha256": "896432eca7fe2417d3248e171df30fd54d9211b0bb6b7be3ba5f23df747aa2c2"
+        },
+        "kazimierz-i-odnowiciel.webp": {
+          "relativePath": "kazimierz-i-odnowiciel.webp",
+          "source": "assets/learning/flashcards/polish-rulers/kazimierz-i-odnowiciel.webp",
+          "bytes": 89074,
+          "fileSha256": "1f526cf9f9ceecdf89c1c195d9e3a31b752f7eba8bedcff8e30d8664ce55fea8"
+        },
+        "kazimierz-ii-sprawiedliwy.webp": {
+          "relativePath": "kazimierz-ii-sprawiedliwy.webp",
+          "source": "assets/learning/flashcards/polish-rulers/kazimierz-ii-sprawiedliwy.webp",
+          "bytes": 85922,
+          "fileSha256": "1f6cdc12f4065ffd51ccb5c7300e26020661e2f71dc7795be2882c8d3c4578fb"
+        },
+        "kazimierz-iii-wielki.webp": {
+          "relativePath": "kazimierz-iii-wielki.webp",
+          "source": "assets/learning/flashcards/polish-rulers/kazimierz-iii-wielki.webp",
+          "bytes": 81098,
+          "fileSha256": "d9c7eebc8ef45b3888c413db88b8554e2b04ce0b6393ae2f01ab782511e5eb10"
+        },
+        "kazimierz-iv-jagiellonczyk.webp": {
+          "relativePath": "kazimierz-iv-jagiellonczyk.webp",
+          "source": "assets/learning/flashcards/polish-rulers/kazimierz-iv-jagiellonczyk.webp",
+          "bytes": 77750,
+          "fileSha256": "bdb4c8875d6ecc1a6943221a54fce80dd19d54d28160b89214aa51b4681b066e"
+        },
+        "konrad-i-mazowiecki.webp": {
+          "relativePath": "konrad-i-mazowiecki.webp",
+          "source": "assets/learning/flashcards/polish-rulers/konrad-i-mazowiecki.webp",
+          "bytes": 77074,
+          "fileSha256": "d7b042b435bcb7d5e5532fd85a69709af7e11729b79f33d97909926920f5faec"
+        },
+        "leszek-bialy.webp": {
+          "relativePath": "leszek-bialy.webp",
+          "source": "assets/learning/flashcards/polish-rulers/leszek-bialy.webp",
+          "bytes": 86766,
+          "fileSha256": "fcbbbaf0d2a507e77f8b00882f70114d3671d9b7e27f8eca3c6d79f761624080"
+        },
+        "leszek-czarny.webp": {
+          "relativePath": "leszek-czarny.webp",
+          "source": "assets/learning/flashcards/polish-rulers/leszek-czarny.webp",
+          "bytes": 79406,
+          "fileSha256": "f9f7c7c0abfbe9fb67ec5c48f54e2737bca82c2197347724c057da0fd93eb50f"
+        },
+        "ludwik-wegierski.webp": {
+          "relativePath": "ludwik-wegierski.webp",
+          "source": "assets/learning/flashcards/polish-rulers/ludwik-wegierski.webp",
+          "bytes": 83652,
+          "fileSha256": "dd5e1ad08f3915f56eadc82d48920eb507aaea610075354f8fb4a4c496ebbec4"
+        },
+        "michal-korybut-wisniowiecki.webp": {
+          "relativePath": "michal-korybut-wisniowiecki.webp",
+          "source": "assets/learning/flashcards/polish-rulers/michal-korybut-wisniowiecki.webp",
+          "bytes": 82086,
+          "fileSha256": "72bfcbf82786fed902683cd5f042a20bb3a111c212b16405637db53819992755"
+        },
+        "mieszko-i.webp": {
+          "relativePath": "mieszko-i.webp",
+          "source": "assets/learning/flashcards/polish-rulers/mieszko-i.webp",
+          "bytes": 68304,
+          "fileSha256": "2d9b98398bf16f2006de3f2169a5af7664d4a2fe070e3b691429e9deed02040d"
+        },
+        "mieszko-ii-lambert.webp": {
+          "relativePath": "mieszko-ii-lambert.webp",
+          "source": "assets/learning/flashcards/polish-rulers/mieszko-ii-lambert.webp",
+          "bytes": 74046,
+          "fileSha256": "db3475cf266471f2d90ae3c3ad8dd936492ea85103dd34b5b9191cf6842354f6"
+        },
+        "mieszko-iii-stary.webp": {
+          "relativePath": "mieszko-iii-stary.webp",
+          "source": "assets/learning/flashcards/polish-rulers/mieszko-iii-stary.webp",
+          "bytes": 87162,
+          "fileSha256": "16abe4a4b69132b38a0d0e1dbd7d37cd24567c97e51e6daedf2090af14cec526"
+        },
+        "mieszko-platonogi.webp": {
+          "relativePath": "mieszko-platonogi.webp",
+          "source": "assets/learning/flashcards/polish-rulers/mieszko-platonogi.webp",
+          "bytes": 221254,
+          "fileSha256": "5be4a796e93664b6a8abf6a94ad127442f8c896794feab7caceb79390e2cb952"
+        },
+        "przemysl-ii.webp": {
+          "relativePath": "przemysl-ii.webp",
+          "source": "assets/learning/flashcards/polish-rulers/przemysl-ii.webp",
+          "bytes": 79164,
+          "fileSha256": "56d90792b5918338516f94dd4f5f9a1b40f82c7ec00cb099c378f29f5156c783"
+        },
+        "stanislaw-august-poniatowski.webp": {
+          "relativePath": "stanislaw-august-poniatowski.webp",
+          "source": "assets/learning/flashcards/polish-rulers/stanislaw-august-poniatowski.webp",
+          "bytes": 79448,
+          "fileSha256": "64e76edb643f80c085fa14250fbbf79056ca95c32f248d0ad05d5808edd2f519"
+        },
+        "stanislaw-leszczynski.webp": {
+          "relativePath": "stanislaw-leszczynski.webp",
+          "source": "assets/learning/flashcards/polish-rulers/stanislaw-leszczynski.webp",
+          "bytes": 89396,
+          "fileSha256": "aac238b358b611147df99cde0f2365ec17d971155700d974a0c1ccaee325db42"
+        },
+        "stefan-batory.webp": {
+          "relativePath": "stefan-batory.webp",
+          "source": "assets/learning/flashcards/polish-rulers/stefan-batory.webp",
+          "bytes": 77514,
+          "fileSha256": "fc1e9099b0ca34570bfdb7c80f66493098ae4199144c5629c0348b9270918aa0"
+        },
+        "waclaw-ii.webp": {
+          "relativePath": "waclaw-ii.webp",
+          "source": "assets/learning/flashcards/polish-rulers/waclaw-ii.webp",
+          "bytes": 78746,
+          "fileSha256": "924bef8d73403a7ae4a555891c63d06e6e9a58eb72ea5f48069e0cbbbd2edcc9"
+        },
+        "waclaw-iii.webp": {
+          "relativePath": "waclaw-iii.webp",
+          "source": "assets/learning/flashcards/polish-rulers/waclaw-iii.webp",
+          "bytes": 83516,
+          "fileSha256": "0cca5b66d0edcb00ebd1f3163157f9d48351f098e171d928e5076ce052375683"
+        },
+        "wladyslaw-i-herman.webp": {
+          "relativePath": "wladyslaw-i-herman.webp",
+          "source": "assets/learning/flashcards/polish-rulers/wladyslaw-i-herman.webp",
+          "bytes": 76712,
+          "fileSha256": "07553eae29782faa66b6d592487c1d60fd6317a806ecb4d750176ae51881637d"
+        },
+        "wladyslaw-i-lokietek.webp": {
+          "relativePath": "wladyslaw-i-lokietek.webp",
+          "source": "assets/learning/flashcards/polish-rulers/wladyslaw-i-lokietek.webp",
+          "bytes": 87304,
+          "fileSha256": "a7f1ffcf5c6a52b8d4c145908d77bb27c6bcc6230f6dc26043a28b7a26464612"
+        },
+        "wladyslaw-ii-jagiello.webp": {
+          "relativePath": "wladyslaw-ii-jagiello.webp",
+          "source": "assets/learning/flashcards/polish-rulers/wladyslaw-ii-jagiello.webp",
+          "bytes": 81506,
+          "fileSha256": "4a4a85bad65ff83de58826329030c2b582fb5bbd27dd4260ef4e07c14da51eb5"
+        },
+        "wladyslaw-ii-wygnaniec.webp": {
+          "relativePath": "wladyslaw-ii-wygnaniec.webp",
+          "source": "assets/learning/flashcards/polish-rulers/wladyslaw-ii-wygnaniec.webp",
+          "bytes": 90364,
+          "fileSha256": "c65fbb692fdea490a6704194511b60e0b04a0c19d925a126b038d971fc6532dd"
+        },
+        "wladyslaw-iii-laskonogi.webp": {
+          "relativePath": "wladyslaw-iii-laskonogi.webp",
+          "source": "assets/learning/flashcards/polish-rulers/wladyslaw-iii-laskonogi.webp",
+          "bytes": 90550,
+          "fileSha256": "9cfe9fee62d392b12d577f716b9a5d2a00f2918a1af33388a3ba2b2cc7a1d5e5"
+        },
+        "wladyslaw-iii-warnenczyk.webp": {
+          "relativePath": "wladyslaw-iii-warnenczyk.webp",
+          "source": "assets/learning/flashcards/polish-rulers/wladyslaw-iii-warnenczyk.webp",
+          "bytes": 86580,
+          "fileSha256": "aa43e26f7b97afb068265591266a54e1db89f8106ddf51a298d9250bd5b53e87"
+        },
+        "wladyslaw-iv-waza.webp": {
+          "relativePath": "wladyslaw-iv-waza.webp",
+          "source": "assets/learning/flashcards/polish-rulers/wladyslaw-iv-waza.webp",
+          "bytes": 78188,
+          "fileSha256": "c76ad3b59f1db712352199bb4486d4b43a8fee43ebda652736f8481b0addb36e"
+        },
+        "zbigniew.webp": {
+          "relativePath": "zbigniew.webp",
+          "source": "assets/learning/flashcards/polish-rulers/zbigniew.webp",
+          "bytes": 112178,
+          "fileSha256": "9289adc72adfc33d66e3e0ca005c88426dd60cb3d4d099788227aa27f46dd86a"
+        },
+        "zygmunt-i-stary.webp": {
+          "relativePath": "zygmunt-i-stary.webp",
+          "source": "assets/learning/flashcards/polish-rulers/zygmunt-i-stary.webp",
+          "bytes": 81916,
+          "fileSha256": "69ca3656c293d2168abdedf4bb1f8863fc7cdf8c9e1c10199eb7dab6b07f056a"
+        },
+        "zygmunt-ii-august.webp": {
+          "relativePath": "zygmunt-ii-august.webp",
+          "source": "assets/learning/flashcards/polish-rulers/zygmunt-ii-august.webp",
+          "bytes": 87246,
+          "fileSha256": "f80c5b5468d17cd58961feb4cbaca2625ee5748a6afda26909d2d59aaa697c5f"
+        },
+        "zygmunt-iii-waza.webp": {
+          "relativePath": "zygmunt-iii-waza.webp",
+          "source": "assets/learning/flashcards/polish-rulers/zygmunt-iii-waza.webp",
+          "bytes": 83098,
+          "fileSha256": "5e494c96be49231ddf33e84580e8e770d8b664b06f944b4f819484792cc809a4"
+        }
+      }
+    },
     "images_trees": {
       "kind": "images",
       "titleKey": "contentDownload.trees",

@@ -7,6 +7,18 @@ export type AttributionCourseRegistryEntry = {
 
 export const ATTRIBUTION_COURSES: AttributionCourseRegistryEntry[] = [
   ...[
+    { id: "wladcy_polski_portrety", pl: "Władcy Polski — rozpoznaj portret", en: "Rulers of Poland — identify the portrait" },
+    { id: "wladcy_polski_portrety_daty", pl: "Władcy Polski — portret i lata panowania", en: "Rulers of Poland — portraits and reign dates" },
+  ].map(({ id, pl, en }) => ({
+    id,
+    sourcePath: "tools/prebuild-data/pl/historia/wladcy_polski/attributions.tsv",
+    title: { pl, en },
+    defaultChanges: {
+      pl: "Zachowano proporcje, zmniejszono do maksymalnie 800 × 800 px i przekonwertowano do WebP (jakość 80).",
+      en: "Preserved aspect ratio, resized to at most 800 × 800 px, and converted to WebP (quality 80).",
+    },
+  })),
+  ...[
     { id: "grzyby_podstawowe", pl: "Podstawowe grzyby", en: "Basic mushrooms", file: "attributions-podstawowe.tsv" },
     { id: "grzyby_rozpoznawanie", pl: "Wszystkie grzyby", en: "All mushrooms", file: "attributions.tsv" },
   ].map(({ id, pl, en, file }) => ({

@@ -5,7 +5,7 @@ export type LocalizedText = { pl: string; en: string };
 export type ImageAttribution = {
   id: string;
   commonName: string;
-  scientificName: string;
+  scientificName?: string;
   title: string;
   author: string;
   sourceUrl: string;

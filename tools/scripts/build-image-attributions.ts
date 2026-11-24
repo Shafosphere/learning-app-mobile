@@ -7,7 +7,6 @@ type TsvRow = Record<string, string>;
 const REQUIRED_COLUMNS = [
   "nr",
   "nazwa_polska",
-  "nazwa_lacinska",
   "nazwa_pliku",
   "link_do_obrazu_i_strony_licencji",
   "licencja",
@@ -71,7 +70,7 @@ export function parseAttributionCourse(course: AttributionCourseRegistryEntry) {
     return {
       id: row.nr,
       commonName: row.nazwa_polska,
-      scientificName: row.nazwa_lacinska,
+      ...(row.nazwa_lacinska ? { scientificName: row.nazwa_lacinska } : {}),
       title: row.tytul_do_atrybucji || titleFromFileName(row.nazwa_pliku),
       author: row.autor_do_atrybucji,
       sourceUrl: row.link_do_obrazu_i_strony_licencji,
@@ -79,7 +78,7 @@ export function parseAttributionCourse(course: AttributionCourseRegistryEntry) {
       licenseUrl: isValidUrl(row.link_do_tekstu_licencji) ? row.link_do_tekstu_licencji : undefined,
       changes: {
         pl: changes,
-        en: row.opis_zmian ? changes : course.defaultChanges.en,
+        en: row.opis_zmian_en || (row.opis_zmian ? changes : course.defaultChanges.en),
       },
     };
   });

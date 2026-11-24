@@ -4,7 +4,7 @@ import { ensureOfficialCourse } from "./repositories/courses";
 
 let mockSyncSlug = "eng_to_pl_a1";
 jest.mock("@/src/constants/officialPacks", () => ({
-  get OFFICIAL_PACKS() { return [{ slug: mockSyncSlug, name: "A1", packVersion: mockSyncSlug === "french_a1" ? 2 : 3,
+  get OFFICIAL_PACKS() { return [{ slug: mockSyncSlug, name: "A1", packVersion: ["french_a1", "pierwiastki_podstawowe"].includes(mockSyncSlug) ? 2 : 3,
     iconId: "flag:en", iconColor: "#10B981", reviewsEnabled: true },
     { slug: "fiszki_podstawy_en_pl_slowa", retired: true, packVersion: 3 },
     { slug: "basic_english_to_spanish_50", retired: true, packVersion: 2 },
@@ -67,6 +67,36 @@ it.each(["eng_to_pl_a1", "french_a1"])("updates %s by stable IDs without clearin
   expect(local.runAsync).toHaveBeenCalledWith(expect.stringContaining("SET pack_version"), nextVersion, expect.any(Number), 7);
   expect(local.execAsync).toHaveBeenLastCalledWith("COMMIT;");
   expect(bundled.closeAsync).toHaveBeenCalled();
+});
+
+it.each([
+  ["pierwiastki_podstawowe", 2, 30],
+  ["pierwiastki_pozostale", 3, 118],
+] as const)("enables both directions for existing %s cards without resetting progress", async (slug, nextVersion, count) => {
+  mockSyncSlug = slug;
+  const existing = { ...card(42, "0001", "H"), backText: "wodór", answerText: "wodór", flipped: 0 };
+  const local = {
+    getFirstAsync: jest.fn().mockResolvedValue({ flashcardsCount: count }),
+    getAllAsync: jest.fn().mockResolvedValue([existing]),
+    execAsync: jest.fn().mockResolvedValue(undefined),
+    runAsync: jest.fn().mockResolvedValue({ lastInsertRowId: 0 }),
+  };
+  const bundled = {
+    getFirstAsync: jest.fn().mockResolvedValue({ id: 5, packVersion: nextVersion, flashcardsCount: count }),
+    getAllAsync: jest.fn().mockResolvedValue([{ ...existing, flipped: 1 }]),
+    closeAsync: jest.fn().mockResolvedValue(undefined),
+  };
+  jest.mocked(SQLite.openDatabaseAsync).mockResolvedValue(bundled as any);
+  jest.mocked(ensureOfficialCourse).mockResolvedValue({ id: 7, packVersion: nextVersion - 1 });
+
+  await seedOfficialPacksWithDb(local as any, { reportStartupProgress: false });
+
+  const update = local.runAsync.mock.calls.find(([sql]) => sql.includes("UPDATE custom_flashcards"));
+  expect(update).toBeDefined();
+  expect(update![9]).toBe(1); // flipped parameter
+  expect(update!.at(-1)).toBe(existing.id);
+  expect(local.runAsync.mock.calls.some(([sql]) => /DELETE FROM custom_(reviews|flashcards)\b/.test(sql))).toBe(false);
+  expect(local.runAsync).toHaveBeenCalledWith(expect.stringContaining("SET pack_version"), nextVersion, expect.any(Number), 7);
 });
 
 it('migrates bird images by external_id without resetting progress or replacing user images', async () => {

@@ -113,6 +113,11 @@ const KNOWLEDGE_ACCORDION_GROUPS: {
     descriptionKey: "constants.knowledgeCourseGroups.description.mushrooms",
     progressiveDescriptionKey: "courses.progressive.mushroomsDescription",
   },
+  {
+    id: "polishRulers",
+    titleKey: "constants.knowledgeCourseGroups.label.polishRulers",
+    descriptionKey: "constants.knowledgeCourseGroups.description.polishRulers",
+  },
 ];
 
 export default function CoursePinScreen() {

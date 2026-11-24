@@ -22,7 +22,7 @@ export type OfficialPackCourseSettings = {
   letterHintSettings?: LetterHintSettings;
 };
 
-export type KnowledgeCourseGroupId = "capitals" | "flags" | "roadSigns" | "elements" | "mushrooms";
+export type KnowledgeCourseGroupId = "capitals" | "flags" | "roadSigns" | "elements" | "mushrooms" | "polishRulers";
 
 type OfficialPackDef = {
   slug: string;
@@ -397,14 +397,14 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "pierwiastki_podstawowe",
-    packVersion: 1,
+    packVersion: 2,
     name: "Podstawowe pierwiastki",
     position: 1,
     iconId: "microscope",
     iconColor: "#0891B2",
     reviewsEnabled: true,
     defaultType: "traditional",
-    defaultFlip: false,
+    defaultFlip: true,
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -414,14 +414,14 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "pierwiastki_pozostale",
-    packVersion: 2,
+    packVersion: 3,
     name: "Wszystkie pierwiastki",
     position: 2,
     iconId: "microscope",
     iconColor: "#0891B2",
     reviewsEnabled: true,
     defaultType: "traditional",
-    defaultFlip: false,
+    defaultFlip: true,
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -444,6 +444,29 @@ const OFFICIAL_PACKS_MANIFEST = ([
     isMini: true,
     categoryId: "kosmos",
   },
+  ...([
+    { slug: "wladcy_polski_portrety", name: "Rozpoznaj portret", images: true },
+    { slug: "wladcy_polski_portrety_daty", name: "Portret i lata panowania", images: true },
+    { slug: "wladcy_polski_daty", name: "Lata panowania", images: false },
+  ] as const).map((course, index) => ({
+    slug: course.slug,
+    name: course.name,
+    packVersion: course.slug === "wladcy_polski_portrety" ? 3 : 4,
+    position: index + 1,
+    iconId: "book",
+    iconColor: "#B45309",
+    reviewsEnabled: true,
+    defaultType: "traditional" as const,
+    defaultFlip: false,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: true,
+    categoryId: "historia",
+    knowledgeGroupId: "polishRulers" as const,
+    settings: { audioEnabled: false, ...(course.images ? { imageSize: "very_large" as const } : {}) },
+    ...(course.images ? { requiredImagePacks: ["images_polish_rulers"] } : {}),
+  })),
   {
     slug: "polska_historia",
     name: "Historia Polski",
@@ -1059,6 +1082,40 @@ const OFFICIAL_PACKS_MANIFEST = ([
     isMini: true,
     categoryId: "geography",
     knowledgeGroupId: "capitals",
+  },
+  {
+    slug: "pierwiastki_podstawowe_en",
+    packVersion: 1,
+    name: "Basic Elements",
+    position: 1,
+    iconId: "microscope",
+    iconColor: "#0891B2",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    sourceLang: "en",
+    targetLang: "en",
+    smallFlag: "en",
+    isMini: true,
+    categoryId: "science",
+    knowledgeGroupId: "elements",
+  },
+  {
+    slug: "pierwiastki_pozostale_en",
+    packVersion: 1,
+    name: "All Elements",
+    position: 2,
+    iconId: "microscope",
+    iconColor: "#0891B2",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    sourceLang: "en",
+    targetLang: "en",
+    smallFlag: "en",
+    isMini: true,
+    categoryId: "science",
+    knowledgeGroupId: "elements",
   },
 ]) satisfies (Omit<OfficialPackDef, "packVersion"> & {
   packVersion?: number;

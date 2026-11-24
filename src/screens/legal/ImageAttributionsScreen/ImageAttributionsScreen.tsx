@@ -76,7 +76,7 @@ export default function ImageAttributionsScreen() {
 
             <View style={styles.compactTable}>
               <View style={styles.compactHeaderRow}>
-                <Text style={[styles.compactHeaderCell, styles.compactBirdColumn]}>{t("legal.licenses.attributions.columns.bird")}</Text>
+                <Text style={[styles.compactHeaderCell, styles.compactSubjectColumn]}>{t("legal.licenses.attributions.columns.subject")}</Text>
                 <Text style={[styles.compactHeaderCell, styles.compactAuthorColumn]}>{t("legal.licenses.attributions.columns.author")}</Text>
                 <Text style={[styles.compactHeaderCell, styles.compactLicenseColumn]}>{t("legal.licenses.attributions.columns.license")}</Text>
               </View>
@@ -91,9 +91,9 @@ export default function ImageAttributionsScreen() {
                       style={styles.compactRow}
                       onPress={() => setExpandedAttributionId(expanded ? null : attribution.id)}
                     >
-                      <View style={[styles.compactCell, styles.compactBirdColumn]}>
-                        <Text style={styles.birdName}>{attribution.commonName}</Text>
-                        <Text style={styles.scientificName}>{attribution.scientificName}</Text>
+                      <View style={[styles.compactCell, styles.compactSubjectColumn]}>
+                        <Text style={styles.subjectName}>{attribution.commonName}</Text>
+                        {attribution.scientificName ? <Text style={styles.scientificName}>{attribution.scientificName}</Text> : null}
                       </View>
                       <Text style={[styles.compactCellText, styles.compactAuthorColumn]} numberOfLines={3}>{attribution.author}</Text>
                       <View style={[styles.compactCell, styles.compactLicenseColumn, styles.compactLicenseCell]}>

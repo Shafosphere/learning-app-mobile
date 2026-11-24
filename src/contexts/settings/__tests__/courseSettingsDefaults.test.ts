@@ -75,7 +75,7 @@ it.each(OFFICIAL_PACKS.filter((pack) => !pack.retired))(
       },
       frontImageRole: imageAnswerCourses.has(pack.slug) ? "replace_back" : "standard",
       cardSize: "large",
-      imageSize: ["ptaki", "drzewa_europy", "grzyby_podstawowe", "grzyby_rozpoznawanie"].includes(pack.slug) ? "very_large"
+      imageSize: ["ptaki", "drzewa_europy", "grzyby_podstawowe", "grzyby_rozpoznawanie", "wladcy_polski_portrety", "wladcy_polski_portrety_daty"].includes(pack.slug) ? "very_large"
         : pack.slug.startsWith("flagi_") || pack.slug.startsWith("znaki_drogowe") ? "medium" : "dynamic",
       imageFrameEnabled: true,
     });

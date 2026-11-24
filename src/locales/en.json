@@ -913,6 +913,7 @@
         },
         "columns": {
           "bird": "Species",
+          "subject": "Image subject",
           "title": "Image title",
           "author": "Creator",
           "license": "License",
@@ -1716,6 +1717,7 @@
         "flags": "Flags",
         "roadSigns": "Road signs",
         "mushrooms": "Mushrooms",
+        "polishRulers": "Rulers of Poland",
         "elements": "Elements"
       },
       "description": {
@@ -1723,6 +1725,7 @@
         "flags": "Flags of the world",
         "roadSigns": "From 80 to 165 signs",
         "mushrooms": "From 20 to 50 mushrooms",
+        "polishRulers": "Portraits, portraits with dates, and dates alone",
         "elements": "From 30 to 118 elements"
       }
     }
@@ -2464,6 +2467,7 @@
     "title": "Images",
     "birds": "Bird images",
     "trees": "Tree and leaf images",
+    "polishRulers": "Images of Polish rulers",
     "mushrooms": "Mushroom images",
     "required": "Download the images to start studying.",
     "unavailable": "Materials unavailable",

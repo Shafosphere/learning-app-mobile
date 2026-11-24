@@ -19,6 +19,7 @@
     "language:export": "tsx ./tools/scripts/export-language-review.ts",
     "audio:google": "node ./Audio/generator/generate-google-tts.mjs",
     "audio:google:all": "node ./Audio/generator/generate-google-tts.mjs --all",
+    "assets:polish-rulers": "node tools/scripts/prepare-polish-rulers-courses.mjs",
     "assets:birds": "node --experimental-strip-types ./tools/scripts/download-bird-images.ts",
     "assets:birds:optimize": "bash ./tools/scripts/optimize-bird-images.sh",
     "assets:a1:optimize": "bash ./tools/scripts/optimize-a1-images.sh",

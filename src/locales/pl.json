@@ -917,6 +917,7 @@
         },
         "columns": {
           "bird": "Gatunek",
+          "subject": "Temat obrazu",
           "title": "Tytuł obrazu",
           "author": "Autor",
           "license": "Licencja",
@@ -1720,6 +1721,7 @@
         "flags": "Flagi",
         "roadSigns": "Znaki drogowe",
         "mushrooms": "Grzyby",
+        "polishRulers": "Władcy Polski",
         "elements": "Pierwiastki"
       },
       "description": {
@@ -1727,6 +1729,7 @@
         "flags": "Flagi państw świata",
         "roadSigns": "Od 80 do 165 znaków",
         "mushrooms": "Od 20 do 50 grzybów",
+        "polishRulers": "Portrety, portrety z datami i same daty",
         "elements": "Od 30 do 118 pierwiastków"
       }
     }
@@ -2468,6 +2471,7 @@
     "title": "Zdjęcia",
     "birds": "Zdjęcia ptaków",
     "trees": "Zdjęcia drzew i liści",
+    "polishRulers": "Wizerunki władców Polski",
     "mushrooms": "Zdjęcia grzybów",
     "required": "Pobierz zdjęcia, aby rozpocząć naukę.",
     "unavailable": "Materiały niedostępne",

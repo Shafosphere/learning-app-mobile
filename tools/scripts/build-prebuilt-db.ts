@@ -12,7 +12,7 @@ const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 // Increment this whenever the bundled database content changes.
-const PREBUILT_DATABASE_VERSION = 18;
+const PREBUILT_DATABASE_VERSION = 24;
 
 const OFFICIAL_PACKS = [
   {
@@ -197,24 +197,24 @@ const OFFICIAL_PACKS = [
   },
   {
     slug: "pierwiastki_podstawowe",
-    packVersion: 1,
+    packVersion: 2,
     name: "Podstawowe pierwiastki",
     iconId: "microscope",
     iconColor: "#0891B2",
     reviewsEnabled: true,
     defaultType: "traditional",
-    defaultFlip: false,
+    defaultFlip: true,
     csvFile: "przyroda/pierwiastki/podstawowe.csv",
   },
   {
     slug: "pierwiastki_pozostale",
-    packVersion: 2,
+    packVersion: 3,
     name: "Wszystkie pierwiastki",
     iconId: "microscope",
     iconColor: "#0891B2",
     reviewsEnabled: true,
     defaultType: "traditional",
-    defaultFlip: false,
+    defaultFlip: true,
     csvFile: "przyroda/pierwiastki/pozostale.csv",
   },
   {
@@ -228,6 +228,21 @@ const OFFICIAL_PACKS = [
     defaultFlip: false,
     csvFile: "przyroda/astronomia/astronomia.csv",
   },
+  ...[
+    { slug: "wladcy_polski_portrety", name: "Rozpoznaj portret", file: "portrety" },
+    { slug: "wladcy_polski_portrety_daty", name: "Portret i lata panowania", file: "portrety_daty" },
+    { slug: "wladcy_polski_daty", name: "Lata panowania", file: "daty" },
+  ].map(course => ({
+    slug: course.slug,
+    name: course.name,
+    packVersion: course.slug === "wladcy_polski_portrety" ? 3 : 4,
+    iconId: "book",
+    iconColor: "#B45309",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    csvFile: `historia/wladcy_polski/${course.file}.csv`,
+  })),
   {
     slug: "polska_historia",
     name: "Historia Polski",
@@ -588,6 +603,30 @@ const OFFICIAL_PACKS = [
     defaultFlip: true,
     csvLocale: "en",
     csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_swiata_en.csv",
+  },
+  {
+    slug: "pierwiastki_podstawowe_en",
+    packVersion: 1,
+    name: "Basic Elements",
+    iconId: "microscope",
+    iconColor: "#0891B2",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "przyroda/pierwiastki/podstawowe_en.csv",
+  },
+  {
+    slug: "pierwiastki_pozostale_en",
+    packVersion: 1,
+    name: "All Elements",
+    iconId: "microscope",
+    iconColor: "#0891B2",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "przyroda/pierwiastki/pozostale_en.csv",
   },
 ].map((pack) => ({
   packVersion: 1,

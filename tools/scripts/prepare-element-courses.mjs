@@ -14,7 +14,7 @@ const symbols = new Set();
 for (const row of data) {
   const number = Number(row.atomicNumber);
   if (!Number.isInteger(number) || number < 1 || number > 118 || ids.has(number)
-    || !row.symbol?.trim() || symbols.has(row.symbol) || !row.namePl?.trim()
+    || !row.symbol?.trim() || symbols.has(row.symbol) || !row.namePl?.trim() || !row.nameEn?.trim()
     || !['True', 'False'].includes(row.basicCourse)) {
     throw new Error(`Invalid or duplicate element: ${row.atomicNumber}`);
   }
@@ -22,14 +22,28 @@ for (const row of data) {
   symbols.add(row.symbol);
 }
 data.sort((a, b) => Number(a.atomicNumber) - Number(b.atomicNumber));
-const destination = path.join(root, 'tools/prebuild-data/pl/przyroda/pierwiastki');
-await fs.mkdir(destination, { recursive: true });
-for (const [filename, basic] of [['podstawowe.csv', 'True'], ['pozostale.csv', null]]) {
-  const cards = data.filter(row => basic === null || row.basicCourse === basic).map(row => ({
-    external_id: row.atomicNumber.padStart(4, '0'),
-    front_text: row.symbol,
-    back_text: row.namePl,
-  }));
-  await fs.writeFile(path.join(destination, filename), Papa.unparse(cards) + '\n');
-  console.log(`${filename}: ${cards.length} cards`);
+for (const [locale, nameField] of [['pl', 'namePl'], ['en', 'nameEn']]) {
+  const destination = path.join(root, 'tools/prebuild-data', locale, 'przyroda/pierwiastki');
+  await fs.mkdir(destination, { recursive: true });
+  for (const [stage, basic] of [['podstawowe', 'True'], ['pozostale', null]]) {
+    const filename = `${stage}${locale === 'en' ? '_en' : ''}.csv`;
+    const cards = data.filter(row => basic === null || row.basicCourse === basic).map(row => ({
+      external_id: row.atomicNumber.padStart(4, '0'),
+      front_text: row.symbol,
+      back_text: row[nameField],
+    }));
+    await fs.writeFile(path.join(destination, filename), Papa.unparse(cards) + '\n');
+    console.log(`${locale}/${filename}: ${cards.length} cards`);
+  }
 }
+
+// Runtime metadata for periodic-table prompts, from the same source as the cards.
+const elements = data.map(row => ({
+  atomicNumber: Number(row.atomicNumber),
+  symbol: row.symbol,
+  name: row.namePl,
+  nameEn: row.nameEn,
+  family: row.familyPl,
+}));
+await fs.writeFile(path.join(root, 'src/constants/chemicalElements.json'),
+  '[\n' + elements.map(element => '  ' + JSON.stringify(element)).join(',\n') + '\n]\n');

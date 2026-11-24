@@ -45,6 +45,12 @@ describe("image attribution generator", () => {
     expect(course.attributions[0].licenseUrl).toBeUndefined();
   });
 
+  it("allows historical subjects without a scientific name", () => {
+    const course = parseAttributionCourse(fixtureCourse("1\tMieszko I\t\tportrait.webp\thttps://example.com/source\tPublic domain\tJan Matejko\t"));
+    expect(course.attributions[0].commonName).toBe("Mieszko I");
+    expect(course.attributions[0].scientificName).toBeUndefined();
+  });
+
   it.each([
     ["1\t\tTestus\tfile.jpg\thttps://example.com/source\tCC BY 4.0\tAuthor\thttps://example.com/license", "missing required field"],
     ["1\tOne\tOne\tone.jpg\thttps://example.com/source\tCC BY 4.0\tAuthor\thttps://example.com/license\n1\tTwo\tTwo\ttwo.jpg\thttps://example.com/source\tCC BY 4.0\tAuthor\thttps://example.com/license", "duplicate nr"],
