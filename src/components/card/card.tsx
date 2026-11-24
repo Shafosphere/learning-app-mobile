@@ -1,3 +1,4 @@
+import { getChemicalElement, PeriodicElementContext } from "./subcomponents/PeriodicElementPrompt";
 import { isFrontImageRoleApplicable, resolveCardPromptPresentation } from "@/src/utils/frontImageRole";
 import { useCourseFrontImageRole } from "@/src/hooks/useCourseFrontImageRole";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -1603,7 +1604,9 @@ export default function Card({
             ) : undefined
           }
         >
-          <CardContentResolver {...resolverProps} />
+          <PeriodicElementContext.Provider value={{ element: getChemicalElement(promptWord), revealAnswer: isIntroMode }}>
+            <CardContentResolver {...resolverProps} />
+          </PeriodicElementContext.Provider>
         </CardFrame>
       </LandscapeStudyContext.Provider>
       {showCorrectionInputs && correction && process.env.NODE_ENV !== "test" ? (

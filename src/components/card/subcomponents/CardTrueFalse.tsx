@@ -1,3 +1,4 @@
+import { PeriodicElementPrompt } from "./PeriodicElementPrompt";
 import { useLandscapeStudyLayout } from "../landscapeStudyLayout";
 import { ReadablePrompt } from "@/Audio/runtime/components/ReadablePrompt";
 import MyButton from "@/src/components/button/button";
@@ -77,7 +78,8 @@ export function CardTrueFalse({
                         />
                     ) : null}
                     {hasText ? (
-                        allowMultilinePrompt ? (
+                        <PeriodicElementPrompt text={promptText} scale={cardMetrics.visualScale}>
+                            {allowMultilinePrompt ? (
                             hasMath ? (
                                 <CardMathText
                                     text={promptText}
@@ -103,7 +105,8 @@ export function CardTrueFalse({
                             >
                                 {promptText}
                             </Text>
-                        )
+                            )}
+                        </PeriodicElementPrompt>
                     ) : null}
                 </View>
 

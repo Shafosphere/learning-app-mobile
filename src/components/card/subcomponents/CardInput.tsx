@@ -1,3 +1,4 @@
+import { PeriodicElementPrompt } from "./PeriodicElementPrompt";
 import { ReadablePrompt } from "@/Audio/runtime/components/ReadablePrompt";
 import { GhostAnswerText } from "./GhostAnswerText";
 import { InlineConfirmButton } from "./InlineConfirmButton";
@@ -353,53 +354,57 @@ export function CardInput({
   ) : null;
   const hasPromptText = promptText.trim().length > 0;
 
-  const promptTextBlock = hasMath ? (
-    <CardMathText
-      text={promptText}
-      textStyle={[
-        styles.cardFont,
-        {
-          fontSize: cardMetrics.fontSize,
-          lineHeight: cardMetrics.lineHeight,
-        },
-        styles.promptText,
-        allowMultilinePrompt && styles.promptTextMultiline,
-        textColorOverride ? { color: textColorOverride } : null,
-      ]}
-    />
-  ) : shouldMarqueePrompt ? (
-    <View style={styles.promptScroll}>
-      <TextTicker
-        key={promptText}
-        style={promptTextStyle}
-        animationType="auto"
-        duration={marqueeDuration + REPEAT_SPACER_PX}
-        repeatSpacer={REPEAT_SPACER_PX}
-        marqueeDelay={MARQUEE_DELAY_MS}
-        loop
-        useNativeDriver={false}
-        numberOfLines={1}
-      >
-        {promptText}
-      </TextTicker>
-    </View>
-  ) : (
-    <Text
-      style={[
-        styles.cardFont,
-        {
-          fontSize: cardMetrics.fontSize,
-          lineHeight: cardMetrics.lineHeight,
-        },
-        styles.promptText,
-        allowMultilinePrompt && styles.promptTextMultiline,
-        textColorOverride ? { color: textColorOverride } : null,
-      ]}
-      numberOfLines={allowMultilinePrompt ? undefined : 1}
-      ellipsizeMode={allowMultilinePrompt ? "clip" : "tail"}
-    >
-      {promptText}
-    </Text>
+  const promptTextBlock = (
+    <PeriodicElementPrompt text={promptText} scale={cardMetrics.visualScale}>
+      {hasMath ? (
+        <CardMathText
+          text={promptText}
+          textStyle={[
+            styles.cardFont,
+            {
+              fontSize: cardMetrics.fontSize,
+              lineHeight: cardMetrics.lineHeight,
+            },
+            styles.promptText,
+            allowMultilinePrompt && styles.promptTextMultiline,
+            textColorOverride ? { color: textColorOverride } : null,
+          ]}
+        />
+      ) : shouldMarqueePrompt ? (
+        <View style={styles.promptScroll}>
+          <TextTicker
+            key={promptText}
+            style={promptTextStyle}
+            animationType="auto"
+            duration={marqueeDuration + REPEAT_SPACER_PX}
+            repeatSpacer={REPEAT_SPACER_PX}
+            marqueeDelay={MARQUEE_DELAY_MS}
+            loop
+            useNativeDriver={false}
+            numberOfLines={1}
+          >
+            {promptText}
+          </TextTicker>
+        </View>
+      ) : (
+        <Text
+          style={[
+            styles.cardFont,
+            {
+              fontSize: cardMetrics.fontSize,
+              lineHeight: cardMetrics.lineHeight,
+            },
+            styles.promptText,
+            allowMultilinePrompt && styles.promptTextMultiline,
+            textColorOverride ? { color: textColorOverride } : null,
+          ]}
+          numberOfLines={allowMultilinePrompt ? undefined : 1}
+          ellipsizeMode={allowMultilinePrompt ? "clip" : "tail"}
+        >
+          {promptText}
+        </Text>
+      )}
+    </PeriodicElementPrompt>
   );
 
   const inputWithAction = (
