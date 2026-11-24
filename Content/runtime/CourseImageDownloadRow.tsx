@@ -17,12 +17,12 @@ import { useCourseImageRevealTarget } from "./CourseImageRevealCoordinator";
 // Ignore intrinsic measurement jitter within half a React Native layout unit.
 const CONTENT_HEIGHT_TOLERANCE = 0.5;
 
-export const CourseImageDownloadRow = memo(function CourseImageDownloadRow({ slug, courseName, expanded = true }: { slug: string | null | undefined; courseName: string; expanded?: boolean }) {
+export const CourseImageDownloadRow = memo(function CourseImageDownloadRow({ slug, courseName, expanded = true, variant = "inline" }: { variant?: "inline" | "standalone"; slug: string | null | undefined; courseName: string; expanded?: boolean }) {
   const supported = (usesImagePAD || __DEV__) && Boolean(getCourseImagePacks(slug).length);
-  return supported ? <CourseRow key={slug} slug={slug!} courseName={courseName} expanded={expanded} /> : null;
+  return supported ? <CourseRow key={slug} slug={slug!} courseName={courseName} expanded={expanded} variant={variant} /> : null;
 });
 
-function CourseRow({ slug, courseName, expanded }: { slug: string; courseName: string; expanded: boolean }) {
+function CourseRow({ slug, courseName, expanded, variant }: { slug: string; courseName: string; expanded: boolean; variant: "inline" | "standalone" }) {
   const { t } = useTranslation();
   const { colors, theme, highContrastEnabled } = useThemeSettings();
   const panelColor = highContrastEnabled ? colors.secondBackground : theme === "dark" ? "#143E43" : "#D5F8F2";
@@ -67,31 +67,33 @@ function CourseRow({ slug, courseName, expanded }: { slug: string; courseName: s
     else if (state.phase === "confirmation") void confirmCourseDownload(slug);
     else void downloadCourse(slug);
   };
+  const standalone = variant === "standalone";
+  const Container = standalone ? View : Animated.View;
   return profileCourseActivation(`panel:${slug}`, (
-    <Animated.View
-      style={[styles.reveal, { backgroundColor: panelColor }, revealStyle]}
+    <Container
+      style={standalone ? styles.standalone : [styles.reveal, { backgroundColor: panelColor }, revealStyle]}
       pointerEvents={expanded ? "auto" : "none"}
       accessibilityElementsHidden={!expanded}
       importantForAccessibility={expanded ? "auto" : "no-hide-descendants"}
     >
     <View
-      style={styles.row}
+      style={[styles.row, standalone && styles.standaloneRow]}
       testID={`course-image-row-${slug}`}
-      onLayout={handleLayout}
+      onLayout={standalone ? undefined : handleLayout}
     >
-      <View style={styles.details}>
+      {!standalone ? <View style={styles.details}>
         <View style={styles.icon} accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
           <FontAwesome6 name="image" size={18} color={colors.headline} />
         </View>
         <Text style={[styles.title, { color: colors.headline }]}>
           {t(getCourseImagePacks(slug).length === 1 ? getImagePack(getCourseImagePacks(slug)[0])?.titleKey ?? "contentDownload.title" : "contentDownload.title")}{size ? ` · ${size}` : ""}
         </Text>
-      </View>
-      {ready ? <View style={[styles.ready, { backgroundColor: colors.my_green }]}>
+      </View> : null}
+      {ready ? <View style={[styles.ready, standalone && styles.standaloneReady, { backgroundColor: standalone ? "transparent" : colors.my_green }]}>
         <View accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <Feather name="check" size={19} color={buttonTextColor} />
+          <Feather name="check" size={19} color={standalone ? colors.headline : buttonTextColor} />
         </View>
-        <Text accessibilityLiveRegion="polite" style={[styles.buttonText, { color: buttonTextColor }]}>{t("audioDownload.downloaded")}</Text>
+        <Text accessibilityLiveRegion="polite" style={[styles.buttonText, { color: standalone ? colors.headline : buttonTextColor }]}>{t("audioDownload.downloaded")}</Text>
       </View> : null}
       {checking && !showButton ? <ActivityIndicator size="small" color={colors.headline} /> : null}
       {showButton ? <Pressable
@@ -100,7 +102,7 @@ function CourseRow({ slug, courseName, expanded }: { slug: string; courseName: s
         accessibilityState={{ disabled: checking }}
         disabled={checking}
         onPress={(event) => { event?.stopPropagation(); action(); }}
-        style={({ pressed }) => [styles.button, { backgroundColor: colors.my_yellow, opacity: checking || pressed ? 0.65 : 1 }]}
+        style={({ pressed }) => [styles.button, standalone && styles.standaloneButton, { backgroundColor: colors.my_yellow, opacity: checking || pressed ? 0.65 : 1 }]}
       >
         {checking ? <ActivityIndicator size="small" color={buttonTextColor} /> : button === "download" ? (
           <View accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
@@ -111,19 +113,24 @@ function CourseRow({ slug, courseName, expanded }: { slug: string; courseName: s
           {t(`audioDownload.${button}`)}
         </Text>
       </Pressable> : null}
-      {__DEV__ && !usesImagePAD ? <Text style={[styles.status, { color: colors.paragraph }]}>{t("contentDownload.preview")}</Text> : null}
-      {showStatus ? <Text accessibilityLiveRegion="polite" style={[styles.status, { color: colors.paragraph }]}>
+      {__DEV__ && !usesImagePAD && !standalone ? <Text style={[styles.status, standalone && styles.standaloneStatus, { color: colors.paragraph }]}>{t("contentDownload.preview")}</Text> : null}
+      {showStatus ? <Text accessibilityLiveRegion="polite" style={[styles.status, standalone && styles.standaloneStatus, { color: colors.paragraph }]}>
         {t(`${status === "failed" || status === "noSpace" ? "contentDownload" : "audioDownload"}.${status}`, { percent })}
       </Text> : null}
       {busy ? <View style={[styles.progressTrack, { backgroundColor: colors.secondBackground }]} accessible={false}>
-        <View style={[styles.progressFill, { width: `${percent}%`, backgroundColor: colors.my_green }]} />
+        <View style={[styles.progressFill, { width: `${percent}%`, backgroundColor: standalone ? "transparent" : colors.my_green }]} />
       </View> : null}
     </View>
-    </Animated.View>
+    </Container>
   ));
 }
 
 const styles = StyleSheet.create({
+  standalone: { width: "100%" },
+  standaloneRow: { position: "relative", paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0, gap: 16 },
+  standaloneButton: { width: "100%", minHeight: 54, borderRadius: 18 },
+  standaloneStatus: { textAlign: "center" },
+  standaloneReady: { width: "100%", justifyContent: "center", backgroundColor: "transparent" },
   // Measure content independently so revealing it never squeezes text or jumps.
   reveal: { overflow: "hidden", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
   row: { position: "absolute", top: 0, left: 0, right: 0, paddingTop: 23, paddingBottom: 8, paddingHorizontal: 14, flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 10 },

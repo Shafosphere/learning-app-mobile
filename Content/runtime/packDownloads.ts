@@ -25,7 +25,8 @@ const revisions: Record<string, number> = {};
 const refreshes = new Map<string, Promise<void>>();
 // Preview missing native support and bundled images in development.
 // This changes UI state only; file resolution still uses real platform assets.
-const developmentPreview = (name: string) => __DEV__ && (!nativeDelivery || (getContentPack(name)?.kind === "images" && !usesImagePAD));
+const forcedImagePreviews = new Set<string>();
+const developmentPreview = (name: string) => __DEV__ && (forcedImagePreviews.has(name) || !nativeDelivery || (getContentPack(name)?.kind === "images" && !usesImagePAD));
 const previewTimers = new Map<string, ReturnType<typeof setTimeout>>();
 let confirmationInFlight: Promise<void> | null = null;
 let started = false;
@@ -47,6 +48,45 @@ function setState(name: string, patch: Partial<PackDownload>) {
   snapshots[name] = next;
   recordCourseActivationEvent("pack.state", { pack: name, phase: next.phase, downloadedBytes: next.downloadedBytes });
   emit();
+}
+
+// Temporarily hide installed image packs without deleting files or contacting Play.
+// The caller owns the preview and restores the real snapshots when leaving it.
+export function previewMissingImagePacks(names: string[]): () => void {
+  if (!__DEV__) return () => {};
+  const previous = new Map<string, PackDownload>();
+  for (const name of new Set(names)) {
+    if (getContentPack(name)?.kind !== "images" || forcedImagePreviews.has(name)) continue;
+    previous.set(name, getPackDownload(name));
+    forcedImagePreviews.add(name);
+    revisions[name] = (revisions[name] ?? 0) + 1;
+    const timer = previewTimers.get(name);
+    if (timer) clearTimeout(timer);
+    previewTimers.delete(name);
+    invalidateReadiness(name);
+    setState(name, { phase: "missing", downloadedBytes: 0, errorCode: 0, nativeStatus: null, confirmationPending: false });
+  }
+  return () => {
+    for (const [name, snapshot] of previous) {
+      revisions[name] = (revisions[name] ?? 0) + 1;
+      const timer = previewTimers.get(name);
+      if (timer) clearTimeout(timer);
+      previewTimers.delete(name);
+      forcedImagePreviews.delete(name);
+      invalidateReadiness(name);
+      snapshots[name] = snapshot;
+      if (developmentPreview(name)) {
+        if (["pending", "downloading", "transferring"].includes(snapshot.phase)) previewDownload(name);
+      } else {
+        // Native transfers may have advanced while their events were hidden.
+        const pending = refreshes.get(name);
+        if (pending) void pending.then(() => refreshPack(name));
+        else void refreshPack(name);
+      }
+    }
+    previous.clear();
+    emit();
+  };
 }
 function diagnostic(name: string, event: string, details: Record<string, unknown> = {}) {
   const state = getPackDownload(name);
@@ -143,6 +183,8 @@ function start() {
   nativeDelivery?.addListener("onPackState", (state) => { void applyNativeState(state); });
   AppState.addEventListener("change", (state) => {
     if (state === "active") Object.keys(snapshots).forEach((name) => {
+      // Simulated downloads keep their timer revision across app resumes.
+      if (developmentPreview(name)) return;
       revisions[name] = (revisions[name] ?? 0) + 1;
       invalidateReadiness(name);
       const pending = refreshes.get(name);

@@ -564,7 +564,9 @@
         "learningReminderPreviewScheduled": "NotifyKit reminder scheduled. ID: {{notificationId}}",
         "learningReminderPreviewDenied": "Notification permission is denied or unavailable.",
         "learningReminderPreviewError": "Could not schedule NotifyKit reminder.",
-        "completeCourseSimulationError": "Could not simulate course completion."
+        "completeCourseSimulationError": "Could not simulate course completion.",
+        "missingImagesPreviewNoPacks": "The current course does not use downloadable image packs. Select a course with images, such as Birds.",
+        "missingImagesPreviewError": "Could not open the preview without downloaded images."
       },
       "onboardingCheckpoints": {
         "languageRequired": "language_required",
@@ -576,6 +578,11 @@
         "done": "done"
       },
       "rows": {
+        "previewMissingImages": {
+          "title": "Flashcards without downloaded images",
+          "subtitle": "Opens the current course with the image download screen. Downloads are simulated and the preview resets when you leave.",
+          "button": "Open flashcards"
+        },
         "testPopup": {
           "title": "Test Boxik bubble",
           "subtitle": "Message preview, developer environment only.",
@@ -2469,7 +2476,10 @@
     "trees": "Tree and leaf images",
     "polishRulers": "Images of Polish rulers",
     "mushrooms": "Mushroom images",
-    "required": "Download the images to start studying.",
+    "missingTitle": "The pictures are missing",
+    "readyTitle": "You're all set!",
+    "readyDescription": "Your images are ready. Let’s start studying.",
+    "required": "Download the images for this course to start studying.",
     "unavailable": "Materials unavailable",
     "start": "Start",
     "lookupError": "Could not check the course materials.",

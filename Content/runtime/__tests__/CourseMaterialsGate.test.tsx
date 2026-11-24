@@ -10,10 +10,14 @@ let mockHasImages = true;
 let mockForeground: (state: import("react-native").AppStateStatus) => void;
 const mockListeners = new Set<() => void>();
 const mockSessionMount = jest.fn();
+const mockRestorePreview = jest.fn();
+const mockPreviewMissingImagePacks = jest.fn((_names: string[]) => mockRestorePreview);
+jest.mock('@/src/components/Box/Skin/BoxSkin', () => 'BoxSkin');
+jest.mock('../useCourseMaterialsEntrance', () => ({ useCourseMaterialsEntrance: () => ({}) }));
 jest.mock('../images', () => ({ get usesImagePAD() { return mockPAD; } }));
 jest.mock('../catalog', () => ({ getCourseImagePacks: (slug: string) => slug === 'ptaki' && mockHasImages ? ['images_birds'] : [] }));
 jest.mock('../courseDownloads', () => ({ getCourseDownload: () => mockSnapshots[mockPhase], refreshCourse: jest.fn(async () => {}) }));
-jest.mock('../packDownloads', () => ({ subscribePackDownloads: (listener: () => void) => { mockListeners.add(listener); return () => { mockListeners.delete(listener); }; } }));
+jest.mock('../packDownloads', () => ({ previewMissingImagePacks: (names: string[]) => mockPreviewMissingImagePacks(names), subscribePackDownloads: (listener: () => void) => { mockListeners.add(listener); return () => { mockListeners.delete(listener); }; } }));
 jest.mock('../CourseImageDownloadRow', () => ({ CourseImageDownloadRow: () => { const { Text } = jest.requireActual('react-native'); return <Text>Download panel</Text>; } }));
 jest.mock('@/src/db/sqlite/db', () => ({ getCustomCourseById: jest.fn() }));
 jest.mock('@/src/contexts/SettingsContext', () => ({ useThemeSettings: () => ({ colors: {} }) }));
@@ -69,4 +73,28 @@ it('courses without image packs and bundled platforms need no downloads', async 
   mockPAD = false;
   render(<CourseMaterialsGate courseId={1}><Session /></CourseMaterialsGate>);
   expect(mockSessionMount).toHaveBeenCalledTimes(2);
+});
+
+it('previews missing course images on bundled platforms and restores them on exit', async () => {
+  mockPAD = false;
+  const screen = render(<CourseMaterialsGate courseId={1} previewMissingImages><Session /></CourseMaterialsGate>);
+  await screen.findByText('Download panel');
+  expect(mockPreviewMissingImagePacks).toHaveBeenCalledWith(['images_birds']);
+  expect(mockSessionMount).not.toHaveBeenCalled();
+  await act(async () => mockForeground('active'));
+  expect(mockPreviewMissingImagePacks).toHaveBeenCalledTimes(1);
+  update('ready');
+  fireEvent.press(screen.getByText('contentDownload.start'));
+  await screen.findByText('Study session');
+  screen.unmount();
+  expect(mockRestorePreview).toHaveBeenCalledTimes(1);
+});
+
+it('does not start a preview if the course lookup finishes after leaving', async () => {
+  let resolve!: (value: any) => void;
+  jest.mocked(getCustomCourseById).mockImplementationOnce(() => new Promise(done => { resolve = done; }));
+  const screen = render(<CourseMaterialsGate courseId={1} previewMissingImages><Session /></CourseMaterialsGate>);
+  screen.unmount();
+  await act(async () => resolve({ slug: 'ptaki', name: 'Birds', isOfficial: true }));
+  expect(mockPreviewMissingImagePacks).not.toHaveBeenCalled();
 });

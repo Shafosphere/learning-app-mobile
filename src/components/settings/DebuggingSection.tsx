@@ -1,4 +1,5 @@
 import MyButton from "@/src/components/button/button";
+import { getCourseImagePacks } from "@/Content/runtime/catalog";
 import errorWav from "@/assets/audio/ui/error.wav";
 import popWav from "@/assets/audio/ui/pop.wav";
 import plumWav from "@/assets/audio/ui/plum.wav";
@@ -9,6 +10,7 @@ import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   addRandomCustomReviews,
+  getCustomCourseById,
   simulateCompletedCustomCourseForDebug,
 } from "@/src/db/sqlite/db";
 import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
@@ -84,6 +86,30 @@ const DebuggingSection: React.FC = () => {
   const [resettingDb, setResettingDb] = useState(false);
   const [markingShieldDay, setMarkingShieldDay] = useState(false);
   const [simulatingCompletedCourse, setSimulatingCompletedCourse] = useState(false);
+  const [openingMissingImages, setOpeningMissingImages] = useState(false);
+
+  const handlePreviewMissingImages = async () => {
+    if (activeCustomCourseId == null || openingMissingImages) return;
+    setOpeningMissingImages(true);
+    try {
+      const course = await getCustomCourseById(activeCustomCourseId);
+      if (!course?.isOfficial || !getCourseImagePacks(course.slug).length) {
+        Alert.alert(
+          t("settings.debug.rows.previewMissingImages.title"),
+          t("settings.debug.alerts.missingImagesPreviewNoPacks")
+        );
+        return;
+      }
+      router.push({
+        pathname: "/flashcards",
+        params: { missingImagesPreviewToken: Date.now().toString() },
+      });
+    } catch {
+      Alert.alert(t("app.status.error"), t("settings.debug.alerts.missingImagesPreviewError"));
+    } finally {
+      setOpeningMissingImages(false);
+    }
+  };
 
   const handleAddRandomCustom = async () => {
     if (activeCustomCourseId == null) {
@@ -474,6 +500,24 @@ const DebuggingSection: React.FC = () => {
   return (
     <View style={styles.sectionCard}>
       <Text style={styles.sectionHeader}>{t("settings.debug.section.tools")}</Text>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.previewMissingImages.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.previewMissingImages.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.previewMissingImages.button")}
+          color="my_yellow"
+          onPress={handlePreviewMissingImages}
+          disabled={activeCustomCourseId == null || openingMissingImages}
+          width={140}
+        />
+      </View>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>

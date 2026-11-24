@@ -566,7 +566,9 @@
         "learningReminderPreviewScheduled": "Zaplanowano przypomnienie NotifyKit. ID: {{notificationId}}",
         "learningReminderPreviewDenied": "Brak zgody na powiadomienia albo moduł jest niedostępny.",
         "learningReminderPreviewError": "Nie udało się zaplanować przypomnienia NotifyKit.",
-        "completeCourseSimulationError": "Nie udało się zasymulować ukończenia kursu."
+        "completeCourseSimulationError": "Nie udało się zasymulować ukończenia kursu.",
+        "missingImagesPreviewNoPacks": "Aktualny kurs nie korzysta z pobieranych paczek obrazów. Wybierz kurs z obrazami, np. Ptaki.",
+        "missingImagesPreviewError": "Nie udało się otworzyć podglądu bez pobranych obrazów."
       },
       "onboardingCheckpoints": {
         "languageRequired": "language_required",
@@ -578,6 +580,11 @@
         "done": "done"
       },
       "rows": {
+        "previewMissingImages": {
+          "title": "Fiszki bez pobranych obrazów",
+          "subtitle": "Otwiera aktualny kurs z ekranem pobierania obrazów. Pobieranie jest symulowane, a podgląd resetuje się po wyjściu.",
+          "button": "Otwórz fiszki"
+        },
         "testPopup": {
           "title": "Przetestuj dymek Boxika",
           "subtitle": "Podgląd komunikatu (tylko w środowisku deweloperskim).",
@@ -2473,7 +2480,10 @@
     "trees": "Zdjęcia drzew i liści",
     "polishRulers": "Wizerunki władców Polski",
     "mushrooms": "Zdjęcia grzybów",
-    "required": "Pobierz zdjęcia, aby rozpocząć naukę.",
+    "missingTitle": "Tu brakuje obrazów",
+    "readyTitle": "Wszystko gotowe!",
+    "readyDescription": "Obrazy są już na miejscu. Możesz rozpocząć naukę.",
+    "required": "Pobierz obrazy do tego kursu, aby rozpocząć naukę.",
     "unavailable": "Materiały niedostępne",
     "start": "Rozpocznij",
     "lookupError": "Nie udało się sprawdzić materiałów kursu.",

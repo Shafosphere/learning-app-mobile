@@ -11,10 +11,11 @@ import {
 type BoxFaceProps = {
   parts: BoxFaceParts;
   style: StyleProp<ViewStyle>;
+  mouthOffsetY?: number;
 };
 
 /** All face PNGs share a 500×500 canvas and must keep their original alignment. */
-export function BoxFace({ parts, style }: BoxFaceProps) {
+export function BoxFace({ parts, style, mouthOffsetY = 0 }: BoxFaceProps) {
   return (
     <View style={style} pointerEvents="none" testID="box-skin-face">
       {parts.blush && (
@@ -43,7 +44,7 @@ export function BoxFace({ parts, style }: BoxFaceProps) {
       />
       <Image
         source={BOX_MOUTH_ASSETS[parts.mouth]}
-        style={styles.layer}
+        style={[styles.layer, { transform: [{ translateY: mouthOffsetY }] }]}
         resizeMode="contain"
         testID="box-skin-face-mouth"
       />

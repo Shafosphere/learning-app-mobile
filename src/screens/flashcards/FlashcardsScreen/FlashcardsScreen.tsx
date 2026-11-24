@@ -71,7 +71,14 @@ import {
 
 export default function Flashcards() {
   const { activeCustomCourseId } = useSettings();
-  return <CourseMaterialsGate courseId={activeCustomCourseId}><FlashcardsContent /></CourseMaterialsGate>;
+  const { missingImagesPreviewToken } = useLocalSearchParams<{ missingImagesPreviewToken?: string }>();
+  const isFocused = useIsFocused();
+  if (__DEV__ && missingImagesPreviewToken && !isFocused) return null;
+  return <CourseMaterialsGate
+    key={missingImagesPreviewToken}
+    courseId={activeCustomCourseId}
+    previewMissingImages={Boolean(missingImagesPreviewToken)}
+  ><FlashcardsContent /></CourseMaterialsGate>;
 }
 
 function FlashcardsContent() {

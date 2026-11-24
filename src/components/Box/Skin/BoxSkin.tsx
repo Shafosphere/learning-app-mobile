@@ -17,6 +17,8 @@ interface BoxSkinProps {
   faceParts?: Partial<BoxFaceParts>;
   /** Adjust the face position for a specific mascot composition. */
   faceStyle?: StyleProp<ViewStyle>;
+  /** Move only the mouth for a custom composition; positive values move it down. */
+  mouthOffsetY?: number;
   isActive?: boolean;
   isCaro?: boolean;
   showHat?: boolean;
@@ -40,6 +42,7 @@ const BoxSkin: React.FC<BoxSkinProps> = ({
   face,
   faceParts,
   faceStyle,
+  mouthOffsetY,
   isActive,
   isCaro,
   showHat = false,
@@ -97,7 +100,7 @@ const BoxSkin: React.FC<BoxSkinProps> = ({
         <BoxCardsRow wordCount={wordCount} styles={styles} variant={cardVariant} />
       ))}
       {shouldShowFace && (
-        <BoxFace parts={getBoxFaceParts(face, faceParts)} style={[styles.face, faceStyle]} />
+        <BoxFace parts={getBoxFaceParts(face, faceParts)} style={[styles.face, faceStyle]} mouthOffsetY={mouthOffsetY} />
       )}
       <Image source={BoxBottom} style={styles.skin} />
       {foregroundSource ? (
