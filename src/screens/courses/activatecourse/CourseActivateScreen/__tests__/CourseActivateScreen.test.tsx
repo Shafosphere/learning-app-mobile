@@ -761,6 +761,31 @@ describe("CourseActivateScreen loading state", () => {
     fireEvent.press(await screen.findByText("Graj"));
     expect(mockPush).toHaveBeenCalledWith("/flashcards");
   });
+  it("keeps pinned science stages together under topic headings", async () => {
+    const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
+    mockedUseSettings.mockReturnValue({
+      ...mockedUseSettings(), pinnedOfficialCourseIds: [81, 82, 83, 84, 85, 86], setActiveCustomCourseId,
+    });
+    const slugs = ["grzyby_podstawowe", "pierwiastki_podstawowe", "grzyby_rozpoznawanie",
+      "pierwiastki_pozostale", "drzewa_europy", "ptaki"];
+    mockedGetOfficialCustomCoursesWithCardCounts.mockResolvedValue(slugs.map((slug, index) => ({
+      id: 81 + index, slug, name: `Science ${index}`, iconId: "mushroom",
+      iconColor: "#000", cardsCount: 50, isOfficial: true,
+    })));
+    const screen = render(<CourseActivateScreen />);
+    const mushrooms = await screen.findByTestId("course-topic-mushrooms");
+    const elements = screen.getByTestId("course-topic-elements");
+    expect(within(mushrooms).getAllByText(/^Science/).map(node => node.props.children))
+      .toEqual(["Science 0", "Science 2"]);
+    expect(within(elements).getAllByText(/^Science/).map(node => node.props.children))
+      .toEqual(["Science 1", "Science 3"]);
+    expect(screen.getAllByTestId(/^official-course-row-/)).toHaveLength(6);
+    expect(screen.getByTestId("course-topic-drzewa_europy")).toBeTruthy();
+    expect(screen.getByTestId("course-topic-ptaki")).toBeTruthy();
+    fireEvent.press(within(mushrooms).getByText("Science 2"));
+    await waitFor(() => expect(setActiveCustomCourseId).toHaveBeenCalledWith(83));
+  });
+
   it("shows the pinned English series under its own heading and activates a stage", async () => {
     const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
     mockedUseSettings.mockReturnValue({

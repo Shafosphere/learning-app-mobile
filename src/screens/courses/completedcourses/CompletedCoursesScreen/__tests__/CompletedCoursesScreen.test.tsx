@@ -186,6 +186,42 @@ describe("CompletedCoursesScreen", () => {
     });
   });
 
+  it("groups completed science stages by topic and preserves stage order", async () => {
+    const courses = [
+      { slug: "grzyby_rozpoznawanie", name: "All mushrooms" },
+      { slug: "pierwiastki_pozostale", name: "All elements" },
+      { slug: "grzyby_podstawowe", name: "Basic mushrooms" },
+      { slug: "pierwiastki_podstawowe", name: "Basic elements" },
+    ];
+    mockedGetCompletedCustomCoursesWithCardCounts.mockResolvedValue(
+      courses.map((course, index) => ({
+        ...course,
+        id: index + 1,
+        iconId: "book",
+        iconColor: "#123",
+        cardsCount: 4,
+        completedCardsCount: 4,
+        reviewsEnabled: true,
+        isOfficial: true,
+      })),
+    );
+
+    const screen = render(<CompletedCoursesScreen />);
+    await screen.findByTestId("course-topic-elements");
+
+    for (const [topic, names] of [
+      ["elements", ["Basic elements", "All elements"]],
+      ["mushrooms", ["Basic mushrooms", "All mushrooms"]],
+    ] as const) {
+      expect(screen.getAllByText(`constants.knowledgeCourseGroups.label.${topic}`))
+        .toHaveLength(1);
+      const section = within(screen.getByTestId(`course-topic-${topic}`));
+      expect(section.getAllByText(/^(Basic|All) /).map((node) => node.props.children))
+        .toEqual(names);
+    }
+    expect(screen.getAllByTestId(/^course-topic-/)).toHaveLength(2);
+  });
+
   it("opens required settings for an unconfigured completed course", async () => {
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,

@@ -1,4 +1,5 @@
 import type { LanguageCourseGroupId } from "@/src/constants/languageCourseGroups";
+import type { KnowledgeCourseGroupId } from "@/src/constants/officialPacks";
 import { CourseCategory } from "@/src/constants/courseCategories";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { CustomCourseSummary } from "@/src/db/sqlite/db";
@@ -10,6 +11,7 @@ export type OfficialCourseListItem = CustomCourseSummary & {
     isMini: boolean;
     categoryId?: string;
     languageGroupId?: LanguageCourseGroupId;
+    knowledgeGroupId?: KnowledgeCourseGroupId;
     position?: number;
 };
 

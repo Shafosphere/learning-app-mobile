@@ -114,6 +114,7 @@ function mapOfficialCourse(
     smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
     isMini: manifest?.isMini ?? true,
     categoryId: manifest?.categoryId,
+    knowledgeGroupId: manifest?.knowledgeGroupId,
     position: manifest?.position,
   };
 }

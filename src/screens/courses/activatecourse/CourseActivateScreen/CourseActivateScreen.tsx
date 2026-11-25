@@ -316,6 +316,7 @@ function CourseActivateContent() {
                   isMini: manifest?.isMini ?? true,
                   categoryId: manifest?.categoryId,
                   languageGroupId: manifest?.languageGroupId,
+                  knowledgeGroupId: manifest?.knowledgeGroupId,
                   position: manifest?.position,
                 };
               });

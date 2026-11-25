@@ -32,6 +32,7 @@ type PreparedGroup = {
     miniIds: Set<number>;
     continuesLanguageSeries: boolean;
     audioPacks: string[];
+    topics: { key: string; titleKey?: string; courses: OfficialCourseListItem[] }[];
 };
 
 type GroupProps = Omit<CourseGroupListProps, "groups" | "colors"> & {
@@ -121,6 +122,22 @@ const CourseGroupView = memo(function CourseGroupView({
 
             {showAudioDownloads && prepared.audioPacks.map(packName => <LanguageAudioDownloadPanel key={packName} packName={packName} />)}
 
+            {prepared.topics.length > 0 ? prepared.topics.map((topic) => (
+                <View key={topic.key} testID={`course-topic-${topic.key}`}>
+                    <OfficialCourseSection
+                        title={topic.titleKey ? t(topic.titleKey) : topic.courses[0].name}
+                        list={topic.courses}
+                        activeCourseId={activeCourseId}
+                        headlineColor={headlineColor}
+                        onPress={onPress}
+                        onEdit={onEdit}
+                        firstCoachmarkCourseId={firstCoachmarkCourseId}
+                        scrollRef={scrollRef}
+                        renderCourseFooter={renderCourseFooter}
+                        cardWidth={cardWidth}
+                    />
+                </View>
+            )) : <>
             <OfficialCourseSection
                 title={t("repeats.labels.courses")}
                 list={regular}
@@ -149,6 +166,7 @@ const CourseGroupView = memo(function CourseGroupView({
                 renderCourseFooter={renderCourseFooter}
                 cardWidth={cardWidth}
             />
+            </>}
         </View>
     ));
 });
@@ -175,8 +193,27 @@ export const CourseGroupList = ({ groups, activeCourseId, colors, firstCoachmark
             }
             const audioPacks = [...new Set(group.official.flatMap(course => getCourseAudioPacks(course.slug)))].filter(name => !seenPacks.has(name));
             audioPacks.forEach(name => seenPacks.add(name));
+            // Positions describe stages within a topic, not across all science courses.
+            const topicMap = new Map<string, PreparedGroup["topics"][number]>();
+            if (group.category?.id === "science") {
+                for (const course of group.official) {
+                    const key = course.knowledgeGroupId ?? course.slug ?? `course:${course.id}`;
+                    let topic = topicMap.get(key);
+                    if (!topic) {
+                        topic = {
+                            key,
+                            titleKey: course.knowledgeGroupId
+                                ? `constants.knowledgeCourseGroups.label.${course.knowledgeGroupId}` : undefined,
+                            courses: [],
+                        };
+                        topicMap.set(key, topic);
+                    }
+                    topic.courses.push(course);
+                }
+            }
             return {
                 audioPacks,
+                topics: [...topicMap.values()].sort((a, b) => a.key.localeCompare(b.key)),
                 group, regular, mini, regularIds, miniIds,
                 continuesLanguageSeries: !group.languageGroupId && !group.category &&
                     seriesPairs.has(JSON.stringify([group.sourceLang, group.targetLang])),

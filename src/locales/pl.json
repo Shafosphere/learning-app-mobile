@@ -908,6 +908,10 @@
         }
       },
       "courses": {
+        "title": "Autorzy obrazów",
+        "search": "Szukaj kolekcji obrazów",
+        "clear": "Wyczyść wyszukiwanie",
+        "empty": "Brak kolekcji pasujących do wyszukiwania.",
         "body": "Źródła, autorzy i warunki licencji obrazów użytych w kursie.",
         "button": "Autorzy"
       },

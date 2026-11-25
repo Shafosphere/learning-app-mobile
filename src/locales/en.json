@@ -906,6 +906,10 @@
         }
       },
       "courses": {
+        "title": "Image credits",
+        "search": "Search image collections",
+        "clear": "Clear search",
+        "empty": "No matching image collections.",
         "body": "Sources, creators, and license terms for images used in this course.",
         "button": "Credits"
       },

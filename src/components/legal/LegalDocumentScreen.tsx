@@ -100,6 +100,7 @@ export default function LegalDocumentScreen({
           isLandscapeLayout && styles.scrollViewLandscape,
         ]}
         contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.heroCard}>

@@ -48,7 +48,7 @@ type OfficialPackDef = {
   isMini?: boolean;
   categoryId?: string;
   languageGroupId?: LanguageCourseGroupId;
-  // Grouping used only by the Knowledge tab on the course pin screen.
+  // Topic grouping on the course pin and activation screens.
   knowledgeGroupId?: KnowledgeCourseGroupId;
   // Opcjonalne ustawienia domyślne aplikowane przy seedowaniu oficjalnego kursu
   settings?: OfficialPackCourseSettings;
